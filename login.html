@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In - Svart Suite</title>
+    <meta name="description" content="Log in to your Svart Suite account to manage activation keys and access your tools.">
+    <meta name="theme-color" content="#0a0a0f">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f'/><text x='50' y='70' font-size='80' font-weight='bold' text-anchor='middle' fill='%237c3aed'>&#x25C6;</text></svg>">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="index.html" style="display:flex;align-items:center;gap:10px;color:var(--primary);text-decoration:none;">
+                    <span class="SVART-logo">&#9670;</span>
+                    <span class="SVART-text">Svart Suite</span>
+                </a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="tools.html">Tools</a></li>
+                <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="SVART.html">Svart Browser</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li class="nav-auth"><a href="signup.html">Sign Up</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="auth-section">
+        <div class="container">
+            <div class="auth-container">
+                <div class="auth-card-site">
+                    <div class="auth-header">
+                        <span class="SVART-logo-large" style="font-size:3rem;">&#9670;</span>
+                        <h2>Welcome Back</h2>
+                        <p>Log in with your Svart ID &mdash; no name, no email, no tracking</p>
+                        <p style="color:var(--text-muted);font-size:0.85rem;margin-top:6px;">Your Svart ID is your key to connect. Use it in the app to join servers and set your display name &mdash; your identity stays in Svart Chat, not on the web.</p>
+                    </div>
+
+                    <form id="loginForm" class="auth-form-site" novalidate>
+                        <div class="form-group">
+                            <label for="svartId">Svart ID</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">&#128273;</span>
+                                <input id="svartId" type="text" placeholder="Enter your activation key" required autocomplete="off" spellcheck="false" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">&#128274;</span>
+                                <input id="password" type="password" placeholder="Enter your password" required minlength="8" autocomplete="current-password" />
+                                <button type="button" class="toggle-password" aria-label="Show password">&#128065;</button>
+                            </div>
+                        </div>
+
+                        <div class="form-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="remember" />
+                                <span>Remember me</span>
+                            </label>
+                            <a href="#" class="forgot-link">Forgot password?</a>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full">Log In</button>
+
+                        <div class="auth-divider">
+                            <span>or</span>
+                        </div>
+
+                        <div class="auth-alt">
+                            <p>Don't have an account? <a href="signup.html">Sign up free</a></p>
+                        </div>
+                    </form>
+
+                    <div id="loginMessage" class="auth-message" style="display:none;"></div>
+                </div>
+
+                <div class="auth-sidebar">
+                    <h3>Your Activation Keys</h3>
+                    <p>Log in to view, manage, and generate activation keys for all Svart Suite apps.</p>
+                    <div class="auth-perks">
+                        <div class="perk">
+                            <span class="perk-icon">&#128273;</span>
+                            <div>
+                                <strong>Activation Keys</strong>
+                                <p>Generate keys for Svart Browser, Svart AI, SVART Notes, Docs, Chat &amp; Passwords.</p>
+                            </div>
+                        </div>
+                        <div class="perk">
+                            <span class="perk-icon">&#128200;</span>
+                            <div>
+                                <strong>Usage Dashboard</strong>
+                                <p>Track your Svart AI requests and manage billing.</p>
+                            </div>
+                        </div>
+                        <div class="perk">
+                            <span class="perk-icon">&#128229;</span>
+                            <div>
+                                <strong>Downloads</strong>
+                                <p>Access all your app downloads in one place.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4><span class="SVART-logo">&#9670;</span> Svart Suite</h4>
+                    <p>Security &amp; Privacy Tools Suite. Built for freedom.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="tools.html">Tools</a></li>
+                        <li><a href="SVART.html">Svart Browser</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                        <li><a href="about.html">About</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Community</h4>
+                    <ul>
+                        <li><a href="https://github.com/SVART-browser" target="_blank">GitHub</a></li>
+                        <li><a href="#">Issue Tracker</a></li>
+                        <li><a href="contact.html">Support</a></li>
+                        <li><a href="#">Contribute</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="website-security.html">Security</a></li>
+                        <li><a href="eula.html">EULA</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Svart Suite. Your privacy, your tools, your control &mdash; we protect people, we do not protect crimes.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+    (function() {
+        // Toggle password visibility
+        document.querySelectorAll('.toggle-password').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const input = this.parentElement.querySelector('input');
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                this.textContent = isPassword ? '\u{1F512}' : '\u{1F441}';
+            });
+        });
+
+        // Login form
+        const form = document.getElementById('loginForm');
+        const msgBox = document.getElementById('loginMessage');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const svartId = document.getElementById('svartId').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!svartId || !password) {
+                showMsg('Please fill in all fields.', 'error');
+                return;
+            }
+            if (svartId.length < 1) {
+                showMsg('Please enter your activation key.', 'error');
+                return;
+            }
+            if (password.length < 8) {
+                showMsg('Password must be at least 8 characters.', 'error');
+                return;
+            }
+
+            // Simulate login (replace with real backend)
+            const btn = form.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
+
+            setTimeout(function() {
+                // Demo: store session
+                const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
+                if (users[svartId]) {
+                    if (users[svartId].password === hashPassword(password)) {
+                        localStorage.setItem('ct_session', JSON.stringify({
+                            svartId: svartId,
+                            loggedIn: true,
+                            ts: Date.now()
+                        }));
+                        showMsg('Login successful! Redirecting...', 'success');
+                        setTimeout(() => { window.location.href = 'account.html'; }, 1000);
+                        return;
+                    }
+                    showMsg('Incorrect password.', 'error');
+                } else {
+                    showMsg('No account found with that Svart ID. <a href="signup.html">Sign up</a>', 'error');
+                }
+                btn.disabled = false;
+                btn.textContent = 'Log In';
+            }, 800);
+        });
+
+        function showMsg(html, type) {
+            msgBox.innerHTML = html;
+            msgBox.className = 'auth-message ' + type;
+            msgBox.style.display = 'block';
+        }
+
+        // Simple hash (demo only — in production use server-side bcrypt)
+        function hashPassword(pw) {
+            let hash = 0;
+            for (let i = 0; i < pw.length; i++) {
+                const c = pw.charCodeAt(i);
+                hash = ((hash << 5) - hash) + c;
+                hash |= 0;
+            }
+            return 'h' + Math.abs(hash).toString(36);
+        }
+    })();
+    </script>
+</body>
+</html>

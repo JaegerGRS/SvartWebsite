@@ -1,0 +1,6 @@
+Contact: security@ciphertools.net
+Expires: 2027-02-23T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://ciphertools.net/.well-known/security.txt
+Policy: https://ciphertools.net/SECURITY.md
+Acknowledgments: https://ciphertools.net/SECURITY.md#acknowledgments

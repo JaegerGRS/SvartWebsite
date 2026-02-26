@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Svart Suite</title>
+    <meta name="description" content="About Svart Suite. Your privacy, your tools, your control — we protect people, we do not protect crimes.">
+    <meta name="theme-color" content="#0a0a0f">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f'/><text x='50' y='70' font-size='80' font-weight='bold' text-anchor='middle' fill='%237c3aed'>&#x25C6;</text></svg>">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="index.html" style="display:flex;align-items:center;gap:10px;color:var(--primary);text-decoration:none;">
+                    <span class="SVART-logo">&#9670;</span>
+                    <span class="SVART-text">Svart Suite</span>
+                </a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="tools.html">Tools</a></li>
+                <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="SVART.html">Svart Browser</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li class="nav-auth"><a href="signup.html">Sign Up</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section id="about" class="about">
+        <div class="container">
+            <h2 class="section-title">About Svart Suite</h2>
+
+            <div class="about-content">
+                <div class="about-text">
+                    <p style="color:var(--primary);font-size:0.85rem;letter-spacing:1px;margin-bottom:20px;">&#9888; Svart Suite is currently in development. All features described are planned for public release.</p>
+
+                    <h3>Privacy by Design</h3>
+                    <p>Svart Suite is built from the ground up with privacy and security as core principles, not afterthoughts. We believe you have the right to browse privately, without surveillance, tracking, or compromises.</p>
+
+                    <h3>Open and Transparent</h3>
+                    <p>Built on Firefox's proven engine with our security enhancements. We don't hide what we do &mdash; full source code, detailed documentation, and transparent security practices.</p>
+
+                    <h3>No Telemetry, No Tracking</h3>
+                    <p>Svart Suite doesn't send any data about you. No telemetry, no analytics, no tracking. Your browsing is yours alone.</p>
+
+                    <h3>Zero Extensions Risk</h3>
+                    <p>All features are built-in. By eliminating the extension ecosystem, we eliminate an entire class of security vulnerabilities.</p>
+
+                    <h3>Svart AI</h3>
+                    <p>Our encrypted AI engine uses AES-256-GCM with PBKDF2 key derivation at 250,000 iterations. It runs cross-platform via the Web Crypto API and powers the intelligent features across the entire suite.</p>
+                </div>
+
+                <div class="about-stats">
+                    <div class="stat">
+                        <div class="stat-number">256-bit</div>
+                        <div class="stat-label">Encryption</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">300+</div>
+                        <div class="stat-label">Filter Rules</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Extensions</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">750</div>
+                        <div class="stat-label">Free Premium AI Requests/mo</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="faq">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h4>Is Svart Suite really free?</h4>
+                    <p>All tools except Svart AI are completely free with no limits. Svart AI gives you <strong>750 free premium requests per month</strong> &mdash; the same full engine that paid users get, with no feature locks and no ads. If you need more, upgrade to &pound;4.99/month for 2,000 requests or &pound;9.99/month for unlimited. No ads on any plan, ever.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>How does the activation key protect my privacy?</h4>
+                    <p>Each activation key generates a unique API key for your Local LLM. This API key is random and only becomes active after you log in to your app with your local password. Your activation key is your ID for the server only &mdash; the server cannot see or access your API key or your data. This ensures your encrypted AI is truly private and only you control it.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>How is Svart Browser different from other browsers?</h4>
+                    <p>SVART is built specifically for privacy and security with military-grade encryption, zero extensions, built-in ad blocking, and Tor integration &mdash; all out of the box.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Can I install extensions?</h4>
+                    <p>In production mode (default), only our built-in ad blocker runs for maximum security. Dev mode allows extensions for developers and testers.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Will Svart Suite work offline?</h4>
+                    <p>Most features work offline. Ad blocking, encryption, and local features are always available. Svart AI and some cloud features require internet.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>How secure is the master password?</h4>
+                    <p>Your master password is hashed with Argon2, a GPU-resistant algorithm. It's never stored in plain text and never sent anywhere.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>What platforms are supported?</h4>
+                    <p>Windows 10/11, macOS 10.15+, and Linux (Arch, Ubuntu, Debian, Fedora). Native installers for all platforms.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>How do I enable Tor?</h4>
+                    <p>Install Tor, then enable it in SVART settings. All traffic will route through Tor's network automatically.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>What about my bookmarks and history?</h4>
+                    <p>All bookmarks, history, and credentials are encrypted locally. You control where they're stored.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4><span class="SVART-logo">&#9670;</span> Svart Suite</h4>
+                    <p>Security &amp; Privacy Tools Suite. Built for freedom.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="tools.html">Tools</a></li>
+                        <li><a href="SVART.html">Svart Browser</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                        <li><a href="about.html">About</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Community</h4>
+                    <ul>
+                        <li><a href="https://github.com/SVART-browser" target="_blank">GitHub</a></li>
+                        <li><a href="#">Issue Tracker</a></li>
+                        <li><a href="contact.html">Support</a></li>
+                        <li><a href="#">Contribute</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="website-security.html">Security</a></li>
+                        <li><a href="eula.html">EULA</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Svart Suite. Your privacy, your tools, your control &mdash; we protect people, we do not protect crimes.</p>
+            </div>
+        </div>
+    </footer>
+    <script src="js/script.js"></script>
+</body>
+</html>

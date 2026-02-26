@@ -1,0 +1,45 @@
+{
+  "name": "svart-suite-website",
+  "version": "1.0.0",
+  "description": "Professional promotional website for Svart Suite - Privacy Software",
+  "type": "module",
+  "scripts": {
+    "start": "http-server -p 8000 -g",
+    "serve": "python3 -m http.server 8000 || python -m http.server 8000",
+    "build": "echo 'No build required - static HTML/CSS/JS'",
+    "lint:html": "html-validate index.html",
+    "lint:css": "stylelint css/style.css",
+    "lint:js": "eslint js/script.js",
+    "test": "echo 'Run automated tests here'",
+    "deploy": "echo 'Push to your hosting provider'"
+  },
+  "keywords": [
+    "svart",
+    "browser",
+    "encryption",
+    "privacy",
+    "security",
+    "ad-blocker",
+    "tor"
+  ],
+  "author": "Svart Suite",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/svartsuite/website"
+  },
+  "homepage": "https://svartsuite.com",
+  "bugs": {
+    "url": "https://github.com/svartsuite/website/issues"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "html-validate": "^8.0.0",
+    "stylelint": "^15.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

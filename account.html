@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account - Svart Suite</title>
+    <meta name="description" content="Manage your Svart Suite account, activation keys, and downloads.">
+    <meta name="theme-color" content="#0a0a0f">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f'/><text x='50' y='70' font-size='80' font-weight='bold' text-anchor='middle' fill='%237c3aed'>&#x25C6;</text></svg>">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="index.html" style="display:flex;align-items:center;gap:10px;color:var(--primary);text-decoration:none;">
+                    <span class="SVART-logo">&#9670;</span>
+                    <span class="SVART-text">Svart Suite</span>
+                </a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="tools.html">Tools</a></li>
+                <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="SVART.html">Svart Browser</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li class="nav-auth"><a href="#" id="navUser" class="nav-user-link">Account</a></li>
+                <li class="nav-auth"><a href="#" id="logoutBtn">Log Out</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="account-section">
+        <div class="container">
+            <div class="account-header">
+                <h2>Welcome back, <span id="userName" style="font-size:0.75em;font-family:monospace;letter-spacing:1px;">User</span></h2>
+                <p>Manage your activation keys and download Svart Suite apps.</p>
+            </div>
+
+            <!-- Activation Key Card -->
+            <div class="account-grid">
+                <div class="account-card account-key-card">
+                    <div class="card-header">
+                        <span>&#128273;</span>
+                        <h3>Your Activation Key</h3>
+                    </div>
+                    <p>Use this key in all Svart Suite desktop apps when prompted for activation.</p>
+                    <div class="activation-key-display">
+                        <code id="userKey">XXXX-XXXX-XXXX-XXXX</code>
+                        <button id="copyKey" class="btn btn-primary btn-sm" type="button">Copy</button>
+                    </div>
+                    <div class="key-info">
+                        <span>&#128274; This key works with all 6 Svart Suite apps</span>
+                    </div>
+                </div>
+
+                <div class="account-card">
+                    <div class="card-header">
+                        <span>&#128200;</span>
+                        <h3>Svart AI Usage</h3>
+                    </div>
+                    <div class="usage-meter">
+                        <div class="usage-bar">
+                            <div class="usage-fill" id="usageFill" style="width:12%"></div>
+                        </div>
+                        <div class="usage-labels">
+                            <span><strong id="usageCount">90</strong> / 750 premium requests used</span>
+                            <span class="usage-period">Resets Mar 1</span>
+                        </div>
+                    </div>
+                    <a href="pricing.html" class="btn btn-secondary btn-sm" style="margin-top:16px;">View Pricing</a>
+                </div>
+            </div>
+
+            <!-- Downloads -->
+            <h3 class="account-section-title">Your Downloads</h3>
+            <p class="section-subtitle" style="margin-bottom:30px;">Download any Svart Suite app. Use your activation key above to unlock each one.</p>
+
+            <div class="download-grid">
+                <div class="download-tile">
+                    <div class="tile-icon">&#128274;</div>
+                    <div class="tile-info">
+                        <h4>Svart Browser</h4>
+                        <span class="tile-version">v1.0.0 &bull; 8.96 MB</span>
+                    </div>
+                    <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+                </div>
+
+                <div class="download-tile">
+                    <div class="tile-icon">&#129302;</div>
+                    <div class="tile-info">
+                        <h4>Svart AI</h4>
+                        <span class="tile-version">v1.0.0 &bull; 8.32 MB</span>
+                    </div>
+                    <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+                </div>
+
+                <div class="download-tile">
+                    <div class="tile-icon">&#128273;</div>
+                    <div class="tile-info">
+                        <h4>SVART Passwords</h4>
+                        <span class="tile-version">v1.0.0 &bull; 8.09 MB</span>
+                    </div>
+                    <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+                </div>
+
+                <div class="download-tile">
+                    <div class="tile-icon">&#128221;</div>
+                    <div class="tile-info">
+                        <h4>SVART Notes</h4>
+                        <span class="tile-version">v1.0.0 &bull; 7.97 MB</span>
+                    </div>
+                    <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+                </div>
+
+                <div class="download-tile">
+                    <div class="tile-icon">&#128196;</div>
+                    <div class="tile-info">
+                        <h4>SVART Docs</h4>
+                        <span class="tile-version">v1.0.0 &bull; 8.08 MB</span>
+                    </div>
+                    <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+                </div>
+
+                <div class="download-tile">
+                    <div class="tile-icon">&#128172;</div>
+                    <div class="tile-info">
+                        <h4>SVART Chat</h4>
+                        <span class="tile-version">v1.0.0 &bull; 8.34 MB</span>
+                    </div>
+                    <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+                </div>
+            </div>
+
+            <!-- Account info -->
+            <h3 class="account-section-title" style="margin-top:60px;">Account Details</h3>
+            <div class="account-card" style="max-width:500px;">
+                <div class="account-detail-row">
+                    <span class="detail-label">Svart ID</span>
+                    <span class="detail-value" id="userEmail">—</span>
+                </div>
+                <div class="account-detail-row">
+                    <span class="detail-label">Member since</span>
+                    <span class="detail-value" id="userSince">—</span>
+                </div>
+                <div class="account-detail-row">
+                    <span class="detail-label">Plan</span>
+                    <span class="detail-value">Free Premium (750 requests/month)</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4><span class="SVART-logo">&#9670;</span> Svart Suite</h4>
+                    <p>Security &amp; Privacy Tools Suite. Built for freedom.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="tools.html">Tools</a></li>
+                        <li><a href="SVART.html">Svart Browser</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                        <li><a href="about.html">About</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Community</h4>
+                    <ul>
+                        <li><a href="https://github.com/SVART-browser" target="_blank">GitHub</a></li>
+                        <li><a href="#">Issue Tracker</a></li>
+                        <li><a href="contact.html">Support</a></li>
+                        <li><a href="#">Contribute</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="website-security.html">Security</a></li>
+                        <li><a href="eula.html">EULA</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Svart Suite. Your privacy, your tools, your control &mdash; we protect people, we do not protect crimes.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+    (function() {
+        // Check session
+        const session = JSON.parse(localStorage.getItem('ct_session') || 'null');
+        if (!session || !session.loggedIn) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        // Populate user info
+        document.getElementById('userName').textContent = session.svartId || 'User';
+        document.getElementById('userEmail').textContent = session.svartId || '—';
+        document.getElementById('navUser').textContent = session.svartId || 'Account';
+
+        // Load activation key
+        const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
+        const user = users[session.svartId];
+        if (user) {
+            document.getElementById('userKey').textContent = user.activationKey || 'XXXX-XXXX-XXXX-XXXX';
+            if (user.createdAt) {
+                document.getElementById('userSince').textContent = new Date(user.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+            }
+        }
+
+        // Copy key
+        document.getElementById('copyKey').addEventListener('click', function() {
+            navigator.clipboard.writeText(document.getElementById('userKey').textContent).then(() => {
+                this.textContent = 'Copied!';
+                setTimeout(() => { this.textContent = 'Copy'; }, 2000);
+            });
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('ct_session');
+            window.location.href = 'index.html';
+        });
+    })();
+    </script>
+</body>
+</html>
