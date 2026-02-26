@@ -42,7 +42,8 @@
                 <li><a href="SVART.html">Svart Browser</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="contact.html">Contact</a></li>
-                <li class="nav-auth"><a href="#" id="navUser" class="nav-user-link">Account</a></li>
+                <li class="nav-auth"><a href="#" id="navUser" class="nav-user-link"><span id="navUsername">Account</span></a></li>
+                <li class="nav-auth"><a href="account-settings.html" id="navSettings" title="Account Settings"><span style="font-size:1.2em;">&#9881;</span></a></li>
                 <li class="nav-auth"><a href="#" id="logoutBtn">Log Out</a></li>
             </ul>
         </div>
@@ -234,7 +235,7 @@
         const username = user.username || 'User';
         document.getElementById('userName').textContent = username;
         document.getElementById('accountUsername').textContent = username;
-        document.getElementById('navUser').textContent = username;
+        document.getElementById('navUsername').textContent = username;
         document.getElementById('userEmail').textContent = session.svartId || '—';
 
         // Svart ID display
