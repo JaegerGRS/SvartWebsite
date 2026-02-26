@@ -39,7 +39,9 @@ function adaptNavForSession() {
             navUser.innerHTML = `<a href="account.html" id="navUser" class="nav-user-link"><span id="navUsername">${username}</span></a>`;
             navMenu.appendChild(navUser);
         } else {
+            navUser.style.display = '';
             navUser.querySelector('#navUsername').textContent = username;
+            navUser.querySelector('a').setAttribute('href', 'account.html');
         }
         // Replace signup with logout
         const signup = navMenu.querySelector('a[href="signup.html"]');
