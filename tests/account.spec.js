@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+import { test, expect } from '@playwright/test';
 
 test('Account dashboard username change', async ({ page }) => {
   await page.goto('http://localhost:8000/login.html');
