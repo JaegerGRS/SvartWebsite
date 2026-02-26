@@ -79,6 +79,7 @@
                         <div class="usage-labels">
                             <span><strong id="usageCount">90</strong> / 750 premium requests used</span>
                             <span class="usage-period">Resets Mar 1</span>
+                            <button id="testAIRequest" class="btn btn-primary btn-sm" style="margin-left:16px;">Test AI Request</button>
                         </div>
                     </div>
                     <a href="pricing.html" class="btn btn-secondary btn-sm" style="margin-top:16px;">View Pricing</a>
@@ -239,6 +240,52 @@
         document.getElementById('userKey').textContent = user.activationKey || 'XXXX-XXXX-XXXX-XXXX';
         if (user.createdAt) {
             document.getElementById('userSince').textContent = new Date(user.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        // AI Usage Meter Logic
+                // Add test button handler for live increment
+                document.getElementById('testAIRequest').addEventListener('click', function() {
+                    window.simulateAIRequest();
+                });
+        // Track requests in localStorage per user
+        const maxRequests = 750;
+        const usageKey = `ai_usage_${session.svartId}`;
+        let usageCount = parseInt(localStorage.getItem(usageKey) || '0', 10);
+
+        // Update usage meter display
+        function updateUsageMeter() {
+            document.getElementById('usageCount').textContent = usageCount;
+            const percent = Math.min(usageCount / maxRequests, 1) * 100;
+            document.getElementById('usageFill').style.width = percent + '%';
+            if (usageCount >= maxRequests) {
+                document.getElementById('usageFill').style.background = 'var(--danger)';
+            } else {
+                document.getElementById('usageFill').style.background = 'var(--primary)';
+            }
+        }
+        updateUsageMeter();
+
+        // Simulate AI request (for demo/testing)
+        window.simulateAIRequest = function() {
+            if (usageCount < maxRequests) {
+                usageCount++;
+                localStorage.setItem(usageKey, usageCount);
+                updateUsageMeter();
+            } else {
+                alert('AI request limit reached for this month!');
+            }
+        };
+
+        // Reset usage monthly (demo: resets on page load if month changed)
+        const now = new Date();
+        const lastResetKey = `ai_usage_reset_${session.svartId}`;
+        const lastReset = localStorage.getItem(lastResetKey);
+        const currentMonth = `${now.getFullYear()}-${now.getMonth()}`;
+        if (lastReset !== currentMonth) {
+            usageCount = 0;
+            localStorage.setItem(usageKey, usageCount);
+            localStorage.setItem(lastResetKey, currentMonth);
+            updateUsageMeter();
         }
 
         // Username change
