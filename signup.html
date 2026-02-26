@@ -280,19 +280,19 @@
             const terms = document.getElementById('terms').checked;
 
             if (!email || !password || !confirm) {
-                showMsg('Please fill all fields.', 'error');
+                showMsg('Please fill in all fields to create your account.', 'error');
                 return;
             }
             if (password.length < 8) {
-                showMsg('Password must be at least 8 characters.', 'error');
+                showMsg('Your password must be at least 8 characters for your security.', 'error');
                 return;
             }
             if (password !== confirm) {
-                showMsg('Passwords do not match.', 'error');
+                showMsg('Passwords do not match. Please double-check and try again.', 'error');
                 return;
             }
             if (!terms) {
-                showMsg('You must agree to the Terms of Service.', 'error');
+                showMsg('You need to agree to the Terms of Service to continue.', 'error');
                 return;
             }
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
