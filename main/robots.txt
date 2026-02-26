@@ -1,0 +1,35 @@
+# robots.txt - Search Engine Optimization
+# Rules for web crawlers and bots
+
+# Default rules for all bots
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /private/
+Disallow: /temp/
+
+# Allow specific search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Block bad bots
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+# Sitemap location
+Sitemap: https://cipher.dev/sitemap.xml
+Sitemap: https://cipher.dev/sitemap-index.xml
+
+# Request rate limiting
+Request-rate: 30/1m
