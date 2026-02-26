@@ -6,10 +6,10 @@ test('Account dashboard username change', async ({ page }) => {
   await page.fill('#password', 'testpassword');
   await page.click('button[type="submit"]');
   await page.goto('http://localhost:8000/account.html');
-  await page.fill('#username', 'NewUsername');
+  await page.fill('#displayName', 'NewDisplayName');
   await page.click('button[type="submit"]');
-  await expect(page.locator('#userName')).toHaveText('NewUsername');
-  await expect(page.locator('#accountUsername')).toHaveText('NewUsername');
+  await expect(page.locator('#userName')).toHaveText('NewDisplayName');
+  await expect(page.locator('#accountUsername')).toHaveText('NewDisplayName');
 });
 
 test('Navigation to SvartChat', async ({ page }) => {
