@@ -32,13 +32,13 @@
         <h2>Account Settings</h2>
         <form id="settingsForm" class="settings-form" novalidate>
           <div class="form-group">
-            <label for="username">App Username</label>
-            <input id="username" type="text" placeholder="Change your app username" minlength="3" maxlength="24" required autocomplete="nickname" />
+            <label for="username">Display Name</label>
+            <input id="username" type="text" placeholder="Change your display name" minlength="3" maxlength="24" required autocomplete="nickname" />
           </div>
-          <button type="submit" class="btn btn-primary">Update Username</button>
+          <button type="submit" class="btn btn-primary">Update Display Name</button>
         </form>
         <div class="settings-info">
-          <p><strong>Current Username:</strong> <span id="settingsUsername"></span></p>
+          <p><strong>Current Display Name:</strong> <span id="settingsUsername"></span></p>
           <p><strong>Svart ID:</strong> <span id="settingsSvartId"></span></p>
         </div>
       </div>
@@ -62,24 +62,24 @@
     const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
     const user = users[session.svartId] || {};
 
-    // Username display
-    const username = user.username || 'User';
-    document.getElementById('settingsUsername').textContent = username;
+    // Display name display
+    const displayName = user.username || 'User';
+    document.getElementById('settingsUsername').textContent = displayName;
     document.getElementById('settingsSvartId').textContent = session.svartId || '—';
 
-    // Username change
+    // Display name change
     document.getElementById('settingsForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const newUsername = document.getElementById('username').value.trim();
-      if (newUsername.length < 3 || newUsername.length > 24) {
-        alert('Username must be 3-24 characters.');
+      const newDisplayName = document.getElementById('username').value.trim();
+      if (newDisplayName.length < 3 || newDisplayName.length > 24) {
+        alert('Display name must be 3-24 characters.');
         return;
       }
-      user.username = newUsername;
+      user.username = newDisplayName;
       users[session.svartId] = user;
       localStorage.setItem('ct_users', JSON.stringify(users));
-      document.getElementById('settingsUsername').textContent = newUsername;
-      alert('Username updated!');
+      document.getElementById('settingsUsername').textContent = newDisplayName;
+      alert('Display name updated!');
     });
   })();
   </script>
