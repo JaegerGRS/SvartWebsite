@@ -33,11 +33,14 @@
     "url": "https://github.com/svartsuite/website/issues"
   },
   "devDependencies": {
+    "@types/argon2-browser": "^1.18.4",
+    "@types/node": "^25.3.2",
     "eslint": "^8.0.0",
     "html-validate": "^8.0.0",
     "http-server": "^14.1.1",
     "prettier": "^3.0.0",
-    "stylelint": "^15.0.0"
+    "stylelint": "^15.0.0",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=14.0.0"
