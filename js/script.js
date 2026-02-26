@@ -33,15 +33,12 @@ function adaptNavForSession() {
         const user = users[session.svartId] || {};
         const username = user.username || 'Account';
         let navUser = navMenu.querySelector('#navUser');
-        if (!navUser) {
-            navUser = document.createElement('li');
-            navUser.className = 'nav-auth';
-            navUser.innerHTML = `<a href="account.html" id="navUser" class="nav-user-link"><span id="navUsername">${username}</span></a>`;
-            navMenu.appendChild(navUser);
-        } else {
+        if (navUser) {
             navUser.style.display = '';
-            navUser.querySelector('#navUsername').textContent = username;
-            navUser.querySelector('a').setAttribute('href', 'account.html');
+            // Update username text
+            const navUsername = navUser.querySelector('#navUsername');
+            if (navUsername) navUsername.textContent = username;
+            navUser.setAttribute('href', 'account.html');
         }
         // Replace signup with logout
         const signup = navMenu.querySelector('a[href="signup.html"]');
