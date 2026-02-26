@@ -8,9 +8,63 @@ document.addEventListener('DOMContentLoaded', function() {
     initContactForm();
     initScrollAnimations();
     initSmartLinks();
+    adaptNavForSession();
 });
 
 // ============ Navigation ============
+// ============ Nav Adaptation ============
+function adaptNavForSession() {
+    // Check session
+    let session = JSON.parse(localStorage.getItem('ct_session') || 'null');
+    if (!session || !session.loggedIn) {
+        session = JSON.parse(localStorage.getItem('ct_persistent_session') || 'null');
+    }
+    const navMenu = document.querySelector('.nav-menu');
+    if (!navMenu) return;
+    // Remove cog except on account page
+    if (!window.location.pathname.endsWith('account.html')) {
+        const cog = navMenu.querySelector('#navSettings');
+        if (cog) cog.style.display = 'none';
+    }
+    // Adapt nav for logged in
+    if (session && session.loggedIn) {
+        // Username
+        const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
+        const user = users[session.svartId] || {};
+        const username = user.username || 'Account';
+        let navUser = navMenu.querySelector('#navUser');
+        if (!navUser) {
+            navUser = document.createElement('li');
+            navUser.className = 'nav-auth';
+            navUser.innerHTML = `<a href="account.html" id="navUser" class="nav-user-link"><span id="navUsername">${username}</span></a>`;
+            navMenu.appendChild(navUser);
+        } else {
+            navUser.querySelector('#navUsername').textContent = username;
+        }
+        // Replace signup with logout
+        const signup = navMenu.querySelector('a[href="signup.html"]');
+        if (signup) {
+            signup.textContent = 'Log Out';
+            signup.setAttribute('href', '#');
+            signup.onclick = function(e) {
+                e.preventDefault();
+                localStorage.removeItem('ct_session');
+                window.location.href = 'index.html';
+            };
+        }
+    } else {
+        // Not logged in: show signup, hide navUser
+        const navUser = navMenu.querySelector('#navUser');
+        if (navUser) navUser.style.display = 'none';
+        // Show signup
+        const signup = navMenu.querySelector('a[href="signup.html"]');
+        if (signup) {
+            signup.textContent = 'Sign Up';
+            signup.setAttribute('href', 'signup.html');
+            signup.onclick = null;
+        }
+    }
+}
 function initNavigation() {
     const navMenu = document.querySelector('.nav-menu');
     const navLinks = document.querySelectorAll('.nav-menu a');
