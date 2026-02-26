@@ -316,8 +316,19 @@
                     return;
                 }
 
-                // Generate activation key
-                const activationKey = generateActivationKey();
+                                // Generate activation key in format XXXX-XXXX-XXXX-XXXX
+                                function generateKey() {
+                                    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                                    let key = '';
+                                    for (let i = 0; i < 4; i++) {
+                                        if (i > 0) key += '-';
+                                        for (let j = 0; j < 4; j++) {
+                                            key += chars.charAt(Math.floor(Math.random() * chars.length));
+                                        }
+                                    }
+                                    return key;
+                                }
+                                const activationKey = generateKey();
 
                 // Save user
                 // Store user by activation key (no names, no personal data)
