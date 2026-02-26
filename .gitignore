@@ -1,0 +1,14 @@
+# Ignore temp and test files
+*.pyc
+*.log
+tmpclaude-*
+test-results/
+node_modules/
+.DS_Store
+.env
+
+# Ignore server-side scripts not needed for static hosting
+server.py
+
+# Ignore local build artifacts
+build/

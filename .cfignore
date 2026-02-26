@@ -1,0 +1,9 @@
+# Cloudflare Pages ignore file
+# Exclude temp, test, and server files from deployment
+server.py
+tmpclaude-*
+test-results/
+node_modules/
+.DS_Store
+.env
+build/
