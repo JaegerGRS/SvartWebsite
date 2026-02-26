@@ -214,10 +214,16 @@
     <script>
     (function() {
         // Check session
-        const session = JSON.parse(localStorage.getItem('ct_session') || 'null');
+        let session = JSON.parse(localStorage.getItem('ct_session') || 'null');
         if (!session || !session.loggedIn) {
-            window.location.href = 'login.html';
-            return;
+            // Try persistent session
+            session = JSON.parse(localStorage.getItem('ct_persistent_session') || 'null');
+            if (!session || !session.loggedIn) {
+                window.location.href = 'login.html';
+                return;
+            }
+            // Restore session
+            localStorage.setItem('ct_session', JSON.stringify(session));
         }
 
         // Load users

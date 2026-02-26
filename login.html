@@ -212,11 +212,23 @@
                 const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
                 if (users[svartId]) {
                     if (users[svartId].password === hashPassword(password)) {
+                        const remember = document.getElementById('remember').checked;
                         localStorage.setItem('ct_session', JSON.stringify({
                             svartId: svartId,
                             loggedIn: true,
-                            ts: Date.now()
+                            ts: Date.now(),
+                            persistent: remember
                         }));
+                        if (remember) {
+                            // Store persistent session
+                            localStorage.setItem('ct_persistent_session', JSON.stringify({
+                                svartId: svartId,
+                                loggedIn: true,
+                                ts: Date.now()
+                            }));
+                        } else {
+                            localStorage.removeItem('ct_persistent_session');
+                        }
                         showMsg('Login successful! Redirecting...', 'success');
                         setTimeout(() => { window.location.href = 'account.html'; }, 1000);
                         return;
