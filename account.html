@@ -1,3 +1,21 @@
+<section class="account-section">
+    <div class="container">
+        <div class="account-card">
+            <h2>Account Settings</h2>
+            <form id="usernameForm" class="account-form" novalidate>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input id="username" type="text" placeholder="Change your username" minlength="3" maxlength="24" required autocomplete="nickname" />
+                </div>
+                <button type="submit" class="btn btn-primary">Update Username</button>
+            </form>
+            <div class="account-info">
+                <p><strong>Svart ID:</strong> <span id="accountSvartId"></span></p>
+                <p><strong>Current Username:</strong> <span id="accountUsername"></span></p>
+            </div>
+        </div>
+    </div>
+</section>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -202,20 +220,42 @@
             return;
         }
 
-        // Populate user info
-        document.getElementById('userName').textContent = session.svartId || 'User';
+        // Load users
+        const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
+        const user = users[session.svartId] || {};
+
+        // Username display
+        const username = user.username || 'User';
+        document.getElementById('userName').textContent = username;
+        document.getElementById('accountUsername').textContent = username;
+        document.getElementById('navUser').textContent = username;
         document.getElementById('userEmail').textContent = session.svartId || '—';
-        document.getElementById('navUser').textContent = session.svartId || 'Account';
+
+        // Svart ID display
+        document.getElementById('accountSvartId').textContent = session.svartId || '—';
 
         // Load activation key
-        const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
-        const user = users[session.svartId];
-        if (user) {
-            document.getElementById('userKey').textContent = user.activationKey || 'XXXX-XXXX-XXXX-XXXX';
-            if (user.createdAt) {
-                document.getElementById('userSince').textContent = new Date(user.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-            }
+        document.getElementById('userKey').textContent = user.activationKey || 'XXXX-XXXX-XXXX-XXXX';
+        if (user.createdAt) {
+            document.getElementById('userSince').textContent = new Date(user.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
         }
+
+        // Username change
+        document.getElementById('usernameForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newUsername = document.getElementById('username').value.trim();
+            if (newUsername.length < 3 || newUsername.length > 24) {
+                alert('Username must be 3-24 characters.');
+                return;
+            }
+            user.username = newUsername;
+            users[session.svartId] = user;
+            localStorage.setItem('ct_users', JSON.stringify(users));
+            document.getElementById('userName').textContent = newUsername;
+            document.getElementById('accountUsername').textContent = newUsername;
+            document.getElementById('navUser').textContent = newUsername;
+            alert('Username updated!');
+        });
 
         // Copy key
         document.getElementById('copyKey').addEventListener('click', function() {

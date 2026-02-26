@@ -42,6 +42,14 @@
                     </div>
 
                     <form id="signupForm" class="auth-form-site" novalidate>
+                                                <div class="form-group">
+                                                    <label for="displayName">Display Name</label>
+                                                    <div class="input-wrapper">
+                                                        <span class="input-icon">&#128100;</span>
+                                                        <input id="displayName" type="text" placeholder="Choose a display name" required minlength="3" maxlength="24" autocomplete="nickname" />
+                                                                                <input id="username" type="text" placeholder="Choose a username" required minlength="3" maxlength="24" autocomplete="nickname" />
+                                                    </div>
+                                                </div>
                         <div class="form-group">
                             <label for="email">Email Address</label>
                             <div class="input-wrapper">
@@ -79,6 +87,7 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+                        <input type="hidden" id="svartId" name="svartId" />
 
                         <div class="auth-divider">
                             <span>or</span>
@@ -93,6 +102,10 @@
 
                     <!-- Activation key display (shown after successful signup) -->
                     <div id="activationResult" class="activation-result" style="display:none;">
+                                                <div class="user-info">
+                                                    <p><strong>Svart ID:</strong> <span id="userSvartId"></span></p>
+                                                    <p><strong>Display Name:</strong> <span id="userDisplayName"></span></p>
+                                                </div>
                         <div class="activation-header">
                             <span class="activation-icon">&#10003;</span>
                             <h3>Account Created!</h3>

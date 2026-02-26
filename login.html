@@ -41,6 +41,13 @@
                     </div>
 
                     <form id="loginForm" class="auth-form-site" novalidate>
+                                                <div class="form-group">
+                                                    <label for="svartId">Svart ID</label>
+                                                    <div class="input-wrapper">
+                                                        <span class="input-icon">&#9670;</span>
+                                                        <input id="svartId" type="text" placeholder="Enter your Svart ID" required minlength="8" maxlength="24" autocomplete="username" />
+                                                    </div>
+                                                </div>
                         <div class="form-group">
                             <label for="svartId">Svart ID</label>
                             <div class="input-wrapper">
@@ -67,6 +74,14 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary btn-full">Log In</button>
+                        <div class="form-group">
+                            <label for="displayName">Display Name</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">&#128100;</span>
+                                <input id="displayName" type="text" placeholder="Display name (optional)" minlength="3" maxlength="24" autocomplete="nickname" />
+                                                        <input id="username" type="text" placeholder="Username (optional)" minlength="3" maxlength="24" autocomplete="nickname" />
+                            </div>
+                        </div>
 
                         <div class="auth-divider">
                             <span>or</span>
