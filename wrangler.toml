@@ -1,0 +1,30 @@
+name = "ciphertools-website"
+compatibility_date = "2026-02-01"
+
+# Pages-specific configuration
+pages_build_output_dir = "main"
+
+# R2 bucket binding for hosting downloadable build artifacts
+[[r2_buckets]]
+binding = "BUILD_STORAGE"
+bucket_name = "ciphertools-builds"
+
+# KV namespace binding for tracking usage/requests
+[[kv_namespaces]]
+binding = "USAGE_DATA"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+
+# ──────────────────────────────────────────────
+# Production environment
+# ──────────────────────────────────────────────
+[env.production]
+name = "ciphertools-website"
+
+[[env.production.r2_buckets]]
+binding = "BUILD_STORAGE"
+bucket_name = "ciphertools-builds"
+
+[[env.production.kv_namespaces]]
+binding = "USAGE_DATA"
+id = "REPLACE_WITH_PRODUCTION_KV_NAMESPACE_ID"
