@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Settings - Svart Suite</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <a href="index.html" style="display:flex;align-items:center;gap:10px;color:var(--primary);text-decoration:none;">
+          <span class="SVART-logo">&#9670;</span>
+          <span class="SVART-text">Svart Suite</span>
+        </a>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="account.html">Account</a></li>
+        <li><a href="account-settings.html" class="nav-link-active">Settings</a></li>
+        <li><a href="SVART.html">Svart Browser</a></li>
+        <li><a href="svartchat.html">SvartChat</a></li>
+        <li><a href="svartdocs.html">SvartDocs</a></li>
+        <li><a href="svartnotes.html">SvartNotes</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="settings-section">
+    <div class="container">
+      <div class="settings-card">
+        <h2>Account Settings</h2>
+        <form id="settingsForm" class="settings-form" novalidate>
+          <div class="form-group">
+            <label for="username">Display Name</label>
+            <input id="username" type="text" placeholder="Change your display name" minlength="3" maxlength="24" required autocomplete="nickname" />
+          </div>
+          <button type="submit" class="btn btn-primary">Update Display Name</button>
+        </form>
+        <div class="settings-info">
+          <p><strong>Current Display Name:</strong> <span id="settingsUsername"></span></p>
+          <p><strong>Svart ID:</strong> <span id="settingsSvartId"></span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+  (function() {
+    // Check session
+    let session = JSON.parse(localStorage.getItem('ct_session') || 'null');
+    if (!session || !session.loggedIn) {
+      session = JSON.parse(localStorage.getItem('ct_persistent_session') || 'null');
+      if (!session || !session.loggedIn) {
+        window.location.href = 'login.html';
+        return;
+      }
+      localStorage.setItem('ct_session', JSON.stringify(session));
+    }
+
+    // Load users
+    const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
+    const user = users[session.svartId] || {};
+
+    // Display name display
+    const displayName = user.username || 'User';
+    document.getElementById('settingsUsername').textContent = displayName;
+    document.getElementById('settingsSvartId').textContent = session.svartId || '—';
+
+    // Display name change
+    document.getElementById('settingsForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const newDisplayName = document.getElementById('username').value.trim();
+      if (newDisplayName.length < 3 || newDisplayName.length > 24) {
+        alert('Display name must be 3-24 characters.');
+        return;
+      }
+      user.username = newDisplayName;
+      users[session.svartId] = user;
+      localStorage.setItem('ct_users', JSON.stringify(users));
+      document.getElementById('settingsUsername').textContent = newDisplayName;
+      alert('Display name updated!');
+    });
+  })();
+  </script>
+</body>
+</html>

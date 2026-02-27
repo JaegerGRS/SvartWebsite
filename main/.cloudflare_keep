@@ -1,2 +1,0 @@
-// This file ensures the main directory is always present for Cloudflare Pages build compatibility.
-// If you see this file, your build output directory is ready for deployment.

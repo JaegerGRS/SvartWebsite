@@ -1,4 +1,5 @@
 name = "ciphertools-website"
+type = "javascript"
 compatibility_date = "2026-02-01"
 
 # Pages-specific configuration
@@ -18,8 +19,7 @@ id = "REPLACE_WITH_KV_NAMESPACE_ID"
 # ──────────────────────────────────────────────
 # Production environment
 # ──────────────────────────────────────────────
-[env.production]
-name = "ciphertools-website"
+
 
 [[env.production.r2_buckets]]
 binding = "BUILD_STORAGE"
