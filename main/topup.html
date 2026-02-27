@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top-Up Requests - Svart Suite</title>
+    <meta name="description" content="Buy Svart AI request top-ups from £0.50. One-time payments, no subscription, no expiry. Choose exactly the amount you need — single packs, bulk packs, or custom amounts.">
+    <meta name="theme-color" content="#0a0a0f">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f'/><text x='50' y='70' font-size='80' font-weight='bold' text-anchor='middle' fill='%237c3aed'>&#x25C6;</text></svg>">
+    <style>
+        .topup-card {
+            text-align: center;
+            padding: 28px 20px;
+            border: 1px solid rgba(124,58,237,0.2);
+            border-radius: 16px;
+            background: rgba(124,58,237,0.03);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .topup-card:hover {
+            border-color: var(--primary);
+            background: rgba(124,58,237,0.06);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(124,58,237,0.15);
+        }
+        .topup-card.popular {
+            border: 2px solid rgba(124,58,237,0.4);
+            background: rgba(124,58,237,0.06);
+        }
+        .topup-card.best-value {
+            border: 2px solid var(--primary);
+            background: rgba(124,58,237,0.08);
+        }
+        .topup-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .topup-badge.popular-badge {
+            background: var(--primary);
+            color: #fff;
+        }
+        .topup-badge.value-badge {
+            background: #22c55e;
+            color: #fff;
+        }
+        .topup-price {
+            color: var(--text-light);
+            font-size: 2rem;
+            font-weight: 900;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .topup-requests {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin: 8px 0 0;
+            font-weight: 600;
+        }
+        .topup-per-req {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin: 4px 0 0;
+        }
+        .topup-bonus {
+            color: #22c55e;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin: 6px 0 0;
+        }
+        .topup-details {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(124,58,237,0.1);
+            text-align: left;
+        }
+        .topup-details p {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            margin: 0 0 6px;
+            padding-left: 16px;
+            position: relative;
+        }
+        .topup-details p::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .topup-btn {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 10px 28px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .topup-btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: 2px solid var(--primary);
+        }
+        .topup-btn-primary:hover {
+            background: transparent;
+            color: var(--primary);
+        }
+        .topup-btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .topup-btn-secondary:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+        .calc-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 32px;
+            border: 2px solid rgba(124,58,237,0.3);
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(124,58,237,0.06), rgba(124,58,237,0.02));
+        }
+        .calc-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, rgba(124,58,237,0.3), var(--primary));
+            outline: none;
+            margin: 20px 0;
+        }
+        .calc-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(124,58,237,0.4);
+        }
+        .calc-slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(124,58,237,0.4);
+        }
+        .calc-result {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(124,58,237,0.08);
+            margin-top: 16px;
+        }
+        .faq-item {
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(124,58,237,0.1);
+        }
+        .faq-item:last-child { border-bottom: none; }
+        .faq-q {
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0 0 8px;
+        }
+        .faq-a {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="index.html" style="display:flex;align-items:center;gap:10px;color:var(--primary);text-decoration:none;">
+                    <span class="SVART-text">Svart Suite</span>
+                </a>
+            </div>
+            <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navMenu">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="tools.html">Tools</a></li>
+                <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="comparison.html">Compare</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li id="navAuthItem" class="nav-auth"><a href="login.html" class="nav-auth-btn">Login / Sign Up</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="navOverlay"></div>
+
+    <section class="pricing" style="padding-top:120px;">
+        <div class="container">
+            <h2 class="section-title">Request Top-Ups</h2>
+            <p class="section-subtitle">One-time payments &bull; No subscription &bull; No expiry &bull; Instant delivery</p>
+            <p style="text-align:center;color:var(--primary);font-size:0.85rem;margin-top:-10px;letter-spacing:1px;">&#9888; Svart Suite is in development. Pricing is subject to change before launch.</p>
+
+            <!-- How top-ups work -->
+            <div style="text-align:center;margin:40px auto 0;max-width:800px;padding:28px 32px;border:2px solid var(--primary);border-radius:16px;background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(124,58,237,0.02));">
+                <p style="color:var(--primary);font-size:1.4rem;font-weight:800;margin:0 0 8px;">&#128176; How Top-Ups Work</p>
+                <p style="color:var(--text-light);font-size:1rem;margin:0 0 12px;">Buy a pack. Requests are added to your account <strong>instantly</strong>. Use them whenever you want &mdash; they <strong>never expire</strong>. Stack multiple packs together. Works on <strong>every plan</strong> including Free Premium.</p>
+                <p style="color:var(--text-muted);font-size:0.85rem;margin:0;">No recurring charges. No auto-renewal. No credit card stored. Just a one-time payment for exactly the requests you need.</p>
+            </div>
+
+            <!-- Quick stats -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;max-width:700px;margin:30px auto 0;">
+                <div style="text-align:center;padding:16px;border-radius:10px;background:rgba(124,58,237,0.04);">
+                    <p style="color:var(--primary);font-size:1.5rem;font-weight:900;margin:0;">£0.50</p>
+                    <p style="color:var(--text-muted);font-size:0.75rem;margin:4px 0 0;">Cheapest top-up</p>
+                </div>
+                <div style="text-align:center;padding:16px;border-radius:10px;background:rgba(124,58,237,0.04);">
+                    <p style="color:var(--primary);font-size:1.5rem;font-weight:900;margin:0;">£0.001</p>
+                    <p style="color:var(--text-muted);font-size:0.75rem;margin:4px 0 0;">Standard cost per request</p>
+                </div>
+                <div style="text-align:center;padding:16px;border-radius:10px;background:rgba(124,58,237,0.04);">
+                    <p style="color:var(--primary);font-size:1.5rem;font-weight:900;margin:0;">£0.00077</p>
+                    <p style="color:var(--text-muted);font-size:0.75rem;margin:4px 0 0;">Lowest cost per request</p>
+                </div>
+                <div style="text-align:center;padding:16px;border-radius:10px;background:rgba(124,58,237,0.04);">
+                    <p style="color:#22c55e;font-size:1.5rem;font-weight:900;margin:0;">Never</p>
+                    <p style="color:var(--text-muted);font-size:0.75rem;margin:4px 0 0;">Expiry date</p>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!--                     SINGLE TOP-UPS                           -->
+            <!-- ============================================================ -->
+            <div style="margin-top:60px;">
+                <h3 class="section-title" style="font-size:1.8rem;">Single Top-Ups</h3>
+                <p class="section-subtitle">Perfect for occasional use or topping off your balance</p>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;max-width:1100px;margin:30px auto 0;">
+                <!-- £0.50 -->
+                <div class="topup-card">
+                    <p class="topup-price">&pound;0.50</p>
+                    <p class="topup-requests">500 requests</p>
+                    <p class="topup-per-req">&pound;0.001 per request</p>
+                    <div class="topup-details">
+                        <p>Instant delivery to your account</p>
+                        <p>Never expires</p>
+                        <p>Works on all plans</p>
+                        <p>Perfect for quick top-offs</p>
+                    </div>
+                    <a href="signup.html" class="topup-btn topup-btn-secondary">Buy 500</a>
+                </div>
+
+                <!-- £1.00 -->
+                <div class="topup-card">
+                    <p class="topup-price">&pound;1.00</p>
+                    <p class="topup-requests">1,000 requests</p>
+                    <p class="topup-per-req">&pound;0.001 per request</p>
+                    <div class="topup-details">
+                        <p>Instant delivery to your account</p>
+                        <p>Never expires</p>
+                        <p>Works on all plans</p>
+                        <p>Good for a few days&rsquo; extra use</p>
+                    </div>
+                    <a href="signup.html" class="topup-btn topup-btn-secondary">Buy 1,000</a>
+                </div>
+
+                <!-- £1.50 -->
+                <div class="topup-card">
+                    <p class="topup-price">&pound;1.50</p>
+                    <p class="topup-requests">1,500 requests</p>
+                    <p class="topup-per-req">&pound;0.001 per request</p>
+                    <div class="topup-details">
+                        <p>Instant delivery to your account</p>
+                        <p>Never expires</p>
+                        <p>Works on all plans</p>
+                        <p>About a week of average use</p>
+                    </div>
+                    <a href="signup.html" class="topup-btn topup-btn-secondary">Buy 1,500</a>
+                </div>
+
+                <!-- £2.00 -->
+                <div class="topup-card">
+                    <p class="topup-price">&pound;2.00</p>
+                    <p class="topup-requests">2,000 requests</p>
+                    <p class="topup-per-req">&pound;0.001 per request</p>
+                    <div class="topup-details">
+                        <p>Instant delivery to your account</p>
+                        <p>Never expires</p>
+                        <p>Works on all plans</p>
+                        <p>Same as a full month on Svart AI plan</p>
+                    </div>
+                    <a href="signup.html" class="topup-btn topup-btn-secondary">Buy 2,000</a>
+                </div>
+
+                <!-- £2.50 (POPULAR) -->
+                <div class="topup-card popular">
+                    <span class="topup-badge popular-badge">Most Popular</span>
+                    <p class="topup-price" style="color:var(--primary);">&pound;2.50</p>
+                    <p class="topup-requests" style="color:var(--text-light);">2,500 requests</p>
+                    <p class="topup-per-req">&pound;0.001 per request</p>
+                    <div class="topup-details">
+                        <p>Instant delivery to your account</p>
+                        <p>Never expires</p>
+                        <p>Works on all plans</p>
+                        <p>Most purchased top-up pack</p>
+                        <p>~2 weeks of heavy daily use</p>
+                    </div>
+                    <a href="signup.html" class="topup-btn topup-btn-primary">Buy 2,500</a>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!--                     BULK PACKS                               -->
+            <!-- ============================================================ -->
+            <div style="margin-top:80px;">
+                <h3 class="section-title" style="font-size:1.8rem;">Bulk Packs</h3>
+                <p class="section-subtitle">Buy more, save more &mdash; bonus requests on larger packs</p>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;max-width:1100px;margin:30px auto 0;">
+                <!-- £5.00 -->
+                <div class="topup-card">
+                    <p class="topup-price">&pound;5.00</p>
+                    <p class="topup-requests">5,000 requests</p>
+                    <p class="topup-per-req">&pound;0.001 per request</p>
+                    <div class="topup-details">
+                        <p>Instant delivery to your account</p>
+                        <p>Never expires &mdash; use at your own pace</p>
+                        <p>Stack with other packs</p>
+                        <p>Equivalent to ~3 months on Free Premium</p>
+                        <p>Great for medium-term coverage</p>
+                    </div>
+                    <a href="signup.html" class="topup-btn topup-btn-secondary">Buy 5,000</a>
+                </div>
+
+                <!-- £10.00 -->
+                <div class="topup-card">
+                    <p class="topup-price">&pound;10.00</p>
+                    <p class="topup-requests">10,000 requests</p>
+                    <p class="topup-per-req">&pound;0.001 per request</p>
+                    <div class="topup-details">
+                        <p>Instant delivery to your account</p>
+                        <p>Never expires &mdash; use at your own pace</p>
+                        <p>Stack with other packs</p>
+                        <p>Equivalent to ~6 months on Free Premium</p>
+                        <p>Solid buffer for heavy users</p>
+                    </div>
+                    <a href="signup.html" class="topup-btn topup-btn-secondary">Buy 10,000</a>
+                </div>
+
+                <!-- £20.00 (BEST VALUE) -->
+                <div class="topup-card best-value">
+                    <span class="topup-badge value-badge">Best Value</span>
+                    <p class="topup-price" style="color:var(--primary);">&pound;20.00</p>
+                    <p class="topup-requests" style="color:var(--text-light);font-weight:700;">25,000 requests</p>
+                    <p class="topup-per-req" style="color:var(--primary);font-weight:700;">&pound;0.0008 per request</p>
+                    <p class="topup-bonus">&#127881; 20% bonus &mdash; 5,000 extra free requests!</p>
+                    <div class="topup-details">
+                        <p>Instant delivery to your account</p>
+                        <p>Never expires &mdash; use at your own pace</p>
+                        <p>20% more requests than standard rate</p>
+                        <p>Equivalent to ~16 months on Free Premium</p>
+                        <p>Best cost-per-request at &pound;0.0008</p>
+                        <p>Perfect for power users who want flexibility</p>
+                    </div>
+                    <a href="signup.html" class="topup-btn topup-btn-primary">Buy 25,000</a>
+                </div>
+
+                <!-- £50.00 (MEGA PACK) -->
+                <div class="topup-card best-value">
+                    <span class="topup-badge value-badge">Mega Pack</span>
+                    <p class="topup-price" style="color:var(--primary);">&pound;50.00</p>
+                    <p class="topup-requests" style="color:var(--text-light);font-weight:700;">65,000 requests</p>
+                    <p class="topup-per-req" style="color:var(--primary);font-weight:700;">&pound;0.00077 per request</p>
+                    <p class="topup-bonus">&#127881; 30% bonus &mdash; 15,000 extra free requests!</p>
+                    <div class="topup-details">
+                        <p>Instant delivery to your account</p>
+                        <p>Never expires &mdash; use at your own pace</p>
+                        <p>30% more requests than standard rate</p>
+                        <p>Equivalent to ~43 months on Free Premium</p>
+                        <p>Lowest cost-per-request at &pound;0.00077</p>
+                        <p>Maximum savings for heavy use</p>
+                    </div>
+                    <a href="signup.html" class="topup-btn topup-btn-primary">Buy 65,000</a>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!--                   COMPLETE TOP-UP TABLE                      -->
+            <!-- ============================================================ -->
+            <div style="margin-top:60px;">
+                <h3 class="section-title" style="font-size:1.5rem;">All Top-Ups at a Glance</h3>
+                <div style="overflow-x:auto;margin-top:20px;max-width:800px;margin-left:auto;margin-right:auto;">
+                    <table class="compare-table">
+                        <thead>
+                            <tr><th>Pack</th><th>Price</th><th>Requests</th><th>Per Request</th><th>Bonus</th><th>Best For</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Micro</td>
+                                <td>&pound;0.50</td>
+                                <td>500</td>
+                                <td>&pound;0.001</td>
+                                <td>&mdash;</td>
+                                <td>Quick top-off</td>
+                            </tr>
+                            <tr>
+                                <td>Small</td>
+                                <td>&pound;1.00</td>
+                                <td>1,000</td>
+                                <td>&pound;0.001</td>
+                                <td>&mdash;</td>
+                                <td>A few days&rsquo; extra use</td>
+                            </tr>
+                            <tr>
+                                <td>Medium</td>
+                                <td>&pound;1.50</td>
+                                <td>1,500</td>
+                                <td>&pound;0.001</td>
+                                <td>&mdash;</td>
+                                <td>About a week</td>
+                            </tr>
+                            <tr>
+                                <td>Standard</td>
+                                <td>&pound;2.00</td>
+                                <td>2,000</td>
+                                <td>&pound;0.001</td>
+                                <td>&mdash;</td>
+                                <td>Month equivalent (Svart AI plan)</td>
+                            </tr>
+                            <tr style="background:rgba(124,58,237,0.04);">
+                                <td><strong>Popular</strong></td>
+                                <td><strong>&pound;2.50</strong></td>
+                                <td><strong>2,500</strong></td>
+                                <td><strong>&pound;0.001</strong></td>
+                                <td>&mdash;</td>
+                                <td><strong>Most purchased</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Bulk 5k</td>
+                                <td>&pound;5.00</td>
+                                <td>5,000</td>
+                                <td>&pound;0.001</td>
+                                <td>&mdash;</td>
+                                <td>Medium-term coverage</td>
+                            </tr>
+                            <tr>
+                                <td>Bulk 10k</td>
+                                <td>&pound;10.00</td>
+                                <td>10,000</td>
+                                <td>&pound;0.001</td>
+                                <td>&mdash;</td>
+                                <td>Heavy user buffer</td>
+                            </tr>
+                            <tr style="background:rgba(34,197,94,0.05);">
+                                <td><strong>Best Value</strong></td>
+                                <td><strong>&pound;20.00</strong></td>
+                                <td><strong>25,000</strong></td>
+                                <td><strong>&pound;0.0008</strong></td>
+                                <td style="color:#22c55e;font-weight:700;">+20%</td>
+                                <td><strong>Power users</strong></td>
+                            </tr>
+                            <tr style="background:rgba(34,197,94,0.05);">
+                                <td><strong>Mega Pack</strong></td>
+                                <td><strong>&pound;50.00</strong></td>
+                                <td><strong>65,000</strong></td>
+                                <td><strong>&pound;0.00077</strong></td>
+                                <td style="color:#22c55e;font-weight:700;">+30%</td>
+                                <td><strong>Maximum savings</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!--                   REQUEST CALCULATOR                         -->
+            <!-- ============================================================ -->
+            <div style="margin-top:80px;">
+                <h3 class="section-title" style="font-size:1.8rem;">&#128290; Request Calculator</h3>
+                <p class="section-subtitle">Slide to see how many requests you need and what it costs</p>
+            </div>
+
+            <div class="calc-container" style="margin-top:30px;">
+                <div style="text-align:center;">
+                    <p style="color:var(--text-muted);font-size:0.9rem;margin:0 0 4px;">I want approximately</p>
+                    <p id="calcRequests" style="color:var(--primary);font-size:2.5rem;font-weight:900;margin:0;">2,500</p>
+                    <p style="color:var(--text-muted);font-size:0.9rem;margin:0;">requests</p>
+                </div>
+                <input type="range" class="calc-slider" id="calcSlider" min="500" max="65000" step="500" value="2500">
+                <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--text-muted);font-size:0.7rem;">500</span>
+                    <span style="color:var(--text-muted);font-size:0.7rem;">65,000</span>
+                </div>
+                <div class="calc-result" id="calcResult">
+                    <p style="color:var(--text-muted);font-size:0.85rem;margin:0 0 4px;">Recommended pack</p>
+                    <p id="calcPack" style="color:var(--text-light);font-size:1.3rem;font-weight:800;margin:0;">Popular Pack &mdash; &pound;2.50</p>
+                    <p id="calcDetail" style="color:var(--text-muted);font-size:0.85rem;margin:6px 0 0;">2,500 requests at &pound;0.001/req</p>
+                    <p id="calcSavings" style="color:#22c55e;font-size:0.8rem;font-weight:600;margin:6px 0 0;display:none;"></p>
+                    <p id="calcVs" style="color:var(--text-muted);font-size:0.75rem;margin:8px 0 0;">ChatGPT equivalent cost: ~&pound;25&ndash;100 &mdash; <strong style="color:var(--primary);">you save 90%+</strong></p>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!--              HOW MANY REQUESTS DO I NEED?                    -->
+            <!-- ============================================================ -->
+            <div style="margin-top:80px;">
+                <h3 class="section-title" style="font-size:1.8rem;">How Many Requests Do I Need?</h3>
+                <p class="section-subtitle">Typical usage patterns for different types of users</p>
+            </div>
+
+            <div class="features-grid" style="margin-top:30px;">
+                <div class="feature-card">
+                    <div class="feature-icon">&#128172;</div>
+                    <h3>Casual User</h3>
+                    <p style="color:var(--primary);font-weight:700;font-size:1.1rem;">~250&ndash;500 requests/month</p>
+                    <p>A few AI chats per day, occasional document analysis. The <strong>Free Premium plan (750/mo)</strong> covers you. Top up a Micro Pack (&pound;0.50) if you go over.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#128187;</div>
+                    <h3>Regular User</h3>
+                    <p style="color:var(--primary);font-weight:700;font-size:1.1rem;">~500&ndash;2,000 requests/month</p>
+                    <p>Daily AI conversations, web scraping, document work. The <strong>Svart AI plan (2,000/mo)</strong> fits perfectly. Or use Free Premium + a Popular Pack (&pound;2.50) for 3,250 total.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#128640;</div>
+                    <h3>Power User</h3>
+                    <p style="color:var(--primary);font-weight:700;font-size:1.1rem;">~2,000&ndash;5,000+ requests/month</p>
+                    <p>Heavy daily use, bulk training, lots of document analysis. The <strong>Unlimited plan (&pound;9.99/mo)</strong> is your best bet. Or Svart AI + a Best Value bulk pack (&pound;20).</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#128170;</div>
+                    <h3>One-Off Projects</h3>
+                    <p style="color:var(--primary);font-weight:700;font-size:1.1rem;">Variable &mdash; burst usage</p>
+                    <p>Need a lot of requests for a specific project but not every month? Top-ups are ideal. Buy a Bulk pack, use it for your project, and don&rsquo;t pay again until you need to.</p>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!--                   WHAT IS A REQUEST?                         -->
+            <!-- ============================================================ -->
+            <div style="margin-top:60px;">
+                <h3 class="section-title" style="font-size:1.5rem;">What Counts as a Request?</h3>
+                <div style="max-width:700px;margin:20px auto 0;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+                        <div>
+                            <h4 style="color:var(--primary);font-size:0.95rem;font-weight:700;margin:0 0 12px;">&#10003; Counts (1 request each)</h4>
+                            <p style="color:var(--text-muted);font-size:0.85rem;margin:0 0 6px;">&#128172; Each AI chat message you send</p>
+                            <p style="color:var(--text-muted);font-size:0.85rem;margin:0 0 6px;">&#127760; Each web scraping query</p>
+                            <p style="color:var(--text-muted);font-size:0.85rem;margin:0 0 6px;">&#129504; Each AI training prompt</p>
+                            <p style="color:var(--text-muted);font-size:0.85rem;margin:0;">&#128196; Each document analysis</p>
+                        </div>
+                        <div>
+                            <h4 style="color:#22c55e;font-size:0.95rem;font-weight:700;margin:0 0 12px;">&#10007; Does NOT count (always free)</h4>
+                            <p style="color:var(--text-muted);font-size:0.85rem;margin:0 0 6px;">&#128274; Browsing &amp; ad blocking</p>
+                            <p style="color:var(--text-muted);font-size:0.85rem;margin:0 0 6px;">&#128736; All other Svart apps</p>
+                            <p style="color:var(--text-muted);font-size:0.85rem;margin:0 0 6px;">&#128200; Viewing your dashboard</p>
+                            <p style="color:var(--text-muted);font-size:0.85rem;margin:0;">&#128259; Updates &amp; downloads</p>
+                        </div>
+                    </div>
+                    <p style="color:var(--text-muted);font-size:0.8rem;margin:20px 0 0;text-align:center;">Each request = one prompt. The AI response is included in that same request. You are <strong>not</strong> charged per token &mdash; one prompt sent = one request used, regardless of response length.</p>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!--                VS COMPETITORS COST                           -->
+            <!-- ============================================================ -->
+            <div style="margin-top:60px;">
+                <h3 class="section-title" style="font-size:1.5rem;">How Much Would This Cost Elsewhere?</h3>
+                <div style="overflow-x:auto;margin-top:20px;max-width:700px;margin-left:auto;margin-right:auto;">
+                    <table class="compare-table">
+                        <thead>
+                            <tr><th>2,500 Requests</th><th>Cost</th><th>Method</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background:rgba(124,58,237,0.04);">
+                                <td><strong>Svart AI Top-Up</strong></td>
+                                <td><strong style="color:var(--primary);">&pound;2.50</strong></td>
+                                <td>One-time purchase, instant</td>
+                            </tr>
+                            <tr>
+                                <td>ChatGPT (usage-based)</td>
+                                <td>&pound;25&ndash;100</td>
+                                <td>API credits at ~&pound;0.01&ndash;0.04/query</td>
+                            </tr>
+                            <tr>
+                                <td>ChatGPT Plus</td>
+                                <td>&pound;20/mo subscription</td>
+                                <td>Monthly recurring, fair-use throttled</td>
+                            </tr>
+                            <tr>
+                                <td>Claude Pro</td>
+                                <td>$20/mo subscription</td>
+                                <td>Monthly recurring, rate-limited</td>
+                            </tr>
+                            <tr>
+                                <td>Gemini AI Pro</td>
+                                <td>&pound;18.99/mo subscription</td>
+                                <td>Monthly recurring, 1,000 credits/mo</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p style="text-align:center;color:var(--text-muted);font-size:0.8rem;margin-top:12px;">Competitors don&rsquo;t offer one-time top-ups. You must subscribe monthly.</p>
+            </div>
+
+            <!-- ============================================================ -->
+            <!--                     TOP-UP FAQ                               -->
+            <!-- ============================================================ -->
+            <div style="margin-top:80px;max-width:700px;margin-left:auto;margin-right:auto;">
+                <h3 class="section-title" style="font-size:1.8rem;">Top-Up FAQ</h3>
+                <div style="margin-top:24px;">
+                    <div class="faq-item">
+                        <p class="faq-q">Do top-up requests expire?</p>
+                        <p class="faq-a">No. Top-up requests never expire. They stay in your account until you use them, whether that&rsquo;s tomorrow or in two years.</p>
+                    </div>
+                    <div class="faq-item">
+                        <p class="faq-q">Can I buy multiple packs?</p>
+                        <p class="faq-a">Yes. Buy as many packs as you want &mdash; they all stack together. Buy three &pound;2.50 packs and you&rsquo;ll have 7,500 requests added to your account.</p>
+                    </div>
+                    <div class="faq-item">
+                        <p class="faq-q">Do top-ups work on the Free Premium plan?</p>
+                        <p class="faq-a">Yes. Top-ups work on every plan including Free Premium. You get your 750 free monthly requests plus any top-ups you&rsquo;ve purchased. Monthly requests are used first.</p>
+                    </div>
+                    <div class="faq-item">
+                        <p class="faq-q">Is it a subscription?</p>
+                        <p class="faq-a">No. Top-ups are a one-time payment. No auto-renewal, no recurring charges. You buy a pack, you get the requests. That&rsquo;s it.</p>
+                    </div>
+                    <div class="faq-item">
+                        <p class="faq-q">How quickly are requests added to my account?</p>
+                        <p class="faq-a">Instantly. As soon as payment completes, the requests appear in your account and you can start using them immediately.</p>
+                    </div>
+                    <div class="faq-item">
+                        <p class="faq-q">Are my monthly plan requests used first or top-up requests?</p>
+                        <p class="faq-a">Monthly plan requests are used first. Your top-up balance is only consumed after your monthly allowance runs out. This means your top-ups last as long as possible.</p>
+                    </div>
+                    <div class="faq-item">
+                        <p class="faq-q">What happens to unused monthly requests?</p>
+                        <p class="faq-a">Monthly plan requests reset on the 1st of each month and do not roll over. Top-up requests are separate and never reset or expire.</p>
+                    </div>
+                    <div class="faq-item">
+                        <p class="faq-q">Can I get a refund on unused top-up requests?</p>
+                        <p class="faq-a">Since requests never expire, there&rsquo;s no urgency to use them. Refunds are handled on a case-by-case basis &mdash; contact support if you need help.</p>
+                    </div>
+                    <div class="faq-item">
+                        <p class="faq-q">How do I check my top-up balance?</p>
+                        <p class="faq-a">Your usage dashboard shows your current top-up balance, monthly allowance, and usage history. Go to Account &rarr; Dashboard to view it.</p>
+                    </div>
+                    <div class="faq-item">
+                        <p class="faq-q">Why are Svart AI top-ups so much cheaper than competitors?</p>
+                        <p class="faq-a">Svart AI runs on your device. We don&rsquo;t pay per-query cloud compute costs &mdash; your machine does the work. That&rsquo;s why we can offer requests at &pound;0.001 each while cloud providers charge 10&ndash;40&times; more.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!--                      CTAs                                    -->
+            <!-- ============================================================ -->
+            <div style="text-align:center;margin-top:60px;">
+                <p style="color:var(--text-muted);font-size:0.95rem;margin:0 0 16px;">Want to see monthly plans instead?</p>
+                <a href="pricing.html" class="btn btn-secondary" style="margin-right:10px;">View All Plans &rarr;</a>
+                <a href="comparison.html" class="btn btn-secondary">Compare vs Competitors &rarr;</a>
+            </div>
+
+            <p style="text-align:center;color:var(--text-muted);font-size:0.8rem;margin-top:40px;">Svart AI is in active development. Pricing shown is planned and may change before launch.</p>
+
+            <!-- Logged-in user CTA -->
+            <div id="topupUserCta" style="display:none;text-align:center;margin-top:30px;padding:24px;border:1px solid rgba(124,58,237,0.3);border-radius:12px;background:rgba(124,58,237,0.05);">
+                <p style="color:var(--text-light);font-size:1rem;font-weight:600;margin:0 0 8px;">Ready to top up?</p>
+                <p style="color:var(--text-muted);font-size:0.85rem;margin:0 0 16px;">Buy top-ups and view your request balance from your dashboard.</p>
+                <a href="account-settings.html#plan" class="btn btn-primary btn-sm" style="margin-right:8px;">Buy Top-Up</a>
+                <a href="account.html" class="btn btn-secondary btn-sm">View Balance</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4><span class="SVART-logo">&#9670;</span> Svart Suite</h4>
+                    <p>Security &amp; Privacy Tools Suite. Built for freedom.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="tools.html">Tools</a></li>
+                        <li><a href="SVART.html">Svart Browser</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="comparison.html">Compare</a></li>
+                <li><a href="about.html">About</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Community</h4>
+                    <ul>
+                        <li><a href="https://github.com/SVART-browser" target="_blank">GitHub</a></li>
+                        <li><a href="https://github.com/JaegerGRS/SvartWebsite/issues" target="_blank">Issue Tracker</a></li>
+                        <li><a href="contact.html">Support</a></li>
+                        <li><a href="https://github.com/JaegerGRS/SvartWebsite" target="_blank">Contribute</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="eula.html">Privacy Policy</a></li>
+                        <li><a href="eula.html">Terms of Service</a></li>
+                        <li><a href="website-security.html">Security</a></li>
+                        <li><a href="eula.html">EULA</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Svart Suite. Your privacy, your tools, your control &mdash; we protect people, we do not protect crimes.</p>
+            </div>
+        </div>
+    </footer>
+    <script src="js/script.js"></script>
+    <script>
+    // Request calculator
+    (function() {
+        var slider = document.getElementById('calcSlider');
+        var reqDisplay = document.getElementById('calcRequests');
+        var packDisplay = document.getElementById('calcPack');
+        var detailDisplay = document.getElementById('calcDetail');
+        var savingsDisplay = document.getElementById('calcSavings');
+        var vsDisplay = document.getElementById('calcVs');
+
+        var packs = [
+            { name: 'Micro Pack', price: 0.50, requests: 500, perReq: 0.001 },
+            { name: 'Small Pack', price: 1.00, requests: 1000, perReq: 0.001 },
+            { name: 'Medium Pack', price: 1.50, requests: 1500, perReq: 0.001 },
+            { name: 'Standard Pack', price: 2.00, requests: 2000, perReq: 0.001 },
+            { name: 'Popular Pack', price: 2.50, requests: 2500, perReq: 0.001 },
+            { name: 'Bulk 5k', price: 5.00, requests: 5000, perReq: 0.001 },
+            { name: 'Bulk 10k', price: 10.00, requests: 10000, perReq: 0.001 },
+            { name: 'Best Value 25k', price: 20.00, requests: 25000, perReq: 0.0008 },
+            { name: 'Mega Pack 65k', price: 50.00, requests: 65000, perReq: 0.00077 }
+        ];
+
+        function formatNumber(n) {
+            return n.toLocaleString('en-GB');
+        }
+
+        function recommend(val) {
+            // Find smallest pack that covers the amount, or suggest combining
+            var best = null;
+            for (var i = packs.length - 1; i >= 0; i--) {
+                if (packs[i].requests >= val) best = packs[i];
+            }
+            if (!best) best = packs[packs.length - 1]; // mega
+
+            // Check if a combo of smaller packs is cheaper
+            if (val > best.requests) {
+                // Need the biggest
+                best = packs[packs.length - 1];
+            }
+
+            return best;
+        }
+
+        function update() {
+            var val = parseInt(slider.value);
+            reqDisplay.textContent = formatNumber(val);
+
+            var pack = recommend(val);
+            var cost = pack.price;
+
+            // If requested more than any single pack, suggest multiples
+            if (val > pack.requests) {
+                var count = Math.ceil(val / pack.requests);
+                cost = count * pack.price;
+                packDisplay.textContent = count + '× ' + pack.name + ' — £' + cost.toFixed(2);
+                detailDisplay.textContent = formatNumber(count * pack.requests) + ' requests at £' + pack.perReq + '/req';
+            } else {
+                packDisplay.textContent = pack.name + ' — £' + cost.toFixed(2);
+                detailDisplay.textContent = formatNumber(pack.requests) + ' requests at £' + pack.perReq + '/req';
+            }
+
+            // Show bonus info for value packs
+            if (pack.requests >= 25000) {
+                var bonus = pack.requests >= 65000 ? '30%' : '20%';
+                savingsDisplay.textContent = '🎉 Includes ' + bonus + ' bonus requests!';
+                savingsDisplay.style.display = 'block';
+            } else {
+                savingsDisplay.style.display = 'none';
+            }
+
+            // Competitor comparison
+            var chatgptCost = val * 0.025; // ~£0.01-0.04 avg
+            vsDisplay.innerHTML = 'ChatGPT equivalent cost: ~£' + chatgptCost.toFixed(0) + '+ — <strong style="color:var(--primary);">you save ' + Math.round((1 - cost / chatgptCost) * 100) + '%</strong>';
+        }
+
+        if (slider) {
+            slider.addEventListener('input', update);
+            update();
+        }
+
+        // Logged-in user CTA
+        var session = JSON.parse(localStorage.getItem('ct_session') || 'null');
+        if (!session || !session.loggedIn) {
+            session = JSON.parse(localStorage.getItem('ct_persistent_session') || 'null');
+        }
+        if (session && session.loggedIn) {
+            var cta = document.getElementById('topupUserCta');
+            if (cta) cta.style.display = 'block';
+
+            // Update buy buttons to point to account
+            var btns = document.querySelectorAll('.topup-btn');
+            btns.forEach(function(btn) {
+                if (btn.href && btn.href.indexOf('signup.html') !== -1) {
+                    btn.href = 'account-settings.html#plan';
+                }
+            });
+        }
+    })();
+    </script>
+</body>
+</html>
