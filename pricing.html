@@ -34,9 +34,17 @@
     <section id="pricing" class="pricing">
         <div class="container">
             <h2 class="section-title">Svart AI Pricing</h2>
-            <p class="section-subtitle">Free premium tier forever &mdash; no ads on any plan, ever</p>
-            <p style="text-align:center;color:var(--primary);font-size:0.85rem;margin-top:-10px;letter-spacing:1px;">&#9888; Svart Suite is currently in development. Pricing is subject to change before launch.</p>
+            <p class="section-subtitle">The only AI that runs on your hardware, auto-selects the best model, and never sends your data anywhere</p>
+            <p style="text-align:center;color:var(--primary);font-size:0.85rem;margin-top:-10px;letter-spacing:1px;">&#9888; Svart Suite is in development. Pricing is subject to change before launch.</p>
 
+            <!-- Speed advantage banner -->
+            <div style="text-align:center;margin:40px auto 0;max-width:800px;padding:28px 32px;border:2px solid var(--primary);border-radius:16px;background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(124,58,237,0.02));">
+                <p style="color:var(--primary);font-size:1.4rem;font-weight:800;margin:0 0 8px;">&#9889; Zero latency. Always the fastest.</p>
+                <p style="color:var(--text-light);font-size:1rem;margin:0 0 12px;">Svart AI runs <strong>directly on your device</strong> with <strong>automatic model detection</strong> &mdash; it scans your hardware and selects the optimal LLM for your CPU, GPU, and RAM. No cloud round-trips, no server queues, no &ldquo;we&rsquo;re experiencing high demand&rdquo; throttling.</p>
+                <p style="color:var(--text-muted);font-size:0.85rem;margin:0;">Cloud AI: 200&ndash;2,000ms per response (server queue + network). <strong>Svart AI: instant &mdash; your hardware, your speed.</strong></p>
+            </div>
+
+            <!-- Pricing cards -->
             <div class="pricing-grid">
                 <div class="pricing-card">
                     <div class="pricing-tier">Free Premium</div>
@@ -44,13 +52,15 @@
                         <span class="price-amount">&pound;0</span>
                         <span class="price-period">/month &mdash; forever</span>
                     </div>
+                    <p style="color:var(--primary);font-size:0.8rem;font-weight:600;margin:-5px 0 15px;text-align:center;">No credit card &bull; No trial &bull; No expiry</p>
                     <ul class="pricing-features">
-                        <li>750 AI chat requests per month</li>
-                        <li>Full local LLM engine &mdash; you own it</li>
+                        <li>750 AI requests per month</li>
+                        <li>Full local LLM &mdash; runs on YOUR device</li>
+                        <li>Auto-detect: picks the best model for your hardware</li>
                         <li>AES-256-GCM encrypted conversations</li>
                         <li>Internet scraping &amp; knowledge training</li>
+                        <li>Document analysis &amp; summarisation</li>
                         <li>Cross-platform (Windows, macOS, Linux)</li>
-                        <li>No credit card required</li>
                         <li>No ads &mdash; ever</li>
                     </ul>
                     <a href="signup.html" class="btn btn-secondary">Get Started Free</a>
@@ -62,9 +72,11 @@
                         <span class="price-amount">&pound;4.99</span>
                         <span class="price-period">/month</span>
                     </div>
+                    <p style="color:var(--text-muted);font-size:0.8rem;font-weight:600;margin:-5px 0 15px;text-align:center;">&pound;59.88/year &bull; Save &pound;180+ vs ChatGPT Plus</p>
                     <ul class="pricing-features">
-                        <li>2,000 AI chat requests per month</li>
+                        <li>2,000 AI requests per month</li>
                         <li>Same full local LLM engine</li>
+                        <li>Same auto-detect hardware optimisation</li>
                         <li>AES-256-GCM encrypted conversations</li>
                         <li>Overflow: &pound;5 per 1,000 extra requests</li>
                         <li>Usage dashboard &amp; analytics</li>
@@ -80,10 +92,12 @@
                         <span class="price-amount">&pound;9.99</span>
                         <span class="price-period">/month</span>
                     </div>
+                    <p style="color:var(--primary);font-size:0.8rem;font-weight:600;margin:-5px 0 15px;text-align:center;">&pound;119.88/year &bull; Half the price of ChatGPT Plus</p>
                     <ul class="pricing-features">
-                        <li>Unlimited AI chat requests &mdash; no caps</li>
+                        <li>Unlimited AI requests &mdash; no caps, no throttle</li>
                         <li>Same full local LLM engine</li>
-                        <li>Priority AI processing</li>
+                        <li>Same auto-detect hardware optimisation</li>
+                        <li>Priority AI model updates</li>
                         <li>Real-time usage dashboard</li>
                         <li>Priority support</li>
                         <li>Early access to new AI models</li>
@@ -94,16 +108,45 @@
             </div>
 
             <!-- Savings callout -->
-            <div style="text-align:center;margin-top:30px;padding:20px;border:1px solid rgba(124,58,237,0.3);border-radius:12px;background:rgba(124,58,237,0.05);">
-                <p style="color:var(--primary);font-size:1.1rem;font-weight:700;margin:0;">750 free requests/mo &mdash; no credit card, no ads, no catch</p>
-                <p style="color:var(--text-muted);font-size:0.9rem;margin:8px 0 0;">Need more? &pound;4.99/mo for 2,000 or &pound;9.99/mo unlimited &mdash; less than half of ChatGPT Plus (&pound;20/mo)</p>
+            <div style="text-align:center;margin-top:30px;padding:24px;border:1px solid rgba(124,58,237,0.3);border-radius:12px;background:rgba(124,58,237,0.05);">
+                <p style="color:var(--primary);font-size:1.15rem;font-weight:700;margin:0;">750 free requests/mo &mdash; no credit card, no ads, no catch</p>
+                <p style="color:var(--text-muted);font-size:0.9rem;margin:8px 0 0;">ChatGPT Plus costs &pound;20/mo. Claude Pro costs $20/mo. Svart AI Unlimited costs &pound;9.99/mo &mdash; and it&rsquo;s faster because it runs on your machine.</p>
             </div>
 
             <!-- How it works -->
             <div class="pricing-compare">
                 <h3>How It Works</h3>
-                <p>Every account starts with <strong>Free Premium &mdash; 750 AI chat requests per month at &pound;0</strong>. No credit card, no trial, no expiry. Requests reset on the 1st of each month. If you need more, upgrade to <strong>Svart AI (&pound;4.99/mo)</strong> for 2,000 requests, or <strong>Svart AI Unlimited (&pound;9.99/mo)</strong> for unlimited.</p>
-                <p style="margin-top:12px;">All plans include the same local LLM engine, AES-256-GCM encryption, internet scraping, and custom training. No feature gates, no ads on any plan. The only difference is request volume and support priority.</p>
+                <p>Every account starts with <strong>Free Premium &mdash; 750 AI requests per month at &pound;0</strong>. No credit card, no trial, no expiry. Requests reset on the 1st of each month.</p>
+                <p style="margin-top:12px;">When you launch Svart AI, it <strong>automatically detects your hardware</strong> (CPU cores, GPU type, available RAM) and <strong>selects the optimal LLM model</strong> for maximum speed. No configuration needed &mdash; it just works, and it runs at the fastest speed your machine can deliver.</p>
+                <p style="margin-top:12px;">All plans include the same local LLM engine, AES-256-GCM encryption, internet scraping, custom training, and auto-detect optimisation. No feature gates, no ads on any plan. The only difference is request volume and support priority.</p>
+            </div>
+
+            <!-- Auto-detect speed section -->
+            <div class="pricing-details" style="margin-top:60px;">
+                <h3 class="section-title" style="font-size:1.8rem;">Why Svart AI Is Always the Fastest</h3>
+                <p class="section-subtitle">Local execution + auto hardware detection = zero wait</p>
+                <div class="features-grid" style="margin-top:30px;">
+                    <div class="feature-card">
+                        <div class="feature-icon">&#9889;</div>
+                        <h3>Auto-Detect Engine</h3>
+                        <p>Svart AI scans your CPU, GPU, and RAM on launch and automatically selects the best-performing LLM model for your exact hardware configuration. No manual setup.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">&#128187;</div>
+                        <h3>Runs Locally</h3>
+                        <p>Every response is generated on your device. No network round-trip, no server queue, no &ldquo;high demand&rdquo; throttling. Your hardware speed IS the AI speed.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">&#128640;</div>
+                        <h3>Zero Latency</h3>
+                        <p>Cloud AI adds 200&ndash;2,000ms of network latency per response. Svart AI processes immediately &mdash; the only delay is your own hardware processing time.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">&#128170;</div>
+                        <h3>Scales With Your Hardware</h3>
+                        <p>Better GPU? Faster responses. More RAM? Larger context windows. Svart AI uses every resource you have &mdash; cloud AI gives you whatever their server queue allows.</p>
+                    </div>
+                </div>
             </div>
 
             <!-- What counts as a request -->
@@ -113,7 +156,7 @@
                     <div class="feature-card">
                         <div class="feature-icon">&#128172;</div>
                         <h3>AI Chat Messages</h3>
-                        <p>Each message you send to Svart AI counts as one request. The AI response is included &mdash; it's one request per prompt, not per token.</p>
+                        <p>Each message you send to Svart AI counts as one request. The AI response is included &mdash; one request per prompt, not per token.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">&#127760;</div>
@@ -160,101 +203,195 @@
                 </div>
             </div>
 
-            <!-- Competitor comparison — simplified -->
+            <!-- Full competitor comparison -->
             <div class="pricing-details" style="margin-top:60px;">
-                <h3 class="section-title" style="font-size:1.8rem;">How We Compare</h3>
-                <p class="section-subtitle">Real pricing from official sources &mdash; February 2026</p>
+                <h3 class="section-title" style="font-size:1.8rem;">Competitor Pricing Breakdown</h3>
+                <p class="section-subtitle">Exact prices from official pricing pages &mdash; February 2026</p>
                 <div style="overflow-x:auto;margin-top:30px;">
                     <table class="compare-table">
                         <thead>
                             <tr>
                                 <th></th>
                                 <th class="highlight-col">Svart AI</th>
-                                <th>ChatGPT</th>
-                                <th>Claude</th>
-                                <th>Gemini</th>
+                                <th>ChatGPT (OpenAI)</th>
+                                <th>Claude (Anthropic)</th>
+                                <th>Gemini (Google)</th>
+                                <th>Copilot (Microsoft)</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Free tier</td>
-                                <td class="highlight-col">750 requests/mo</td>
-                                <td>Vague &ldquo;limited&rdquo;</td>
-                                <td>Vague &ldquo;limited&rdquo;</td>
-                                <td>Unspecified credits</td>
+                                <td><strong>Free tier</strong></td>
+                                <td class="highlight-col"><strong>750 req/mo &mdash; full engine</strong></td>
+                                <td>GPT-4o mini, vague &ldquo;limited&rdquo;</td>
+                                <td>Sonnet, vague &ldquo;limited&rdquo;</td>
+                                <td>Gemini 2.0 Flash, unspecified limits</td>
+                                <td>Limited daily chats</td>
                             </tr>
                             <tr>
-                                <td>Cheapest paid</td>
-                                <td class="highlight-col">&pound;4.99/mo</td>
-                                <td>&pound;7/mo (may have ads)</td>
-                                <td>$20/mo</td>
-                                <td>&pound;7.99/mo</td>
+                                <td><strong>Entry paid plan</strong></td>
+                                <td class="highlight-col"><strong>&pound;4.99/mo</strong> (2,000 req)</td>
+                                <td>&pound;7/mo &ldquo;Go&rdquo; (may include ads)</td>
+                                <td>$20/mo &ldquo;Pro&rdquo; (5&times; free usage)</td>
+                                <td>&pound;7.99/mo &ldquo;Premium&rdquo; (200 credits)</td>
+                                <td>$20/mo &ldquo;Pro&rdquo; (priority access)</td>
                             </tr>
                             <tr>
-                                <td>Unlimited plan</td>
-                                <td class="highlight-col">&pound;9.99/mo</td>
-                                <td>&pound;20/mo &ldquo;Unlimited*&rdquo;</td>
-                                <td>$100+/mo Max</td>
-                                <td>&pound;18.99/mo (1,000 credits)</td>
+                                <td><strong>Mid-tier plan</strong></td>
+                                <td class="highlight-col">&mdash;</td>
+                                <td>&pound;20/mo &ldquo;Plus&rdquo; (Unlimited*)</td>
+                                <td>&mdash;</td>
+                                <td>&pound;18.99/mo &ldquo;AI Pro&rdquo; (1,000 credits)</td>
+                                <td>&mdash;</td>
                             </tr>
                             <tr>
-                                <td>Runs where?</td>
-                                <td class="highlight-col">&#10003; Your device</td>
-                                <td>&#10007; Their cloud</td>
-                                <td>&#10007; Their cloud</td>
-                                <td>&#10007; Their cloud</td>
+                                <td><strong>Unlimited / top plan</strong></td>
+                                <td class="highlight-col"><strong>&pound;9.99/mo</strong> unlimited</td>
+                                <td>&pound;200/mo &ldquo;Pro&rdquo; (unlimited*)</td>
+                                <td>$100/mo &ldquo;Max&rdquo; (5&times; Pro)</td>
+                                <td>&pound;18.99/mo (still capped at 1,000)</td>
+                                <td>$20/mo (usage limits apply)</td>
                             </tr>
                             <tr>
-                                <td>End-to-end encrypted</td>
-                                <td class="highlight-col">&#10003; AES-256-GCM</td>
+                                <td><strong>Annual cost (top)</strong></td>
+                                <td class="highlight-col"><strong>&pound;119.88/yr</strong></td>
+                                <td>&pound;240/yr (Plus) or &pound;2,400/yr (Pro)</td>
+                                <td>$1,200/yr (Max)</td>
+                                <td>&pound;227.88/yr (AI Pro)</td>
+                                <td>$240/yr (Pro)</td>
+                            </tr>
+                            <tr style="background:rgba(124,58,237,0.03);">
+                                <td><strong>Response speed</strong></td>
+                                <td class="highlight-col"><strong>&#9889; Instant &mdash; local hardware</strong></td>
+                                <td>200&ndash;2,000ms (cloud latency)</td>
+                                <td>300&ndash;3,000ms (cloud latency)</td>
+                                <td>200&ndash;1,500ms (cloud latency)</td>
+                                <td>300&ndash;2,000ms (cloud latency)</td>
+                            </tr>
+                            <tr style="background:rgba(124,58,237,0.03);">
+                                <td><strong>Throttled at peak?</strong></td>
+                                <td class="highlight-col"><strong>&#10003; Never &mdash; it&rsquo;s your hardware</strong></td>
+                                <td>&#10007; Yes &mdash; &ldquo;high demand&rdquo; queues</td>
+                                <td>&#10007; Yes &mdash; rate limited</td>
+                                <td>&#10007; Yes &mdash; credit-based cap</td>
+                                <td>&#10007; Yes &mdash; usage limits</td>
+                            </tr>
+                            <tr style="background:rgba(124,58,237,0.03);">
+                                <td><strong>Auto-selects best model?</strong></td>
+                                <td class="highlight-col"><strong>&#10003; Yes &mdash; scans your hardware</strong></td>
+                                <td>&#10007; No &mdash; locked to chosen model</td>
+                                <td>&#10007; No &mdash; locked to chosen model</td>
+                                <td>&#10007; No &mdash; locked to chosen model</td>
+                                <td>&#10007; No &mdash; locked to chosen model</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Runs where?</strong></td>
+                                <td class="highlight-col"><strong>&#10003; Your device</strong></td>
+                                <td>&#10007; OpenAI cloud</td>
+                                <td>&#10007; Anthropic cloud</td>
+                                <td>&#10007; Google cloud</td>
+                                <td>&#10007; Microsoft cloud</td>
+                            </tr>
+                            <tr>
+                                <td><strong>End-to-end encrypted</strong></td>
+                                <td class="highlight-col"><strong>&#10003; AES-256-GCM</strong></td>
                                 <td>&#10007; Transit only</td>
                                 <td>&#10007; Transit only</td>
                                 <td>&#10007; Transit only</td>
+                                <td>&#10007; Transit only</td>
                             </tr>
                             <tr>
-                                <td>Can read your data?</td>
-                                <td class="highlight-col">&#10003; Never</td>
-                                <td>&#10007; Yes</td>
-                                <td>&#10007; Yes</td>
-                                <td>&#10007; Yes</td>
+                                <td><strong>Can read your data?</strong></td>
+                                <td class="highlight-col"><strong>&#10003; Never</strong></td>
+                                <td>&#10007; Yes &mdash; full access</td>
+                                <td>&#10007; Yes &mdash; full access</td>
+                                <td>&#10007; Yes &mdash; full access</td>
+                                <td>&#10007; Yes &mdash; full access</td>
                             </tr>
                             <tr>
-                                <td>Ads?</td>
-                                <td class="highlight-col">Never</td>
-                                <td>Go plan may</td>
+                                <td><strong>Trains on your chats?</strong></td>
+                                <td class="highlight-col"><strong>&#10003; Only if YOU train it</strong></td>
+                                <td>&#10007; Default on (opt-out available)</td>
+                                <td>&#10007; Opt-out available</td>
+                                <td>&#10007; Yes on free tier</td>
+                                <td>&#10007; Not by default (enterprise)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ads?</strong></td>
+                                <td class="highlight-col"><strong>Never</strong></td>
+                                <td>Go plan may include ads</td>
                                 <td>No</td>
                                 <td>No</td>
+                                <td>No</td>
                             </tr>
                             <tr>
-                                <td>Annual cost (top plan)</td>
-                                <td class="highlight-col">&pound;119.88</td>
-                                <td>&pound;240+</td>
-                                <td>$1,200+</td>
-                                <td>&pound;227.88</td>
+                                <td><strong>Credit card to start?</strong></td>
+                                <td class="highlight-col"><strong>No</strong></td>
+                                <td>Yes (paid plans)</td>
+                                <td>Yes (paid plans)</td>
+                                <td>Yes (paid plans)</td>
+                                <td>Yes (paid plans)</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <p style="color:var(--text-muted);font-size:0.75rem;margin-top:14px;text-align:center;">Sources: chatgpt.com/pricing, claude.ai/pricing, one.google.com/about/plans &mdash; Feb 2026. Competitor pricing may change.</p>
+                <p style="color:var(--text-muted);font-size:0.75rem;margin-top:14px;text-align:center;">Sources: chatgpt.com/pricing, claude.ai/pricing, one.google.com/about/plans, microsoft.com/copilot &mdash; Feb 2026. Competitor pricing may change. &ldquo;*Unlimited&rdquo; on cloud plans often includes fair-use throttling.</p>
+            </div>
+
+            <!-- Side-by-side annual cost comparison -->
+            <div class="pricing-details" style="margin-top:60px;">
+                <h3 class="section-title" style="font-size:1.8rem;">What You Actually Pay Per Year</h3>
+                <p class="section-subtitle">Top-tier plan comparison &mdash; real annual costs</p>
+                <div class="features-grid" style="margin-top:30px;">
+                    <div class="feature-card" style="border-color:var(--primary);background:rgba(124,58,237,0.05);">
+                        <div class="feature-icon" style="font-size:2rem;">&#9670;</div>
+                        <h3 style="color:var(--primary);">Svart AI Unlimited</h3>
+                        <p style="font-size:2.2rem;font-weight:900;color:var(--text-light);line-height:1;">&pound;119.88<span style="font-size:0.8rem;font-weight:400;color:var(--text-muted);">/year</span></p>
+                        <p>Unlimited requests, local execution, zero latency, auto-detect hardware, AES-256-GCM, no ads.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon" style="font-size:2rem;">&#128172;</div>
+                        <h3>ChatGPT Plus</h3>
+                        <p style="font-size:2.2rem;font-weight:900;color:var(--text-light);line-height:1;">&pound;240<span style="font-size:0.8rem;font-weight:400;color:var(--text-muted);">/year</span></p>
+                        <p>&ldquo;Unlimited*&rdquo; with fair-use throttling, cloud-only, 200&ndash;2,000ms latency. Pro: &pound;2,400/yr.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon" style="font-size:2rem;">&#128172;</div>
+                        <h3>Claude Max</h3>
+                        <p style="font-size:2.2rem;font-weight:900;color:var(--text-light);line-height:1;">$1,200<span style="font-size:0.8rem;font-weight:400;color:var(--text-muted);">/year</span></p>
+                        <p>5&times; Pro usage, cloud-only, 300&ndash;3,000ms latency. Still rate-limited under heavy use.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon" style="font-size:2rem;">&#128172;</div>
+                        <h3>Google AI Pro</h3>
+                        <p style="font-size:2.2rem;font-weight:900;color:var(--text-light);line-height:1;">&pound;227.88<span style="font-size:0.8rem;font-weight:400;color:var(--text-muted);">/year</span></p>
+                        <p>1,000 AI credits/month, cloud-only, 200&ndash;1,500ms latency. Not truly unlimited.</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Why different -->
             <div class="pricing-compare" style="margin-top:60px;">
-                <h3>Why We&rsquo;re Cheaper</h3>
+                <h3>Why We&rsquo;re Cheaper AND Faster</h3>
                 <p><strong>Svart AI runs on your device.</strong> We don&rsquo;t pay per-query cloud compute costs &mdash; your machine does the work. Our servers only handle authentication and updates, and they can only see your activation key and email &mdash; never your data.</p>
-                <p>That&rsquo;s why we can offer 750 free requests with the full engine and keep paid plans at half the price of every competitor.</p>
+                <p style="margin-top:12px;"><strong>Every cloud AI charges you for server time.</strong> OpenAI, Anthropic, Google, and Microsoft all run your prompts on massive data centres and charge you for the privilege. You wait in their queue, you use their hardware, and they read every word you type.</p>
+                <p style="margin-top:12px;"><strong>Svart AI&rsquo;s auto-detect engine</strong> scans your hardware on launch and selects the optimal model variant &mdash; right size for your GPU VRAM, right quantisation for your CPU, right context window for your available RAM. You get the fastest possible response from YOUR machine, not the slowest available slot on someone else&rsquo;s.</p>
+                <p style="margin-top:12px;">That&rsquo;s why we can offer <strong>750 free requests with the full engine</strong> and keep paid plans at <strong>half the price of every competitor</strong> &mdash; while being faster.</p>
             </div>
 
             <!-- Promise -->
             <div class="pricing-compare" style="margin-top:40px;">
                 <h3>Our Pricing Promise</h3>
                 <div style="text-align:left;max-width:600px;margin:20px auto 0;">
+                    <p style="margin:0 0 8px;">&#10003; <strong>Always fastest</strong> &mdash; local execution, zero cloud latency</p>
+                    <p style="margin:0 0 8px;">&#10003; <strong>Auto-detect</strong> &mdash; optimal model for your exact hardware</p>
                     <p style="margin:0 0 8px;">&#10007; No ads &mdash; on any plan, including free</p>
                     <p style="margin:0 0 8px;">&#10007; No feature gates &mdash; all plans get the full engine</p>
                     <p style="margin:0 0 8px;">&#10007; No price increases for existing users</p>
                     <p style="margin:0 0 8px;">&#10007; No credit card for Free Premium</p>
                     <p style="margin:0 0 8px;">&#10007; No vague &ldquo;credits&rdquo; or asterisked limits</p>
                     <p style="margin:0 0 8px;">&#10007; No training on your data &mdash; it&rsquo;s your local LLM</p>
+                    <p style="margin:0 0 8px;">&#10007; No throttling &mdash; your hardware, your speed</p>
                     <p style="margin:0;">&#10007; No reading your conversations &mdash; ever</p>
                 </div>
             </div>
