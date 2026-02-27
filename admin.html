@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Registration Log</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .admin-login { max-width: 400px; margin: 120px auto; padding: 32px; background: rgba(20,20,30,0.9); border: 1px solid var(--border-color); border-radius: 16px; }
+        .admin-login h2 { color: var(--primary); margin-bottom: 16px; }
+        .admin-login input { width: 100%; padding: 12px 16px; background: rgba(10,10,15,0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 1rem; margin-bottom: 12px; }
+        .admin-login input:focus { border-color: var(--primary); outline: none; }
+        .admin-panel { max-width: 1100px; margin: 100px auto 40px; padding: 0 20px; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+        .admin-header h1 { color: var(--primary); font-size: 1.6rem; }
+        .admin-stats { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
+        .stat-card { background: rgba(20,20,30,0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px 28px; min-width: 140px; }
+        .stat-card .stat-num { font-size: 2rem; font-weight: 700; color: var(--primary); }
+        .stat-card .stat-label { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
+        .search-bar { display: flex; gap: 10px; margin-bottom: 24px; }
+        .search-bar input { flex: 1; padding: 12px 16px; background: rgba(10,10,15,0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 1rem; }
+        .search-bar input:focus { border-color: var(--primary); outline: none; }
+        .search-bar button { padding: 12px 24px; }
+        .search-result { background: rgba(20,20,30,0.8); border: 1px solid var(--primary); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+        .search-result h3 { color: var(--primary); margin-bottom: 12px; }
+        .search-result .key-value { display: flex; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(39,39,42,0.4); flex-wrap: wrap; }
+        .search-result .key-value:last-child { border-bottom: none; }
+        .search-result .label { color: var(--text-muted); min-width: 120px; font-size: 0.9rem; }
+        .search-result .value { color: var(--text-light); font-weight: 600; word-break: break-all; }
+        .search-result .activation-key { color: var(--accent); font-family: monospace; font-size: 1.1rem; letter-spacing: 1px; cursor: pointer; }
+        .search-result .activation-key:hover { text-decoration: underline; }
+        .reg-table { width: 100%; border-collapse: collapse; background: rgba(20,20,30,0.6); border-radius: 12px; overflow: hidden; }
+        .reg-table th { background: rgba(124,58,237,0.15); color: var(--primary); padding: 12px 16px; text-align: left; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .reg-table td { padding: 12px 16px; border-bottom: 1px solid rgba(39,39,42,0.3); color: var(--text-light); font-size: 0.9rem; }
+        .reg-table tr:hover td { background: rgba(124,58,237,0.05); }
+        .reg-table .key-cell { font-family: monospace; color: var(--accent); letter-spacing: 0.5px; }
+        .reg-table .email-cell { max-width: 250px; overflow: hidden; text-overflow: ellipsis; }
+        .no-data { text-align: center; padding: 40px; color: var(--text-muted); }
+        .copy-btn { background: none; border: 1px solid var(--border-color); color: var(--text-muted); padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: all 0.2s; }
+        .copy-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .admin-logout { background: none; border: 1px solid var(--danger, #ef4444); color: var(--danger, #ef4444); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+        .admin-logout:hover { background: rgba(239,68,68,0.15); }
+        @media (max-width: 768px) {
+            .reg-table { font-size: 0.8rem; }
+            .reg-table th, .reg-table td { padding: 8px 10px; }
+            .admin-stats { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="adminLoginScreen">
+        <div class="admin-login">
+            <h2>Admin Access</h2>
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your admin secret to view registrations.</p>
+            <input type="password" id="adminSecret" placeholder="Admin secret key" autocomplete="off">
+            <button class="btn btn-primary btn-full" id="adminLoginBtn">Access Panel</button>
+            <p id="adminLoginError" style="color:#ef4444;margin-top:12px;display:none;font-size:0.9rem;"></p>
+        </div>
+    </div>
+
+    <!-- Admin Panel (hidden until authenticated) -->
+    <div id="adminPanel" class="admin-panel" style="display:none;">
+        <div class="admin-header">
+            <h1>Registration Log</h1>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <button class="btn btn-primary" id="refreshBtn" style="padding:8px 16px;font-size:0.85rem;">Refresh</button>
+                <button class="admin-logout" id="adminLogoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <div class="admin-stats">
+            <div class="stat-card">
+                <div class="stat-num" id="totalUsers">-</div>
+                <div class="stat-label">Total Registrations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num" id="todayUsers">-</div>
+                <div class="stat-label">Today</div>
+            </div>
+        </div>
+
+        <!-- Email Search -->
+        <div class="search-bar">
+            <input type="email" id="searchEmail" placeholder="Search by email to find their activation key...">
+            <button class="btn btn-primary" id="searchBtn">Search</button>
+        </div>
+        <div id="searchResult" style="display:none;"></div>
+
+        <!-- Full Registration Table -->
+        <div style="overflow-x:auto;">
+            <table class="reg-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Email</th>
+                        <th>Activation Key</th>
+                        <th>Display Name</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="regTableBody">
+                    <tr><td colspan="6" class="no-data">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        let adminToken = '';
+        const API_BASE = '/api/registrations';
+
+        // Elements
+        const loginScreen = document.getElementById('adminLoginScreen');
+        const panel = document.getElementById('adminPanel');
+        const secretInput = document.getElementById('adminSecret');
+        const loginBtn = document.getElementById('adminLoginBtn');
+        const loginError = document.getElementById('adminLoginError');
+        const logoutBtn = document.getElementById('adminLogoutBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const searchEmail = document.getElementById('searchEmail');
+        const searchBtn = document.getElementById('searchBtn');
+        const searchResult = document.getElementById('searchResult');
+        const totalUsers = document.getElementById('totalUsers');
+        const todayUsers = document.getElementById('todayUsers');
+        const tableBody = document.getElementById('regTableBody');
+
+        // Check if already authed this session
+        const stored = sessionStorage.getItem('svart_admin_token');
+        if (stored) {
+            adminToken = stored;
+            showPanel();
+        }
+
+        loginBtn.addEventListener('click', doLogin);
+        secretInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
+        logoutBtn.addEventListener('click', function() {
+            sessionStorage.removeItem('svart_admin_token');
+            adminToken = '';
+            panel.style.display = 'none';
+            loginScreen.style.display = '';
+            secretInput.value = '';
+        });
+        refreshBtn.addEventListener('click', loadRegistrations);
+        searchBtn.addEventListener('click', doSearch);
+        searchEmail.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
+
+        function doLogin() {
+            const secret = secretInput.value.trim();
+            if (!secret) return;
+            adminToken = secret;
+            sessionStorage.setItem('svart_admin_token', secret);
+            showPanel();
+        }
+
+        function showPanel() {
+            loginScreen.style.display = 'none';
+            panel.style.display = '';
+            loadRegistrations();
+        }
+
+        async function loadRegistrations() {
+            tableBody.innerHTML = '<tr><td colspan="6" class="no-data">Loading...</td></tr>';
+            try {
+                const resp = await fetch(API_BASE, {
+                    headers: { 'Authorization': 'Bearer ' + adminToken }
+                });
+                const data = await resp.json();
+                if (!data.success) {
+                    if (resp.status === 401) {
+                        loginError.textContent = 'Invalid admin secret.';
+                        loginError.style.display = '';
+                        sessionStorage.removeItem('svart_admin_token');
+                        panel.style.display = 'none';
+                        loginScreen.style.display = '';
+                        return;
+                    }
+                    tableBody.innerHTML = '<tr><td colspan="6" class="no-data">Error: ' + (data.error || 'Unknown') + '</td></tr>';
+                    return;
+                }
+
+                const regs = data.registrations || [];
+                totalUsers.textContent = data.total || 0;
+
+                // Count today
+                const today = new Date().toISOString().slice(0, 10);
+                const todayCount = regs.filter(function(r) { return r.date && r.date.startsWith(today); }).length;
+                todayUsers.textContent = todayCount;
+
+                if (regs.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6" class="no-data">No registrations yet.</td></tr>';
+                    return;
+                }
+
+                // Show newest first
+                const sorted = regs.slice().reverse();
+                tableBody.innerHTML = sorted.map(function(r, i) {
+                    const num = regs.length - i;
+                    const dateStr = r.date ? new Date(r.date).toLocaleString() : '-';
+                    return '<tr>' +
+                        '<td>' + num + '</td>' +
+                        '<td class="email-cell">' + escHtml(r.email) + '</td>' +
+                        '<td class="key-cell">' + escHtml(r.key) + '</td>' +
+                        '<td>' + escHtml(r.displayName || '-') + '</td>' +
+                        '<td>' + dateStr + '</td>' +
+                        '<td><button class="copy-btn" onclick="copyText(\'' + escAttr(r.key) + '\')">Copy Key</button></td>' +
+                        '</tr>';
+                }).join('');
+            } catch (e) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="no-data">Network error. Is the API running?</td></tr>';
+            }
+        }
+
+        async function doSearch() {
+            const email = searchEmail.value.trim();
+            if (!email) { searchResult.style.display = 'none'; return; }
+
+            searchResult.style.display = '';
+            searchResult.innerHTML = '<p style="color:var(--text-muted);">Searching...</p>';
+
+            try {
+                const resp = await fetch(API_BASE + '?email=' + encodeURIComponent(email), {
+                    headers: { 'Authorization': 'Bearer ' + adminToken }
+                });
+                const data = await resp.json();
+                if (!data.success || !data.found) {
+                    searchResult.innerHTML = '<div class="search-result"><h3>No results</h3><p style="color:var(--text-muted);">No registration found for <strong>' + escHtml(email) + '</strong></p></div>';
+                    return;
+                }
+
+                const records = data.records || [];
+                let html = '<div class="search-result"><h3>Found ' + records.length + ' key(s) for ' + escHtml(email) + '</h3>';
+                records.forEach(function(rec) {
+                    html += '<div class="key-value"><span class="label">Activation Key</span><span class="value activation-key" onclick="copyText(\'' + escAttr(rec.activationKey) + '\')" title="Click to copy">' + escHtml(rec.activationKey) + '</span></div>';
+                    html += '<div class="key-value"><span class="label">Display Name</span><span class="value">' + escHtml(rec.displayName || '-') + '</span></div>';
+                    html += '<div class="key-value"><span class="label">Registered</span><span class="value">' + new Date(rec.registeredAt).toLocaleString() + '</span></div>';
+                    if (rec.country && rec.country !== 'unknown') {
+                        html += '<div class="key-value"><span class="label">Country</span><span class="value">' + escHtml(rec.country) + '</span></div>';
+                    }
+                    html += '<hr style="border:none;border-top:1px solid rgba(39,39,42,0.3);margin:8px 0;">';
+                });
+                html += '</div>';
+                searchResult.innerHTML = html;
+            } catch (e) {
+                searchResult.innerHTML = '<div class="search-result"><h3>Error</h3><p style="color:#ef4444;">Network error during search.</p></div>';
+            }
+        }
+
+        function escHtml(str) {
+            var d = document.createElement('div');
+            d.textContent = str || '';
+            return d.innerHTML;
+        }
+
+        function escAttr(str) {
+            return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        // Global copy function
+        window.copyText = function(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Brief flash feedback
+                var el = event.target;
+                var orig = el.textContent;
+                el.textContent = 'Copied!';
+                setTimeout(function() { el.textContent = orig; }, 1500);
+            });
+        };
+    })();
+    </script>
+</body>
+</html>

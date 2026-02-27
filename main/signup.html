@@ -335,12 +335,24 @@
                 // Store user by activation key (no names, no personal data)
                 const svartId = activationKey;
                 users[svartId] = {
+                    username: document.getElementById('displayName').value.trim(),
                     password: hashPassword(password),
                     email: email,
                     activationKey: activationKey,
                     createdAt: new Date().toISOString()
                 };
                 localStorage.setItem('ct_users', JSON.stringify(users));
+
+                // Log registration to server (for admin key recovery)
+                fetch('/api/registrations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        activationKey: activationKey,
+                        displayName: document.getElementById('displayName').value.trim()
+                    })
+                }).catch(function() { /* silent - localStorage is primary */ });
 
                 // Auto login via Svart ID
                 localStorage.setItem('ct_session', JSON.stringify({
@@ -353,6 +365,8 @@
                 form.style.display = 'none';
                 msgBox.style.display = 'none';
                 generatedKeyEl.textContent = activationKey;
+                document.getElementById('userSvartId').textContent = svartId;
+                document.getElementById('userDisplayName').textContent = document.getElementById('displayName').value.trim();
                 resultBox.style.display = 'block';
             }, 1000);
         });
