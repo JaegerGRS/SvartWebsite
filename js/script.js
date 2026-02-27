@@ -78,7 +78,7 @@ function adaptNavForSession() {
         }
     } else {
         // Not logged in
-        authItem.innerHTML = '<a href="login.html" class="nav-auth-btn">Login / Sign Up</a>';
+        authItem.innerHTML = '<a href="login.html" class="nav-auth-btn">Login/SignUp</a>';
     }
 }
 
