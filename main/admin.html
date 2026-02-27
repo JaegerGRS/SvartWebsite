@@ -18,6 +18,8 @@
         .stat-card { background: rgba(20,20,30,0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px 28px; min-width: 140px; }
         .stat-card .stat-num { font-size: 2rem; font-weight: 700; color: var(--primary); }
         .stat-card .stat-label { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
+        .stat-card.alert .stat-num { color: #f59e0b; }
+        .stat-card.danger .stat-num { color: #ef4444; }
         .search-bar { display: flex; gap: 10px; margin-bottom: 24px; }
         .search-bar input { flex: 1; padding: 12px 16px; background: rgba(10,10,15,0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 1rem; }
         .search-bar input:focus { border-color: var(--primary); outline: none; }
@@ -39,6 +41,11 @@
         .no-data { text-align: center; padding: 40px; color: var(--text-muted); }
         .copy-btn { background: none; border: 1px solid var(--border-color); color: var(--text-muted); padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: all 0.2s; }
         .copy-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .resolve-btn { background: none; border: 1px solid #22c55e; color: #22c55e; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: all 0.2s; }
+        .resolve-btn:hover { background: rgba(34,197,94,0.15); }
+        .status-pending { color: #f59e0b; font-weight: 600; }
+        .status-resolved { color: #22c55e; }
+        .section-title { color: var(--primary); font-size: 1.3rem; margin: 40px 0 16px; padding-top: 24px; border-top: 1px solid var(--border-color); }
         .admin-logout { background: none; border: 1px solid var(--danger, #ef4444); color: var(--danger, #ef4444); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
         .admin-logout:hover { background: rgba(239,68,68,0.15); }
         @media (max-width: 768px) {
@@ -79,6 +86,10 @@
                 <div class="stat-num" id="todayUsers">-</div>
                 <div class="stat-label">Today</div>
             </div>
+            <div class="stat-card alert" id="resetStatCard" style="display:none;">
+                <div class="stat-num" id="pendingResets">-</div>
+                <div class="stat-label">Pending Resets</div>
+            </div>
         </div>
 
         <!-- Email Search -->
@@ -106,6 +117,27 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Password Reset Requests -->
+        <h2 class="section-title">&#128274; Password Reset Requests</h2>
+        <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Users who forgot their password and requested help. Search their email above to find their activation key, then contact them.</p>
+        <div style="overflow-x:auto;">
+            <table class="reg-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Email</th>
+                        <th>Registered?</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="resetTableBody">
+                    <tr><td colspan="6" class="no-data">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
@@ -127,6 +159,9 @@
         const totalUsers = document.getElementById('totalUsers');
         const todayUsers = document.getElementById('todayUsers');
         const tableBody = document.getElementById('regTableBody');
+        const resetTableBody = document.getElementById('resetTableBody');
+        const resetStatCard = document.getElementById('resetStatCard');
+        const pendingResetsEl = document.getElementById('pendingResets');
 
         // Check if already authed this session
         const stored = sessionStorage.getItem('svart_admin_token');
@@ -144,7 +179,7 @@
             loginScreen.style.display = '';
             secretInput.value = '';
         });
-        refreshBtn.addEventListener('click', loadRegistrations);
+        refreshBtn.addEventListener('click', function() { loadRegistrations(); loadResetRequests(); });
         searchBtn.addEventListener('click', doSearch);
         searchEmail.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
 
@@ -160,6 +195,7 @@
             loginScreen.style.display = 'none';
             panel.style.display = '';
             loadRegistrations();
+            loadResetRequests();
         }
 
         async function loadRegistrations() {
@@ -258,6 +294,74 @@
         function escAttr(str) {
             return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         }
+
+        // ======== Password Reset Requests ========
+        async function loadResetRequests() {
+            resetTableBody.innerHTML = '<tr><td colspan="6" class="no-data">Loading...</td></tr>';
+            try {
+                var resp = await fetch('/api/password-reset', {
+                    headers: { 'Authorization': 'Bearer ' + adminToken }
+                });
+                var data = await resp.json();
+                if (!data.success) {
+                    if (resp.status === 401) return; // handled by loadRegistrations
+                    resetTableBody.innerHTML = '<tr><td colspan="6" class="no-data">Error: ' + (data.error || 'Unknown') + '</td></tr>';
+                    return;
+                }
+
+                var reqs = data.requests || [];
+                var pending = data.pending || 0;
+
+                if (pending > 0) {
+                    resetStatCard.style.display = '';
+                    pendingResetsEl.textContent = pending;
+                } else {
+                    resetStatCard.style.display = 'none';
+                }
+
+                if (reqs.length === 0) {
+                    resetTableBody.innerHTML = '<tr><td colspan="6" class="no-data">No password reset requests yet.</td></tr>';
+                    return;
+                }
+
+                var sorted = reqs.slice().reverse();
+                resetTableBody.innerHTML = sorted.map(function(r, i) {
+                    var num = reqs.length - i;
+                    var dateStr = r.date ? new Date(r.date).toLocaleString() : '-';
+                    var regBadge = r.registered
+                        ? '<span style="color:#22c55e;">&#10003; Yes</span>'
+                        : '<span style="color:#ef4444;">&#10007; No</span>';
+                    var statusBadge = r.status === 'resolved'
+                        ? '<span class="status-resolved">&#10003; Resolved</span>'
+                        : '<span class="status-pending">&#9679; Pending</span>';
+                    var actionBtn = r.status === 'pending'
+                        ? '<button class="resolve-btn" onclick="resolveReset(\'' + escAttr(r.id) + '\')">Resolve</button>'
+                        : '';
+                    return '<tr>' +
+                        '<td>' + num + '</td>' +
+                        '<td class="email-cell">' + escHtml(r.email) + '</td>' +
+                        '<td>' + regBadge + '</td>' +
+                        '<td>' + dateStr + '</td>' +
+                        '<td>' + statusBadge + '</td>' +
+                        '<td>' + actionBtn + '</td>' +
+                        '</tr>';
+                }).join('');
+            } catch (e) {
+                resetTableBody.innerHTML = '<tr><td colspan="6" class="no-data">Network error loading reset requests.</td></tr>';
+            }
+        }
+
+        // Mark a reset request as resolved
+        window.resolveReset = async function(id) {
+            try {
+                await fetch('/api/password-reset?resolve=' + encodeURIComponent(id), {
+                    headers: { 'Authorization': 'Bearer ' + adminToken }
+                });
+                loadResetRequests();
+            } catch (e) {
+                alert('Failed to resolve request.');
+            }
+        };
 
         // Global copy function
         window.copyText = function(text) {
