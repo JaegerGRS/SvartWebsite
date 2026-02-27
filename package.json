@@ -6,7 +6,7 @@
   "scripts": {
     "start": "http-server -p 8000 -g",
     "serve": "python3 -m http.server 8000 || python -m http.server 8000",
-    "build": "rmdir /S /Q main && mkdir main && xcopy /Y index.html main\\ && xcopy /Y about.html main\\ && xcopy /Y contact.html main\\ && xcopy /Y pricing.html main\\ && xcopy /Y login.html main\\ && xcopy /Y signup.html main\\ && xcopy /Y account.html main\\ && xcopy /Y account-settings.html main\\ && xcopy /Y roadmap.html main\\ && xcopy /Y SVART.html main\\ && xcopy /Y robots.txt main\\ && xcopy /Y sitemap.xml main\\ && xcopy /E /I /Y css main\\ && xcopy /E /I /Y js main\\ && xcopy /E /I /Y pages main\\ && xcopy /Y _headers main\\ && xcopy /Y _redirects main\\",
+    "build": "node build-main.js",
     "lint:html": "html-validate index.html",
     "lint:css": "stylelint css/style.css",
     "lint:js": "eslint js/script.js",

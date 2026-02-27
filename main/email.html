@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Management - Svart Suite</title>
+    <meta name="description" content="Manage your email addresses and routing with Svart Suite and Cloudflare.">
+    <meta name="theme-color" content="#0a0a0f">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="index.html" style="display:flex;align-items:center;gap:10px;color:var(--primary);text-decoration:none;">
+                    <span class="SVART-logo">&#9670;</span>
+                    <span class="SVART-text">Svart Suite</span>
+                </a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="tools.html">Tools</a></li>
+                <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="email.html" class="active">Email</a></li>
+            </ul>
+        </div>
+    </nav>
+    <section class="page-hero" style="padding:80px 0 40px;text-align:center;">
+        <div class="container">
+            <h1 class="section-title">Email Management</h1>
+            <p class="section-subtitle">Manage your custom email addresses and routing with Cloudflare.</p>
+        </div>
+    </section>
+    <section class="email-management">
+        <div class="container">
+            <div class="email-card">
+                <h2>Cloudflare Email Routing</h2>
+                <p>Set up custom email addresses for your domain (e.g., you@svartsecurity.org) and forward them to your preferred inbox.</p>
+                <ol>
+                    <li>Go to <a href="https://dash.cloudflare.com/" target="_blank">Cloudflare Dashboard</a>.</li>
+                    <li>Select your domain and open <b>Email</b> &gt; <b>Email Routing</b>.</li>
+                    <li>Add desired email addresses and set forwarding rules.</li>
+                </ol>
+                <p>For advanced email management, connect your domain to a service like Mailgun or SendGrid for sending/receiving emails.</p>
+            </div>
+            <div class="email-card">
+                <h2>Send a Test Email</h2>
+                <form id="emailForm">
+                    <label for="to">To:</label>
+                    <input type="email" id="to" name="to" required placeholder="recipient@example.com">
+                    <label for="subject">Subject:</label>
+                    <input type="text" id="subject" name="subject" required placeholder="Subject">
+                    <label for="message">Message:</label>
+                    <textarea id="message" name="message" required placeholder="Your message"></textarea>
+                    <button class="btn" type="submit">Send Email</button>
+                </form>
+                <div id="emailStatus"></div>
+            </div>
+        </div>
+    </section>
+    <script src="js/email.js"></script>
+    <script>
+    // Demo email form handler (future: integrate with Cloudflare)
+    document.getElementById('emailForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const to = document.getElementById('to').value;
+        const subject = document.getElementById('subject').value;
+        const message = document.getElementById('message').value;
+        window.sendEmail(to, subject, message).then(result => {
+            document.getElementById('emailStatus').innerText = result;
+        });
+    });
+    </script>
+</body>
+</html>
