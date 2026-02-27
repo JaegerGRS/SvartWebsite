@@ -11,7 +11,7 @@ mkdirSync('main/pages', { recursive: true });
 const htmlFiles = [
   'index.html', 'about.html', 'contact.html', 'pricing.html',
   'login.html', 'signup.html', 'account.html', 'account-settings.html',
-  'roadmap.html', 'SVART.html', 'tools.html', 'email.html',
+  'roadmap.html', 'SVART.html', 'tools.html',
   'website-security.html', 'eula.html', 'tools-template.html', 'admin.html'
 ];
 for (const f of htmlFiles) {
@@ -23,7 +23,6 @@ if (existsSync('css/style.css')) cpSync('css/style.css', 'main/css/style.css');
 
 // JS
 if (existsSync('js/script.js')) cpSync('js/script.js', 'main/js/script.js');
-if (existsSync('js/email.js')) cpSync('js/email.js', 'main/js/email.js');
 
 // Pages
 if (existsSync('pages')) cpSync('pages', 'main/pages', { recursive: true });
