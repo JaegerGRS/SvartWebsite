@@ -63,7 +63,7 @@ function adaptNavForSession() {
         // Get username
         const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
         const user = users[session.svartId] || {};
-        const username = user.username || user.displayName || session.email || 'Account';
+        const username = user.username || user.displayName || session.email || 'Dashboard';
         authItem.innerHTML =
             '<a href="account.html" class="nav-auth-btn"><span class="nav-user-name">' + username + '</span></a>' +
             ' <a href="#" class="nav-auth-btn nav-logout-btn" id="navLogoutBtn">Sign Out</a>';

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account - Svart Suite</title>
-    <meta name="description" content="Manage your Svart Suite account, activation keys, and downloads.">
+    <title>Dashboard - Svart Suite</title>
+    <meta name="description" content="Your Svart Suite dashboard — activation keys, AI usage, and downloads.">
     <meta name="theme-color" content="#0a0a0f">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f'/><text x='50' y='70' font-size='80' font-weight='bold' text-anchor='middle' fill='%237c3aed'>&#x25C6;</text></svg>">
@@ -35,7 +35,7 @@
         <div class="container">
             <div class="account-header">
                 <h2>Welcome back, <span id="userName" style="font-size:0.75em;font-family:monospace;letter-spacing:1px;">User</span></h2>
-                <p>Manage your activation keys and download Svart Suite apps.</p>
+                <p>Your dashboard — activation keys, AI usage, and downloads.</p>
             </div>
 
             <!-- Activation Key Card -->
@@ -62,15 +62,23 @@
                     </div>
                     <div class="usage-meter">
                         <div class="usage-bar">
-                            <div class="usage-fill" id="usageFill" style="width:12%"></div>
+                            <div class="usage-fill" id="usageFill" style="width:0%"></div>
                         </div>
                         <div class="usage-labels">
-                            <span><strong id="usageCount">90</strong> / 750 premium requests used</span>
-                            <span class="usage-period">Resets Mar 1</span>
-                            <button id="testAIRequest" class="btn btn-primary btn-sm" style="margin-left:16px;">Test AI Request</button>
+                            <span><strong id="usageCount">0</strong> / <span id="usageMax">750</span> requests used</span>
+                            <span class="usage-period" id="usageReset">Resets —</span>
                         </div>
                     </div>
-                    <a href="pricing.html" class="btn btn-secondary btn-sm" style="margin-top:16px;">View Pricing</a>
+                    <div id="usagePlan" style="margin-top:8px;font-size:0.85rem;color:var(--text-muted);">Plan: Free Premium</div>
+                    <a href="pricing.html" class="btn btn-secondary btn-sm" style="margin-top:12px;">Upgrade Plan</a>
+
+                    <!-- Recent AI Requests Log -->
+                    <div style="margin-top:24px;">
+                        <h4 style="font-size:0.95rem;margin-bottom:10px;color:var(--text-light);">Recent AI Chat Requests</h4>
+                        <div id="aiRequestLog" style="max-height:200px;overflow-y:auto;font-size:0.82rem;color:var(--text-muted);border:1px solid var(--border-color);border-radius:8px;padding:10px;">
+                            <p style="opacity:0.5;">No requests yet. Use Svart AI Chat to see your history here.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -135,7 +143,7 @@
             </div>
 
             <!-- Account info -->
-            <h3 class="account-section-title" style="margin-top:60px;">Account Details</h3>
+            <h3 class="account-section-title" style="margin-top:60px;">Your Details</h3>
             <div class="account-card" style="max-width:500px;">
                 <div class="account-detail-row">
                     <span class="detail-label">Email</span>
@@ -227,44 +235,87 @@
             document.getElementById('userSince').textContent = new Date(user.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
         }
 
-        // AI Usage Meter
-        document.getElementById('testAIRequest').addEventListener('click', function() {
-            window.simulateAIRequest();
-        });
+        // ======== AI Usage Meter ========
+        var maxRequests = 750;
+        var planName = 'Free Premium';
+        // Check if user has upgraded plan stored
+        var userPlan = localStorage.getItem('ai_plan_' + session.svartId) || 'free';
+        if (userPlan === 'pro') { maxRequests = 2000; planName = 'Svart AI (£4.99/mo)'; }
+        else if (userPlan === 'unlimited') { maxRequests = Infinity; planName = 'Svart AI Unlimited (£9.99/mo)'; }
+        document.getElementById('usageMax').textContent = maxRequests === Infinity ? '∞' : maxRequests;
+        document.getElementById('usagePlan').textContent = 'Plan: ' + planName;
 
-        const maxRequests = 750;
-        const usageKey = 'ai_usage_' + session.svartId;
-        let usageCount = parseInt(localStorage.getItem(usageKey) || '0', 10);
+        // Calculate next reset date (1st of next month)
+        var now = new Date();
+        var nextReset = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        var resetStr = nextReset.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        document.getElementById('usageReset').textContent = 'Resets ' + resetStr;
+
+        // Load usage count
+        var usageKey = 'ai_usage_' + session.svartId;
+        var usageCount = parseInt(localStorage.getItem(usageKey) || '0', 10);
+
+        // Reset usage monthly
+        var lastResetKey = 'ai_usage_reset_' + session.svartId;
+        var lastReset = localStorage.getItem(lastResetKey);
+        var currentMonth = now.getFullYear() + '-' + now.getMonth();
+        if (lastReset !== currentMonth) {
+            usageCount = 0;
+            localStorage.setItem(usageKey, '0');
+            localStorage.setItem(lastResetKey, currentMonth);
+            // Also clear the request log for the new month
+            localStorage.setItem('ai_requests_' + session.svartId, '[]');
+        }
 
         function updateUsageMeter() {
             document.getElementById('usageCount').textContent = usageCount;
-            const percent = Math.min(usageCount / maxRequests, 1) * 100;
-            document.getElementById('usageFill').style.width = percent + '%';
-            document.getElementById('usageFill').style.background = usageCount >= maxRequests ? 'var(--danger)' : 'var(--primary)';
+            if (maxRequests === Infinity) {
+                document.getElementById('usageFill').style.width = '100%';
+                document.getElementById('usageFill').style.background = 'var(--primary)';
+            } else {
+                var percent = Math.min(usageCount / maxRequests, 1) * 100;
+                document.getElementById('usageFill').style.width = percent + '%';
+                document.getElementById('usageFill').style.background = usageCount >= maxRequests ? 'var(--danger)' : 'var(--primary)';
+            }
         }
         updateUsageMeter();
 
-        window.simulateAIRequest = function() {
-            if (usageCount < maxRequests) {
-                usageCount++;
-                localStorage.setItem(usageKey, usageCount);
-                updateUsageMeter();
-            } else {
-                alert('AI request limit reached for this month!');
-            }
-        };
+        // ======== AI Request Log ========
+        var requestLogKey = 'ai_requests_' + session.svartId;
+        var requestLog = JSON.parse(localStorage.getItem(requestLogKey) || '[]');
 
-        // Reset usage monthly
-        const now = new Date();
-        const lastResetKey = 'ai_usage_reset_' + session.svartId;
-        const lastReset = localStorage.getItem(lastResetKey);
-        const currentMonth = now.getFullYear() + '-' + now.getMonth();
-        if (lastReset !== currentMonth) {
-            usageCount = 0;
-            localStorage.setItem(usageKey, usageCount);
-            localStorage.setItem(lastResetKey, currentMonth);
-            updateUsageMeter();
+        function renderRequestLog() {
+            var logEl = document.getElementById('aiRequestLog');
+            if (requestLog.length === 0) {
+                logEl.innerHTML = '<p style="opacity:0.5;">No requests yet. Use Svart AI Chat to see your history here.</p>';
+                return;
+            }
+            // Show most recent first, max 50
+            var recent = requestLog.slice(-50).reverse();
+            var html = '<table style="width:100%;border-collapse:collapse;">';
+            html += '<tr style="border-bottom:1px solid var(--border-color);"><th style="text-align:left;padding:4px 8px;color:var(--text-light);font-size:0.8rem;">#</th><th style="text-align:left;padding:4px 8px;color:var(--text-light);font-size:0.8rem;">Time</th><th style="text-align:left;padding:4px 8px;color:var(--text-light);font-size:0.8rem;">Prompt</th><th style="text-align:right;padding:4px 8px;color:var(--text-light);font-size:0.8rem;">Tokens</th></tr>';
+            for (var i = 0; i < recent.length; i++) {
+                var r = recent[i];
+                var time = new Date(r.ts).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+                var prompt = (r.prompt || 'AI request').substring(0, 40);
+                if ((r.prompt || '').length > 40) prompt += '…';
+                var tokens = r.tokens || '—';
+                html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:4px 8px;">' + (requestLog.length - i) + '</td><td style="padding:4px 8px;">' + time + '</td><td style="padding:4px 8px;">' + prompt + '</td><td style="padding:4px 8px;text-align:right;">' + tokens + '</td></tr>';
+            }
+            html += '</table>';
+            logEl.innerHTML = html;
         }
+        renderRequestLog();
+
+        // Global function that Svart AI Chat app calls to log a request
+        window.logAIRequest = function(prompt, tokens) {
+            usageCount++;
+            localStorage.setItem(usageKey, usageCount.toString());
+            requestLog.push({ ts: Date.now(), prompt: prompt || 'AI request', tokens: tokens || 0 });
+            localStorage.setItem(requestLogKey, JSON.stringify(requestLog));
+            updateUsageMeter();
+            renderRequestLog();
+        };
 
         // Copy activation key
         document.getElementById('copyKey').addEventListener('click', function() {
