@@ -38,16 +38,15 @@
                     <div class="auth-header">
                         <span class="SVART-logo-large" style="font-size:3rem;">&#9670;</span>
                         <h2>Welcome Back</h2>
-                        <p>Log in with your Svart ID &mdash; no name, no email, no tracking</p>
-                        <p style="color:var(--text-muted);font-size:0.85rem;margin-top:6px;">Your Svart ID is your key to connect. Use it in the app to join servers and set your display name &mdash; your identity stays in Svart Chat, not on the web.</p>
+                        <p>Log in with your email to access your account and activation key</p>
                     </div>
 
                     <form id="loginForm" class="auth-form-site" novalidate>
                         <div class="form-group">
-                            <label for="svartId">Activation Key (Svart ID)</label>
+                            <label for="email">Email Address</label>
                             <div class="input-wrapper">
-                                <span class="input-icon">&#128273;</span>
-                                <input id="svartId" type="text" placeholder="e.g. ABCD-1234-EFGH-5678" required autocomplete="off" spellcheck="false" />
+                                <span class="input-icon">&#9993;</span>
+                                <input id="email" type="email" placeholder="you@example.com" required autocomplete="email" />
                             </div>
                         </div>
 
@@ -172,15 +171,15 @@
 
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            const svartId = document.getElementById('svartId').value.trim();
+            const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
 
-            if (!svartId || !password) {
+            if (!email || !password) {
                 showMsg('Please fill in all fields.', 'error');
                 return;
             }
-            if (svartId.length < 1) {
-                showMsg('Please enter your activation key.', 'error');
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showMsg('Please enter a valid email address.', 'error');
                 return;
             }
             if (password.length < 8) {
@@ -188,40 +187,46 @@
                 return;
             }
 
-            // Simulate login (replace with real backend)
             const btn = form.querySelector('button[type="submit"]');
             btn.disabled = true;
             btn.textContent = 'Logging in...';
 
             setTimeout(function() {
-                // Demo: store session
+                // Find user by email
                 const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
-                if (users[svartId]) {
-                    if (users[svartId].password === hashPassword(password)) {
+                var foundKey = null;
+                var foundUser = null;
+                for (var key in users) {
+                    if (users[key].email && users[key].email.toLowerCase() === email) {
+                        foundKey = key;
+                        foundUser = users[key];
+                        break;
+                    }
+                }
+
+                if (foundUser) {
+                    if (foundUser.password === hashPassword(password)) {
                         const remember = document.getElementById('remember').checked;
-                        localStorage.setItem('ct_session', JSON.stringify({
-                            svartId: svartId,
+                        var sessionData = {
+                            svartId: foundKey,
+                            email: email,
                             loggedIn: true,
                             ts: Date.now(),
                             persistent: remember
-                        }));
+                        };
+                        localStorage.setItem('ct_session', JSON.stringify(sessionData));
                         if (remember) {
-                            // Store persistent session
-                            localStorage.setItem('ct_persistent_session', JSON.stringify({
-                                svartId: svartId,
-                                loggedIn: true,
-                                ts: Date.now()
-                            }));
+                            localStorage.setItem('ct_persistent_session', JSON.stringify(sessionData));
                         } else {
                             localStorage.removeItem('ct_persistent_session');
                         }
                         showMsg('Login successful! Redirecting...', 'success');
-                        setTimeout(() => { window.location.href = 'account.html'; }, 1000);
+                        setTimeout(function() { window.location.href = 'account.html'; }, 1000);
                         return;
                     }
                     showMsg('Incorrect password.', 'error');
                 } else {
-                    showMsg('No account found with that Svart ID. <a href="signup.html">Sign up</a>', 'error');
+                    showMsg('No account found with that email. <a href="signup.html">Sign up</a>', 'error');
                 }
                 btn.disabled = false;
                 btn.textContent = 'Log In';
@@ -234,7 +239,6 @@
             msgBox.style.display = 'block';
         }
 
-        // Simple hash (demo only — in production use server-side bcrypt)
         function hashPassword(pw) {
             let hash = 0;
             for (let i = 0; i < pw.length; i++) {

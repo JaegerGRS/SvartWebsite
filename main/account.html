@@ -138,8 +138,12 @@
             <h3 class="account-section-title" style="margin-top:60px;">Account Details</h3>
             <div class="account-card" style="max-width:500px;">
                 <div class="account-detail-row">
-                    <span class="detail-label">Svart ID</span>
-                    <span class="detail-value" id="userEmail">—</span>
+                    <span class="detail-label">Email</span>
+                    <span class="detail-value" id="userEmail">&mdash;</span>
+                </div>
+                <div class="account-detail-row">
+                    <span class="detail-label">Activation Key</span>
+                    <span class="detail-value" id="userSvartId" style="font-family:monospace;letter-spacing:1px;">&mdash;</span>
                 </div>
                 <div class="account-detail-row">
                     <span class="detail-label">Member since</span>
@@ -215,8 +219,9 @@
         // Populate page with user data
         const displayName = user.displayName || user.username || 'User';
         document.getElementById('userName').textContent = displayName;
-        document.getElementById('userEmail').textContent = session.svartId || '—';
-        document.getElementById('userKey').textContent = user.activationKey || 'XXXX-XXXX-XXXX-XXXX';
+        document.getElementById('userEmail').textContent = user.email || session.email || '—';
+        document.getElementById('userSvartId').textContent = session.svartId || '—';
+        document.getElementById('userKey').textContent = user.activationKey || session.svartId || 'XXXX-XXXX-XXXX-XXXX';
 
         if (user.createdAt) {
             document.getElementById('userSince').textContent = new Date(user.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
