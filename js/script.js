@@ -3,13 +3,13 @@
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize all interactive features
-    initHamburger();
-    initNavigation();
-    initContactForm();
-    initScrollAnimations();
-    initSmartLinks();
-    adaptNavForSession();
+    // Initialize all interactive features — each wrapped so one failure doesn't block the rest
+    try { initHamburger(); } catch(e) { console.error('initHamburger:', e); }
+    try { initNavigation(); } catch(e) { console.error('initNavigation:', e); }
+    try { initContactForm(); } catch(e) { console.error('initContactForm:', e); }
+    try { initScrollAnimations(); } catch(e) { console.error('initScrollAnimations:', e); }
+    try { initSmartLinks(); } catch(e) { console.error('initSmartLinks:', e); }
+    try { adaptNavForSession(); } catch(e) { console.error('adaptNavForSession:', e); }
 });
 
 // ============ Hamburger Menu ============
@@ -63,10 +63,10 @@ function adaptNavForSession() {
         // Get username
         const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
         const user = users[session.svartId] || {};
-        const username = user.username || 'Account';
+        const username = user.username || user.displayName || session.email || 'Account';
         authItem.innerHTML =
             '<a href="account.html" class="nav-auth-btn"><span class="nav-user-name">' + username + '</span></a>' +
-            ' <a href="#" class="nav-auth-btn nav-logout-btn" id="navLogoutBtn">Logout</a>';
+            ' <a href="#" class="nav-auth-btn nav-logout-btn" id="navLogoutBtn">Sign Out</a>';
         var logoutBtn = document.getElementById('navLogoutBtn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', function(e) {
@@ -78,7 +78,7 @@ function adaptNavForSession() {
         }
     } else {
         // Not logged in
-        authItem.innerHTML = '<a href="login.html" class="nav-auth-btn">Login/SignUp</a>';
+        authItem.innerHTML = '<a href="login.html" class="nav-auth-btn">Login / Sign Up</a>';
     }
 }
 
