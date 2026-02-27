@@ -75,46 +75,109 @@
                 </table>
             </div>
             <div class="email-card">
-                <h2>Cloudflare Email Routing Setup</h2>
-                <p>All email addresses above are routed through <b>Cloudflare Email Routing</b> to forward mail to your inbox.</p>
-                <h3 style="color:var(--accent);margin-top:16px;">How to configure:</h3>
+                <h2>ImprovMX Email Forwarding Setup</h2>
+                <p>All email addresses above are forwarded via <a href="https://improvmx.com/" target="_blank"><b>ImprovMX</b></a> (free plan &mdash; 25 aliases, 1 destination).</p>
+
+                <h3 style="color:var(--accent);margin-top:18px;">Step 1 &mdash; Create an ImprovMX Account</h3>
                 <ol>
-                    <li>Go to <a href="https://dash.cloudflare.com/" target="_blank">Cloudflare Dashboard</a> &rarr; select <b>svartsecurity.org</b>.</li>
-                    <li>Navigate to <b>Email</b> &gt; <b>Email Routing</b>.</li>
-                    <li>Click <b>Create address</b> and add each address above.</li>
-                    <li>Set the forwarding destination (your personal inbox).</li>
-                    <li>Verify the destination email if prompted.</li>
+                    <li>Go to <a href="https://improvmx.com/" target="_blank">improvmx.com</a> and sign up (free).</li>
+                    <li>Click <b>Add Domain</b> and enter <code>svartsecurity.org</code>.</li>
+                    <li>Set your forwarding destination (personal inbox that will receive all mail).</li>
                 </ol>
-                <p style="margin-top:16px;color:var(--text-muted);font-size:0.9em;"><b>Note:</b> Sending email from these addresses requires Cloudflare's email sending feature (currently in beta waitlist). Once enabled, outbound emails will work automatically.</p>
+
+                <h3 style="color:var(--accent);margin-top:18px;">Step 2 &mdash; Add DNS Records in Cloudflare</h3>
+                <p>Go to <a href="https://dash.cloudflare.com/" target="_blank">Cloudflare Dashboard</a> &rarr; <b>svartsecurity.org</b> &rarr; <b>DNS</b> &rarr; <b>Records</b> and add:</p>
+                <table style="width:100%;border-collapse:collapse;margin:12px 0;">
+                    <thead>
+                        <tr style="border-bottom:2px solid var(--border-color);text-align:left;">
+                            <th style="padding:8px 10px;color:var(--primary);">Type</th>
+                            <th style="padding:8px 10px;color:var(--primary);">Name</th>
+                            <th style="padding:8px 10px;color:var(--primary);">Value</th>
+                            <th style="padding:8px 10px;color:var(--primary);">Priority</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:8px 10px;">MX</td>
+                            <td style="padding:8px 10px;">@</td>
+                            <td style="padding:8px 10px;"><code>mx1.improvmx.com</code></td>
+                            <td style="padding:8px 10px;">10</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:8px 10px;">MX</td>
+                            <td style="padding:8px 10px;">@</td>
+                            <td style="padding:8px 10px;"><code>mx2.improvmx.com</code></td>
+                            <td style="padding:8px 10px;">20</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:8px 10px;">TXT</td>
+                            <td style="padding:8px 10px;">@</td>
+                            <td style="padding:8px 10px;"><code>v=spf1 include:spf.improvmx.com ~all</code></td>
+                            <td style="padding:8px 10px;">&mdash;</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="color:var(--text-muted);font-size:0.9em;">Make sure <b>Proxy status</b> is set to <b>DNS only</b> (grey cloud) for MX records.</p>
+
+                <h3 style="color:var(--accent);margin-top:18px;">Step 3 &mdash; Create Aliases</h3>
+                <p>In the ImprovMX dashboard, add each alias:</p>
+                <ul style="margin:8px 0 0 18px;">
+                    <li><code>support</code> &rarr; your inbox</li>
+                    <li><code>contact</code> &rarr; your inbox</li>
+                    <li><code>security</code> &rarr; your inbox</li>
+                    <li><code>admin</code> &rarr; your inbox</li>
+                    <li><code>noreply</code> &rarr; your inbox</li>
+                </ul>
+
+                <h3 style="color:var(--accent);margin-top:18px;">Step 4 &mdash; Send As (Optional)</h3>
+                <p>To <b>reply from</b> your @svartsecurity.org addresses via Gmail:</p>
+                <ol>
+                    <li>Open Gmail &rarr; <b>Settings</b> &rarr; <b>Accounts</b> &rarr; <b>Send mail as</b> &rarr; <b>Add another email</b>.</li>
+                    <li>Enter the alias (e.g. <code>support@svartsecurity.org</code>).</li>
+                    <li>SMTP Server: <code>smtp.improvmx.com</code>, Port: <code>587</code>, TLS.</li>
+                    <li>Username: your ImprovMX alias, Password: your ImprovMX API key (from <b>Account Settings</b>).</li>
+                    <li>Confirm the verification email sent to your inbox.</li>
+                </ol>
+                <p style="margin-top:12px;color:var(--text-muted);font-size:0.9em;"><b>Note:</b> SMTP sending via ImprovMX requires the <b>Premium plan ($9.99/mo)</b>. On the free plan, you can receive and forward email but replies must come from your personal address.</p>
             </div>
+
             <div class="email-card">
-                <h2>Send a Test Email</h2>
-                <form id="emailForm">
-                    <label for="to">To:</label>
-                    <input type="email" id="to" name="to" required placeholder="recipient@example.com">
-                    <label for="subject">Subject:</label>
-                    <input type="text" id="subject" name="subject" required placeholder="Subject">
-                    <label for="message">Message:</label>
-                    <textarea id="message" name="message" required placeholder="Your message"></textarea>
-                    <button class="btn" type="submit">Send Email</button>
-                </form>
-                <div id="emailStatus"></div>
+                <h2>Free Plan Limits</h2>
+                <table style="width:100%;border-collapse:collapse;margin:12px 0;">
+                    <thead>
+                        <tr style="border-bottom:2px solid var(--border-color);text-align:left;">
+                            <th style="padding:8px 10px;color:var(--primary);">Feature</th>
+                            <th style="padding:8px 10px;color:var(--primary);">Free</th>
+                            <th style="padding:8px 10px;color:var(--primary);">Premium</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:8px 10px;">Aliases</td>
+                            <td style="padding:8px 10px;">25</td>
+                            <td style="padding:8px 10px;">Unlimited</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:8px 10px;">Destinations</td>
+                            <td style="padding:8px 10px;">1</td>
+                            <td style="padding:8px 10px;">Unlimited</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:8px 10px;">SMTP Sending</td>
+                            <td style="padding:8px 10px;">&#10008;</td>
+                            <td style="padding:8px 10px;">&#10004;</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:8px 10px;">Custom domain</td>
+                            <td style="padding:8px 10px;">1</td>
+                            <td style="padding:8px 10px;">Unlimited</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="color:var(--text-muted);font-size:0.9em;">The free plan covers all 5 @svartsecurity.org aliases forwarding to one inbox. Upgrade only if you need outbound SMTP.</p>
             </div>
         </div>
     </section>
-    <script src="js/email.js"></script>
     <script src="js/script.js"></script>
-    <script>
-    // Demo email form handler (future: integrate with Cloudflare)
-    document.getElementById('emailForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const to = document.getElementById('to').value;
-        const subject = document.getElementById('subject').value;
-        const message = document.getElementById('message').value;
-        window.sendEmail(to, subject, message).then(result => {
-            document.getElementById('emailStatus').innerText = result;
-        });
-    });
-    </script>
 </body>
 </html>
