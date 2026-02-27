@@ -6,10 +6,11 @@
     <title>Admin - Registration Log</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="stylesheet" href="css/style.css">
+    <script>!function(){var t=localStorage.getItem("svart_theme");t&&"dark"!==t&&document.documentElement.setAttribute("data-theme",t)}()</script>
     <style>
         .admin-login { max-width: 400px; margin: 120px auto; padding: 32px; background: rgba(20,20,30,0.9); border: 1px solid var(--border-color); border-radius: 16px; }
         .admin-login h2 { color: var(--primary); margin-bottom: 16px; }
-        .admin-login input { width: 100%; padding: 12px 16px; background: rgba(10,10,15,0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 1rem; margin-bottom: 12px; }
+        .admin-login input { width: 100%; padding: 12px 16px; background: rgba(var(--bg-dark-rgb),0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 1rem; margin-bottom: 12px; }
         .admin-login input:focus { border-color: var(--primary); outline: none; }
         .admin-panel { max-width: 1100px; margin: 100px auto 40px; padding: 0 20px; }
         .admin-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
@@ -21,7 +22,7 @@
         .stat-card.alert .stat-num { color: #f59e0b; }
         .stat-card.danger .stat-num { color: #ef4444; }
         .search-bar { display: flex; gap: 10px; margin-bottom: 24px; }
-        .search-bar input { flex: 1; padding: 12px 16px; background: rgba(10,10,15,0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 1rem; }
+        .search-bar input { flex: 1; padding: 12px 16px; background: rgba(var(--bg-dark-rgb),0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 1rem; }
         .search-bar input:focus { border-color: var(--primary); outline: none; }
         .search-bar button { padding: 12px 24px; }
         .search-result { background: rgba(20,20,30,0.8); border: 1px solid var(--primary); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
@@ -33,9 +34,9 @@
         .search-result .activation-key { color: var(--accent); font-family: monospace; font-size: 1.1rem; letter-spacing: 1px; cursor: pointer; }
         .search-result .activation-key:hover { text-decoration: underline; }
         .reg-table { width: 100%; border-collapse: collapse; background: rgba(20,20,30,0.6); border-radius: 12px; overflow: hidden; }
-        .reg-table th { background: rgba(124,58,237,0.15); color: var(--primary); padding: 12px 16px; text-align: left; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .reg-table th { background: rgba(var(--primary-rgb),0.15); color: var(--primary); padding: 12px 16px; text-align: left; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
         .reg-table td { padding: 12px 16px; border-bottom: 1px solid rgba(39,39,42,0.3); color: var(--text-light); font-size: 0.9rem; }
-        .reg-table tr:hover td { background: rgba(124,58,237,0.05); }
+        .reg-table tr:hover td { background: rgba(var(--primary-rgb),0.05); }
         .reg-table .key-cell { font-family: monospace; color: var(--accent); letter-spacing: 0.5px; }
         .reg-table .email-cell { max-width: 250px; overflow: hidden; text-overflow: ellipsis; }
         .no-data { text-align: center; padding: 40px; color: var(--text-muted); }
@@ -375,5 +376,6 @@
         };
     })();
     </script>
+    <script src="js/script.js"></script>
 </body>
 </html>

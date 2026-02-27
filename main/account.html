@@ -7,6 +7,7 @@
   <meta name="description" content="Your Svart Suite dashboard — manage your profile, security, plan, tools, downloads, and preferences all in one place.">
   <meta name="theme-color" content="#0a0a0f">
   <link rel="stylesheet" href="css/style.css">
+  <script>!function(){var t=localStorage.getItem("svart_theme");t&&"dark"!==t&&document.documentElement.setAttribute("data-theme",t)}()</script>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f'/><text x='50' y='70' font-size='80' font-weight='bold' text-anchor='middle' fill='%237c3aed'>&#x25C6;</text></svg>">
 </head>
 <body>
@@ -298,7 +299,7 @@
 
         <!-- ===== Monthly Tiers Tab ===== -->
         <div class="plan-sub-panel" id="plantab-monthly">
-          <div class="settings-card" style="border-color:var(--primary);background:rgba(124,58,237,0.04);">
+          <div class="settings-card" style="border-color:var(--primary);background:rgba(var(--primary-rgb),0.04);">
             <h3><span class="card-icon">&#128200;</span> Current Plan</h3>
             <div class="settings-row">
               <span class="settings-row-label">Plan</span>
@@ -359,30 +360,30 @@
 
         <!-- ===== Request Top-Ups Tab ===== -->
         <div class="plan-sub-panel" id="plantab-topups" style="display:none;">
-          <div class="settings-card" style="border-color:var(--primary);background:rgba(124,58,237,0.04);">
+          <div class="settings-card" style="border-color:var(--primary);background:rgba(var(--primary-rgb),0.04);">
             <h3><span class="card-icon">&#128176;</span> Buy Request Top-Ups</h3>
             <p>One-time payments &mdash; no subscription, no expiry. Requests are added to your account instantly and stay until you use them. Works on <strong>any plan</strong> including Free Premium.</p>
 
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:20px;">
-              <div style="text-align:center;padding:20px 16px;border:1px solid var(--border-color);border-radius:12px;background:rgba(10,10,15,0.4);transition:border-color 0.2s;">
+              <div style="text-align:center;padding:20px 16px;border:1px solid var(--border-color);border-radius:12px;background:rgba(var(--bg-dark-rgb),0.4);transition:border-color 0.2s;">
                 <p style="color:var(--text-light);font-size:1.5rem;font-weight:900;margin:0;">&pound;2.50</p>
                 <p style="color:var(--primary);font-size:0.95rem;font-weight:600;margin:6px 0 4px;">2,500 requests</p>
                 <p style="color:var(--text-muted);font-size:0.75rem;margin:0;">&pound;0.001 per request</p>
                 <button class="btn btn-secondary btn-sm" style="margin-top:12px;width:100%;" disabled>Buy</button>
               </div>
-              <div style="text-align:center;padding:20px 16px;border:1px solid var(--border-color);border-radius:12px;background:rgba(10,10,15,0.4);transition:border-color 0.2s;">
+              <div style="text-align:center;padding:20px 16px;border:1px solid var(--border-color);border-radius:12px;background:rgba(var(--bg-dark-rgb),0.4);transition:border-color 0.2s;">
                 <p style="color:var(--text-light);font-size:1.5rem;font-weight:900;margin:0;">&pound;5.00</p>
                 <p style="color:var(--primary);font-size:0.95rem;font-weight:600;margin:6px 0 4px;">5,000 requests</p>
                 <p style="color:var(--text-muted);font-size:0.75rem;margin:0;">&pound;0.001 per request</p>
                 <button class="btn btn-secondary btn-sm" style="margin-top:12px;width:100%;" disabled>Buy</button>
               </div>
-              <div style="text-align:center;padding:20px 16px;border:1px solid var(--border-color);border-radius:12px;background:rgba(10,10,15,0.4);transition:border-color 0.2s;">
+              <div style="text-align:center;padding:20px 16px;border:1px solid var(--border-color);border-radius:12px;background:rgba(var(--bg-dark-rgb),0.4);transition:border-color 0.2s;">
                 <p style="color:var(--text-light);font-size:1.5rem;font-weight:900;margin:0;">&pound;10.00</p>
                 <p style="color:var(--primary);font-size:0.95rem;font-weight:600;margin:6px 0 4px;">10,000 requests</p>
                 <p style="color:var(--text-muted);font-size:0.75rem;margin:0;">&pound;0.001 per request</p>
                 <button class="btn btn-secondary btn-sm" style="margin-top:12px;width:100%;" disabled>Buy</button>
               </div>
-              <div style="text-align:center;padding:20px 16px;border:2px solid var(--primary);border-radius:12px;background:rgba(124,58,237,0.06);transition:border-color 0.2s;">
+              <div style="text-align:center;padding:20px 16px;border:2px solid var(--primary);border-radius:12px;background:rgba(var(--primary-rgb),0.06);transition:border-color 0.2s;">
                 <p style="color:var(--primary);font-size:0.7rem;font-weight:700;letter-spacing:1px;margin:0 0 6px;">BEST VALUE</p>
                 <p style="color:var(--text-light);font-size:1.5rem;font-weight:900;margin:0;">&pound;20.00</p>
                 <p style="color:var(--primary);font-size:0.95rem;font-weight:600;margin:6px 0 4px;">25,000 requests</p>
@@ -528,7 +529,7 @@
           <div class="settings-row">
             <span class="settings-row-label">Theme</span>
             <span class="settings-row-value">
-              <select id="themePref" style="background:rgba(10,10,15,0.6);border:1px solid var(--border-color);color:var(--text-light);padding:6px 12px;border-radius:6px;font-family:inherit;font-size:0.85rem;">
+              <select id="themePref" style="background:rgba(var(--bg-dark-rgb),0.6);border:1px solid var(--border-color);color:var(--text-light);padding:6px 12px;border-radius:6px;font-family:inherit;font-size:0.85rem;">
                 <option value="dark" selected>Dark (default)</option>
                 <option value="midnight">Midnight</option>
                 <option value="light" disabled>Light (coming soon)</option>
@@ -566,7 +567,7 @@
           <div class="settings-row">
             <span class="settings-row-label">Session timeout</span>
             <span class="settings-row-value">
-              <select id="prefTimeout" style="background:rgba(10,10,15,0.6);border:1px solid var(--border-color);color:var(--text-light);padding:6px 12px;border-radius:6px;font-family:inherit;font-size:0.85rem;">
+              <select id="prefTimeout" style="background:rgba(var(--bg-dark-rgb),0.6);border:1px solid var(--border-color);color:var(--text-light);padding:6px 12px;border-radius:6px;font-family:inherit;font-size:0.85rem;">
                 <option value="30">30 minutes (default)</option>
                 <option value="60">1 hour</option>
                 <option value="120">2 hours</option>

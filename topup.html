@@ -7,30 +7,31 @@
     <meta name="description" content="Buy Svart AI request top-ups from £0.50. One-time payments, no subscription, no expiry. Choose exactly the amount you need — single packs, bulk packs, or custom amounts.">
     <meta name="theme-color" content="#0a0a0f">
     <link rel="stylesheet" href="css/style.css">
+    <script>!function(){var t=localStorage.getItem("svart_theme");t&&"dark"!==t&&document.documentElement.setAttribute("data-theme",t)}()</script>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f'/><text x='50' y='70' font-size='80' font-weight='bold' text-anchor='middle' fill='%237c3aed'>&#x25C6;</text></svg>">
     <style>
         .topup-card {
             text-align: center;
             padding: 28px 20px;
-            border: 1px solid rgba(124,58,237,0.2);
+            border: 1px solid rgba(var(--primary-rgb),0.2);
             border-radius: 16px;
-            background: rgba(124,58,237,0.03);
+            background: rgba(var(--primary-rgb),0.03);
             transition: all 0.3s ease;
             position: relative;
         }
         .topup-card:hover {
             border-color: var(--primary);
-            background: rgba(124,58,237,0.06);
+            background: rgba(var(--primary-rgb),0.06);
             transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(124,58,237,0.15);
+            box-shadow: 0 8px 30px rgba(var(--primary-rgb),0.15);
         }
         .topup-card.popular {
-            border: 2px solid rgba(124,58,237,0.4);
-            background: rgba(124,58,237,0.06);
+            border: 2px solid rgba(var(--primary-rgb),0.4);
+            background: rgba(var(--primary-rgb),0.06);
         }
         .topup-card.best-value {
             border: 2px solid var(--primary);
-            background: rgba(124,58,237,0.08);
+            background: rgba(var(--primary-rgb),0.08);
         }
         .topup-badge {
             position: absolute;
@@ -79,7 +80,7 @@
         .topup-details {
             margin-top: 16px;
             padding-top: 14px;
-            border-top: 1px solid rgba(124,58,237,0.1);
+            border-top: 1px solid rgba(var(--primary-rgb),0.1);
             text-align: left;
         }
         .topup-details p {
@@ -129,16 +130,16 @@
             max-width: 600px;
             margin: 0 auto;
             padding: 32px;
-            border: 2px solid rgba(124,58,237,0.3);
+            border: 2px solid rgba(var(--primary-rgb),0.3);
             border-radius: 16px;
-            background: linear-gradient(135deg, rgba(124,58,237,0.06), rgba(124,58,237,0.02));
+            background: linear-gradient(135deg, rgba(var(--primary-rgb),0.06), rgba(var(--primary-rgb),0.02));
         }
         .calc-slider {
             -webkit-appearance: none;
             width: 100%;
             height: 8px;
             border-radius: 4px;
-            background: linear-gradient(to right, rgba(124,58,237,0.3), var(--primary));
+            background: linear-gradient(to right, rgba(var(--primary-rgb),0.3), var(--primary));
             outline: none;
             margin: 20px 0;
         }
@@ -149,7 +150,7 @@
             border-radius: 50%;
             background: var(--primary);
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(124,58,237,0.4);
+            box-shadow: 0 2px 8px rgba(var(--primary-rgb),0.4);
         }
         .calc-slider::-moz-range-thumb {
             width: 24px;
@@ -158,26 +159,26 @@
             background: var(--primary);
             cursor: pointer;
             border: none;
-            box-shadow: 0 2px 8px rgba(124,58,237,0.4);
+            box-shadow: 0 2px 8px rgba(var(--primary-rgb),0.4);
         }
         .calc-result {
             text-align: center;
             padding: 20px;
             border-radius: 12px;
-            background: rgba(124,58,237,0.08);
+            background: rgba(var(--primary-rgb),0.08);
             margin-top: 16px;
         }
         .faq-item {
             padding: 24px 28px;
             margin-bottom: 12px;
             border-radius: 12px;
-            background: rgba(124,58,237,0.06);
-            border: 1px solid rgba(124,58,237,0.1);
+            background: rgba(var(--primary-rgb),0.06);
+            border: 1px solid rgba(var(--primary-rgb),0.1);
             transition: border-color 0.2s, background 0.2s;
         }
         .faq-item:hover {
-            border-color: rgba(124,58,237,0.25);
-            background: rgba(124,58,237,0.10);
+            border-color: rgba(var(--primary-rgb),0.25);
+            background: rgba(var(--primary-rgb),0.10);
         }
         .faq-item:last-child { margin-bottom: 0; }
         .faq-q {
@@ -225,7 +226,7 @@
             <p style="text-align:center;color:var(--primary);font-size:0.85rem;margin-top:-10px;letter-spacing:1px;">&#9888; Svart Suite is in development. Pricing is subject to change before launch.</p>
 
             <!-- How top-ups work -->
-            <div style="text-align:center;margin:40px auto 0;max-width:800px;padding:28px 32px;border:2px solid var(--primary);border-radius:16px;background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(124,58,237,0.02));">
+            <div style="text-align:center;margin:40px auto 0;max-width:800px;padding:28px 32px;border:2px solid var(--primary);border-radius:16px;background:linear-gradient(135deg,rgba(var(--primary-rgb),0.08),rgba(var(--primary-rgb),0.02));">
                 <p style="color:var(--primary);font-size:1.4rem;font-weight:800;margin:0 0 8px;">&#128176; How Top-Ups Work</p>
                 <p style="color:var(--text-light);font-size:1rem;margin:0 0 12px;">Buy a pack. Requests are added to your account <strong>instantly</strong>. Use them whenever you want &mdash; they <strong>never expire</strong>. Stack multiple packs together. Works on <strong>every plan</strong> including Free Premium.</p>
                 <p style="color:var(--text-muted);font-size:0.85rem;margin:0;">No recurring charges. No auto-renewal. No credit card stored. Just a one-time payment for exactly the requests you need.</p>
@@ -233,19 +234,19 @@
 
             <!-- Quick stats -->
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;max-width:700px;margin:30px auto 0;">
-                <div style="text-align:center;padding:16px;border-radius:10px;background:rgba(124,58,237,0.04);">
+                <div style="text-align:center;padding:16px;border-radius:10px;background:rgba(var(--primary-rgb),0.04);">
                     <p style="color:var(--primary);font-size:1.5rem;font-weight:900;margin:0;">£0.50</p>
                     <p style="color:var(--text-muted);font-size:0.75rem;margin:4px 0 0;">Cheapest top-up</p>
                 </div>
-                <div style="text-align:center;padding:16px;border-radius:10px;background:rgba(124,58,237,0.04);">
+                <div style="text-align:center;padding:16px;border-radius:10px;background:rgba(var(--primary-rgb),0.04);">
                     <p style="color:var(--primary);font-size:1.5rem;font-weight:900;margin:0;">£0.001</p>
                     <p style="color:var(--text-muted);font-size:0.75rem;margin:4px 0 0;">Standard cost per request</p>
                 </div>
-                <div style="text-align:center;padding:16px;border-radius:10px;background:rgba(124,58,237,0.04);">
+                <div style="text-align:center;padding:16px;border-radius:10px;background:rgba(var(--primary-rgb),0.04);">
                     <p style="color:var(--primary);font-size:1.5rem;font-weight:900;margin:0;">£0.00077</p>
                     <p style="color:var(--text-muted);font-size:0.75rem;margin:4px 0 0;">Lowest cost per request</p>
                 </div>
-                <div style="text-align:center;padding:16px;border-radius:10px;background:rgba(124,58,237,0.04);">
+                <div style="text-align:center;padding:16px;border-radius:10px;background:rgba(var(--primary-rgb),0.04);">
                     <p style="color:#22c55e;font-size:1.5rem;font-weight:900;margin:0;">Never</p>
                     <p style="color:var(--text-muted);font-size:0.75rem;margin:4px 0 0;">Expiry date</p>
                 </div>
@@ -452,7 +453,7 @@
                                 <td>&mdash;</td>
                                 <td>Month equivalent (Svart AI plan)</td>
                             </tr>
-                            <tr style="background:rgba(124,58,237,0.04);">
+                            <tr style="background:rgba(var(--primary-rgb),0.04);">
                                 <td><strong>Popular</strong></td>
                                 <td><strong>&pound;2.50</strong></td>
                                 <td><strong>2,500</strong></td>
@@ -597,7 +598,7 @@
                             <tr><th>2,500 Requests</th><th>Cost</th><th>Method</th></tr>
                         </thead>
                         <tbody>
-                            <tr style="background:rgba(124,58,237,0.04);">
+                            <tr style="background:rgba(var(--primary-rgb),0.04);">
                                 <td><strong>Svart AI Top-Up</strong></td>
                                 <td><strong style="color:var(--primary);">&pound;2.50</strong></td>
                                 <td>One-time purchase, instant</td>
@@ -689,7 +690,7 @@
             <p style="text-align:center;color:var(--text-muted);font-size:0.8rem;margin-top:40px;">Svart AI is in active development. Pricing shown is planned and may change before launch.</p>
 
             <!-- Logged-in user CTA -->
-            <div id="topupUserCta" style="display:none;text-align:center;margin-top:30px;padding:24px;border:1px solid rgba(124,58,237,0.3);border-radius:12px;background:rgba(124,58,237,0.05);">
+            <div id="topupUserCta" style="display:none;text-align:center;margin-top:30px;padding:24px;border:1px solid rgba(var(--primary-rgb),0.3);border-radius:12px;background:rgba(var(--primary-rgb),0.05);">
                 <p style="color:var(--text-light);font-size:1rem;font-weight:600;margin:0 0 8px;">Ready to top up?</p>
                 <p style="color:var(--text-muted);font-size:0.85rem;margin:0 0 16px;">Buy top-ups and view your request balance from your dashboard.</p>
                 <a href="account.html#plan-topups" class="btn btn-primary btn-sm" style="margin-right:8px;">Buy Top-Up</a>

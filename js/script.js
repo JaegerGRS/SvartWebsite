@@ -505,6 +505,11 @@ window.applyTheme = function(theme) {
         document.documentElement.removeAttribute('data-theme');
     }
     localStorage.setItem('svart_theme', theme || 'dark');
+    // Update browser theme-color meta tag
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+        meta.setAttribute('content', theme === 'midnight' ? '#020617' : '#0a0a0f');
+    }
 };
 
 // Add loading states for buttons
