@@ -153,13 +153,13 @@ function initContactForm() {
         const emailInput = form.querySelector('input[type="email"]');
         const messageInput = form.querySelector('textarea');
         
-        // Get and trim values
-        const name = sanitizeInput(nameInput.value);
+        // Get and trim values — Svart ID is optional
+        const svartId = nameInput ? sanitizeInput(nameInput.value) : '';
         const email = sanitizeEmail(emailInput.value);
         const message = sanitizeInput(messageInput.value);
         
         // Validation
-        const validation = validateContactForm(name, email, message);
+        const validation = validateContactForm(email, message);
         if (!validation.valid) {
             showNotification(validation.error, 'error');
             return;
@@ -167,7 +167,7 @@ function initContactForm() {
         
         // Send form
         submitContactForm({
-            name: name,
+            name: svartId || 'Anonymous',
             email: email,
             message: message,
             csrf_token: csrfToken,
@@ -202,15 +202,7 @@ function isValidEmail(email) {
 }
 
 // Validate contact form
-function validateContactForm(name, email, message) {
-    if (!name || name.length < 2) {
-        return { valid: false, error: 'Name must be at least 2 characters' };
-    }
-    
-    if (name.length > 100) {
-        return { valid: false, error: 'Name is too long' };
-    }
-    
+function validateContactForm(email, message) {
     if (!email) {
         return { valid: false, error: 'Email is required' };
     }
@@ -237,15 +229,14 @@ function validateContactForm(name, email, message) {
 
 // Detect spam patterns
 function containsSpamPatterns(text) {
+    const urlCount = (text.match(/http[s]?:\/\//gi) || []).length;
+    if (urlCount > 2) return true;
+    
     const spamPatterns = [
-        /http[s]?:\/\//gi,           // Too many URLs
         /(click here|buy now|limited offer)/gi,
         /(viagra|cialis|casino|lottery)/gi,
         /(^[A-Z\s]{20,}$)/gm         // ALL CAPS spam
     ];
-    
-    const urlCount = (text.match(/http[s]?:\/\//gi) || []).length;
-    if (urlCount > 2) return true;
     
     return spamPatterns.some(pattern => text.match(pattern));
 }

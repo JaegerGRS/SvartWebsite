@@ -33,6 +33,7 @@
     "url": "https://github.com/svartsuite/website/issues"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260226.1",
     "@types/argon2-browser": "^1.18.4",
     "@types/node": "^25.3.2",
     "eslint": "^8.0.0",
