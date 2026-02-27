@@ -173,16 +173,16 @@
                     <h4>Community</h4>
                     <ul>
                         <li><a href="https://github.com/SVART-browser" target="_blank">GitHub</a></li>
-                        <li><a href="#">Issue Tracker</a></li>
+                        <li><a href="https://github.com/JaegerGRS/SvartWebsite/issues" target="_blank">Issue Tracker</a></li>
                         <li><a href="contact.html">Support</a></li>
-                        <li><a href="#">Contribute</a></li>
+                        <li><a href="https://github.com/JaegerGRS/SvartWebsite" target="_blank">Contribute</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>Legal</h4>
                     <ul>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="eula.html">Privacy Policy</a></li>
+                        <li><a href="eula.html">Terms of Service</a></li>
                         <li><a href="website-security.html">Security</a></li>
                         <li><a href="eula.html">EULA</a></li>
                     </ul>
@@ -200,60 +200,45 @@
         // Check session
         let session = JSON.parse(localStorage.getItem('ct_session') || 'null');
         if (!session || !session.loggedIn) {
-            // Try persistent session
             session = JSON.parse(localStorage.getItem('ct_persistent_session') || 'null');
             if (!session || !session.loggedIn) {
                 window.location.href = 'login.html';
                 return;
             }
-            // Restore session
             localStorage.setItem('ct_session', JSON.stringify(session));
         }
 
-        // Load users
+        // Load user data
         const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
         const user = users[session.svartId] || {};
 
-        // Username display
-        const username = user.username || 'User';
-        document.getElementById('userName').textContent = username;
-        document.getElementById('accountUsername').textContent = username;
-        document.getElementById('navUsername').textContent = username;
+        // Populate page with user data
+        const displayName = user.displayName || user.username || 'User';
+        document.getElementById('userName').textContent = displayName;
         document.getElementById('userEmail').textContent = session.svartId || '—';
-
-        // Svart ID display
-        document.getElementById('accountSvartId').textContent = session.svartId || '—';
-
-        // Load activation key
         document.getElementById('userKey').textContent = user.activationKey || 'XXXX-XXXX-XXXX-XXXX';
+
         if (user.createdAt) {
             document.getElementById('userSince').textContent = new Date(user.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
         }
 
-        // AI Usage Meter Logic
-                // Add test button handler for live increment
-                document.getElementById('testAIRequest').addEventListener('click', function() {
-                    window.simulateAIRequest();
-                });
-        // Track requests in localStorage per user
+        // AI Usage Meter
+        document.getElementById('testAIRequest').addEventListener('click', function() {
+            window.simulateAIRequest();
+        });
+
         const maxRequests = 750;
-        const usageKey = `ai_usage_${session.svartId}`;
+        const usageKey = 'ai_usage_' + session.svartId;
         let usageCount = parseInt(localStorage.getItem(usageKey) || '0', 10);
 
-        // Update usage meter display
         function updateUsageMeter() {
             document.getElementById('usageCount').textContent = usageCount;
             const percent = Math.min(usageCount / maxRequests, 1) * 100;
             document.getElementById('usageFill').style.width = percent + '%';
-            if (usageCount >= maxRequests) {
-                document.getElementById('usageFill').style.background = 'var(--danger)';
-            } else {
-                document.getElementById('usageFill').style.background = 'var(--primary)';
-            }
+            document.getElementById('usageFill').style.background = usageCount >= maxRequests ? 'var(--danger)' : 'var(--primary)';
         }
         updateUsageMeter();
 
-        // Simulate AI request (for demo/testing)
         window.simulateAIRequest = function() {
             if (usageCount < maxRequests) {
                 usageCount++;
@@ -264,11 +249,11 @@
             }
         };
 
-        // Reset usage monthly (demo: resets on page load if month changed)
+        // Reset usage monthly
         const now = new Date();
-        const lastResetKey = `ai_usage_reset_${session.svartId}`;
+        const lastResetKey = 'ai_usage_reset_' + session.svartId;
         const lastReset = localStorage.getItem(lastResetKey);
-        const currentMonth = `${now.getFullYear()}-${now.getMonth()}`;
+        const currentMonth = now.getFullYear() + '-' + now.getMonth();
         if (lastReset !== currentMonth) {
             usageCount = 0;
             localStorage.setItem(usageKey, usageCount);
@@ -276,36 +261,12 @@
             updateUsageMeter();
         }
 
-        // Username change
-        document.getElementById('usernameForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const newUsername = document.getElementById('username').value.trim();
-            if (newUsername.length < 3 || newUsername.length > 24) {
-                alert('Username must be 3-24 characters.');
-                return;
-            }
-            user.username = newUsername;
-            users[session.svartId] = user;
-            localStorage.setItem('ct_users', JSON.stringify(users));
-            document.getElementById('userName').textContent = newUsername;
-            document.getElementById('accountUsername').textContent = newUsername;
-            document.getElementById('navUser').textContent = newUsername;
-            alert('Username updated!');
-        });
-
-        // Copy key
+        // Copy activation key
         document.getElementById('copyKey').addEventListener('click', function() {
             navigator.clipboard.writeText(document.getElementById('userKey').textContent).then(() => {
                 this.textContent = 'Copied!';
                 setTimeout(() => { this.textContent = 'Copy'; }, 2000);
             });
-        });
-
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            localStorage.removeItem('ct_session');
-            window.location.href = 'index.html';
         });
     })();
     </script>
