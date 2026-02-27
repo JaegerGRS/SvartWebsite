@@ -153,61 +153,129 @@
 
       <!-- ===== Plan & Usage Panel ===== -->
       <div class="settings-panel" id="panel-plan">
-        <div class="settings-card" style="border-color:var(--primary);background:rgba(124,58,237,0.04);">
-          <h3><span class="card-icon">&#128200;</span> Current Plan</h3>
-          <div class="settings-row">
-            <span class="settings-row-label">Plan</span>
-            <span class="settings-row-value" id="planName" style="color:var(--primary);">Free Premium</span>
+        <!-- Sub-tabs for Monthly Plans vs Top-Ups -->
+        <div style="display:flex;gap:0;margin-bottom:24px;border-bottom:2px solid var(--border-color);">
+          <button class="plan-sub-tab active" data-plantab="monthly" style="flex:1;padding:12px 16px;background:none;border:none;border-bottom:2px solid var(--primary);margin-bottom:-2px;color:var(--primary);font-weight:700;font-size:0.95rem;cursor:pointer;font-family:inherit;transition:all 0.2s;">&#128197; Monthly Tiers</button>
+          <button class="plan-sub-tab" data-plantab="topups" style="flex:1;padding:12px 16px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--text-muted);font-weight:600;font-size:0.95rem;cursor:pointer;font-family:inherit;transition:all 0.2s;">&#128176; Request Top-Ups</button>
+        </div>
+
+        <!-- ===== Monthly Tiers Tab ===== -->
+        <div class="plan-sub-panel" id="plantab-monthly">
+          <div class="settings-card" style="border-color:var(--primary);background:rgba(124,58,237,0.04);">
+            <h3><span class="card-icon">&#128200;</span> Current Plan</h3>
+            <div class="settings-row">
+              <span class="settings-row-label">Plan</span>
+              <span class="settings-row-value" id="planName" style="color:var(--primary);">Free Premium</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">AI Requests Used</span>
+              <span class="settings-row-value"><span id="planUsed">0</span> / <span id="planMax">750</span></span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Resets</span>
+              <span class="settings-row-value" id="planReset">—</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Monthly cost</span>
+              <span class="settings-row-value" id="planCost">&pound;0</span>
+            </div>
+            <div style="margin-top:20px;">
+              <a href="pricing.html" class="btn btn-primary btn-sm">View Plans &amp; Upgrade</a>
+            </div>
           </div>
-          <div class="settings-row">
-            <span class="settings-row-label">AI Requests Used</span>
-            <span class="settings-row-value"><span id="planUsed">0</span> / <span id="planMax">750</span></span>
+
+          <div class="settings-card">
+            <h3><span class="card-icon">&#128202;</span> Usage Breakdown</h3>
+            <p>Your AI request activity this billing period.</p>
+            <div class="settings-row">
+              <span class="settings-row-label">AI Chat Messages</span>
+              <span class="settings-row-value" id="usageChat">0</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Web Scraping Queries</span>
+              <span class="settings-row-value" id="usageScrape">0</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Training Sessions</span>
+              <span class="settings-row-value" id="usageTrain">0</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Document Analysis</span>
+              <span class="settings-row-value" id="usageDocs">0</span>
+            </div>
+            <p style="color:var(--text-muted);font-size:0.8rem;margin-top:14px;">Svart Browser, Docs, Notes, Chat &amp; Passwords usage is always free and unlimited.</p>
           </div>
-          <div class="settings-row">
-            <span class="settings-row-label">Resets</span>
-            <span class="settings-row-value" id="planReset">—</span>
-          </div>
-          <div class="settings-row">
-            <span class="settings-row-label">Monthly cost</span>
-            <span class="settings-row-value" id="planCost">&pound;0</span>
-          </div>
-          <div style="margin-top:20px;">
-            <a href="pricing.html" class="btn btn-primary btn-sm">View Plans &amp; Upgrade</a>
+
+          <div class="settings-card">
+            <h3><span class="card-icon">&#128176;</span> Billing</h3>
+            <p>Plans are managed through your Svart Suite account. No credit card is required for Free Premium.</p>
+            <div class="settings-row">
+              <span class="settings-row-label">Payment method</span>
+              <span class="settings-row-value" id="billingMethod">None (Free plan)</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Next billing date</span>
+              <span class="settings-row-value" id="billingDate">N/A</span>
+            </div>
           </div>
         </div>
 
-        <div class="settings-card">
-          <h3><span class="card-icon">&#128202;</span> Usage Breakdown</h3>
-          <p>Your AI request activity this billing period.</p>
-          <div class="settings-row">
-            <span class="settings-row-label">AI Chat Messages</span>
-            <span class="settings-row-value" id="usageChat">0</span>
-          </div>
-          <div class="settings-row">
-            <span class="settings-row-label">Web Scraping Queries</span>
-            <span class="settings-row-value" id="usageScrape">0</span>
-          </div>
-          <div class="settings-row">
-            <span class="settings-row-label">Training Sessions</span>
-            <span class="settings-row-value" id="usageTrain">0</span>
-          </div>
-          <div class="settings-row">
-            <span class="settings-row-label">Document Analysis</span>
-            <span class="settings-row-value" id="usageDocs">0</span>
-          </div>
-          <p style="color:var(--text-muted);font-size:0.8rem;margin-top:14px;">Svart Browser, Docs, Notes, Chat &amp; Passwords usage is always free and unlimited.</p>
-        </div>
+        <!-- ===== Request Top-Ups Tab ===== -->
+        <div class="plan-sub-panel" id="plantab-topups" style="display:none;">
+          <div class="settings-card" style="border-color:var(--primary);background:rgba(124,58,237,0.04);">
+            <h3><span class="card-icon">&#128176;</span> Buy Request Top-Ups</h3>
+            <p>One-time payments &mdash; no subscription, no expiry. Requests are added to your account instantly and stay until you use them. Works on <strong>any plan</strong> including Free Premium.</p>
 
-        <div class="settings-card">
-          <h3><span class="card-icon">&#128176;</span> Billing</h3>
-          <p>Plans are managed through your Svart Suite account. No credit card is required for Free Premium.</p>
-          <div class="settings-row">
-            <span class="settings-row-label">Payment method</span>
-            <span class="settings-row-value" id="billingMethod">None (Free plan)</span>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:20px;">
+              <div style="text-align:center;padding:20px 16px;border:1px solid var(--border-color);border-radius:12px;background:rgba(10,10,15,0.4);transition:border-color 0.2s;">
+                <p style="color:var(--text-light);font-size:1.5rem;font-weight:900;margin:0;">&pound;2.50</p>
+                <p style="color:var(--primary);font-size:0.95rem;font-weight:600;margin:6px 0 4px;">2,500 requests</p>
+                <p style="color:var(--text-muted);font-size:0.75rem;margin:0;">&pound;0.001 per request</p>
+                <button class="btn btn-secondary btn-sm" style="margin-top:12px;width:100%;" disabled>Buy</button>
+              </div>
+              <div style="text-align:center;padding:20px 16px;border:1px solid var(--border-color);border-radius:12px;background:rgba(10,10,15,0.4);transition:border-color 0.2s;">
+                <p style="color:var(--text-light);font-size:1.5rem;font-weight:900;margin:0;">&pound;5.00</p>
+                <p style="color:var(--primary);font-size:0.95rem;font-weight:600;margin:6px 0 4px;">5,000 requests</p>
+                <p style="color:var(--text-muted);font-size:0.75rem;margin:0;">&pound;0.001 per request</p>
+                <button class="btn btn-secondary btn-sm" style="margin-top:12px;width:100%;" disabled>Buy</button>
+              </div>
+              <div style="text-align:center;padding:20px 16px;border:1px solid var(--border-color);border-radius:12px;background:rgba(10,10,15,0.4);transition:border-color 0.2s;">
+                <p style="color:var(--text-light);font-size:1.5rem;font-weight:900;margin:0;">&pound;10.00</p>
+                <p style="color:var(--primary);font-size:0.95rem;font-weight:600;margin:6px 0 4px;">10,000 requests</p>
+                <p style="color:var(--text-muted);font-size:0.75rem;margin:0;">&pound;0.001 per request</p>
+                <button class="btn btn-secondary btn-sm" style="margin-top:12px;width:100%;" disabled>Buy</button>
+              </div>
+              <div style="text-align:center;padding:20px 16px;border:2px solid var(--primary);border-radius:12px;background:rgba(124,58,237,0.06);transition:border-color 0.2s;">
+                <p style="color:var(--primary);font-size:0.7rem;font-weight:700;letter-spacing:1px;margin:0 0 6px;">BEST VALUE</p>
+                <p style="color:var(--text-light);font-size:1.5rem;font-weight:900;margin:0;">&pound;20.00</p>
+                <p style="color:var(--primary);font-size:0.95rem;font-weight:600;margin:6px 0 4px;">25,000 requests</p>
+                <p style="color:var(--text-muted);font-size:0.75rem;margin:0;">&pound;0.0008 per request &mdash; 20% bonus</p>
+                <button class="btn btn-primary btn-sm" style="margin-top:12px;width:100%;" disabled>Buy</button>
+              </div>
+            </div>
+            <p style="color:var(--text-muted);font-size:0.75rem;margin-top:16px;">Payments will be available when Svart AI launches. Top-up requests never expire and stack with your monthly plan allowance.</p>
           </div>
-          <div class="settings-row">
-            <span class="settings-row-label">Next billing date</span>
-            <span class="settings-row-value" id="billingDate">N/A</span>
+
+          <div class="settings-card">
+            <h3><span class="card-icon">&#128230;</span> Your Top-Up Balance</h3>
+            <p>Purchased request packs that haven&rsquo;t been used yet.</p>
+            <div class="settings-row">
+              <span class="settings-row-label">Top-up requests remaining</span>
+              <span class="settings-row-value" id="topupBalance" style="color:var(--primary);font-weight:700;">0</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Total purchased (all time)</span>
+              <span class="settings-row-value" id="topupTotal">0</span>
+            </div>
+            <p style="color:var(--text-muted);font-size:0.8rem;margin-top:14px;">Top-up requests are used <strong>after</strong> your monthly plan allowance runs out. They never expire and carry over between months.</p>
+          </div>
+
+          <div class="settings-card">
+            <h3><span class="card-icon">&#128203;</span> Purchase History</h3>
+            <p id="topupHistoryEmpty" style="color:var(--text-muted);">No top-up purchases yet.</p>
+            <div id="topupHistoryList" style="display:none;">
+              <!-- Populated by JS when purchases exist -->
+            </div>
           </div>
         </div>
       </div>
@@ -619,11 +687,41 @@
       window.location.href = 'index.html';
     });
 
+    // ===== Plan sub-tabs (Monthly Tiers / Request Top-Ups) =====
+    document.querySelectorAll('.plan-sub-tab').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.plan-sub-tab').forEach(function(b) {
+          b.classList.remove('active');
+          b.style.borderBottomColor = 'transparent';
+          b.style.color = 'var(--text-muted)';
+        });
+        btn.classList.add('active');
+        btn.style.borderBottomColor = 'var(--primary)';
+        btn.style.color = 'var(--primary)';
+        document.querySelectorAll('.plan-sub-panel').forEach(function(p) { p.style.display = 'none'; });
+        document.getElementById('plantab-' + btn.getAttribute('data-plantab')).style.display = 'block';
+      });
+    });
+
+    // Top-up balance from localStorage
+    var topupBalance = parseInt(localStorage.getItem('ai_topup_balance_' + svartId) || '0', 10);
+    var topupTotal = parseInt(localStorage.getItem('ai_topup_total_' + svartId) || '0', 10);
+    document.getElementById('topupBalance').textContent = topupBalance.toLocaleString();
+    document.getElementById('topupTotal').textContent = topupTotal.toLocaleString();
+
     // ===== Deep link: open tab from URL hash =====
     var hash = window.location.hash.replace('#', '');
     if (hash) {
+      // Support plan-topups deep link
+      var subTab = null;
+      if (hash === 'plan-topups') { hash = 'plan'; subTab = 'topups'; }
+      else if (hash === 'plan-monthly') { hash = 'plan'; subTab = 'monthly'; }
       var targetBtn = document.querySelector('.settings-nav-btn[data-tab="' + hash + '"]');
       if (targetBtn) targetBtn.click();
+      if (subTab) {
+        var subBtn = document.querySelector('.plan-sub-tab[data-plantab="' + subTab + '"]');
+        if (subBtn) subBtn.click();
+      }
     }
   })();
   </script>
