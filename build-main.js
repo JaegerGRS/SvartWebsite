@@ -9,7 +9,7 @@ mkdirSync('main/pages', { recursive: true });
 
 // HTML pages
 const htmlFiles = [
-  'index.html', 'about.html', 'contact.html', 'pricing.html',
+  'index.html', 'about.html', 'contact.html', 'pricing.html', 'comparison.html',
   'login.html', 'signup.html', 'account.html', 'account-settings.html',
   'roadmap.html', 'SVART.html', 'tools.html',
   'website-security.html', 'eula.html', 'tools-template.html', 'admin.html',
