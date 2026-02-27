@@ -41,14 +41,51 @@
     <section class="email-management">
         <div class="container">
             <div class="email-card">
-                <h2>Cloudflare Email Routing</h2>
-                <p>Set up custom email addresses for your domain (e.g., you@svartsecurity.org) and forward them to your preferred inbox.</p>
+                <h2>Svart Suite Email Addresses</h2>
+                <p>Reach us using any of the following official email addresses:</p>
+                <table style="width:100%;border-collapse:collapse;margin:20px 0;">
+                    <thead>
+                        <tr style="border-bottom:2px solid var(--border-color);text-align:left;">
+                            <th style="padding:10px 12px;color:var(--primary);">Address</th>
+                            <th style="padding:10px 12px;color:var(--primary);">Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:10px 12px;"><a href="mailto:support@svartsecurity.org">support@svartsecurity.org</a></td>
+                            <td style="padding:10px 12px;color:var(--text-muted);">Customer support &amp; help</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:10px 12px;"><a href="mailto:contact@svartsecurity.org">contact@svartsecurity.org</a></td>
+                            <td style="padding:10px 12px;color:var(--text-muted);">General inquiries</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:10px 12px;"><a href="mailto:security@svartsecurity.org">security@svartsecurity.org</a></td>
+                            <td style="padding:10px 12px;color:var(--text-muted);">Security vulnerability reports</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:10px 12px;"><a href="mailto:admin@svartsecurity.org">admin@svartsecurity.org</a></td>
+                            <td style="padding:10px 12px;color:var(--text-muted);">Admin &amp; internal use</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:10px 12px;">noreply@svartsecurity.org</td>
+                            <td style="padding:10px 12px;color:var(--text-muted);">Automated emails (no replies)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="email-card">
+                <h2>Cloudflare Email Routing Setup</h2>
+                <p>All email addresses above are routed through <b>Cloudflare Email Routing</b> to forward mail to your inbox.</p>
+                <h3 style="color:var(--accent);margin-top:16px;">How to configure:</h3>
                 <ol>
-                    <li>Go to <a href="https://dash.cloudflare.com/" target="_blank">Cloudflare Dashboard</a>.</li>
-                    <li>Select your domain and open <b>Email</b> &gt; <b>Email Routing</b>.</li>
-                    <li>Add desired email addresses and set forwarding rules.</li>
+                    <li>Go to <a href="https://dash.cloudflare.com/" target="_blank">Cloudflare Dashboard</a> &rarr; select <b>svartsecurity.org</b>.</li>
+                    <li>Navigate to <b>Email</b> &gt; <b>Email Routing</b>.</li>
+                    <li>Click <b>Create address</b> and add each address above.</li>
+                    <li>Set the forwarding destination (your personal inbox).</li>
+                    <li>Verify the destination email if prompted.</li>
                 </ol>
-                <p>For advanced email management, connect your domain to a service like Mailgun or SendGrid for sending/receiving emails.</p>
+                <p style="margin-top:16px;color:var(--text-muted);font-size:0.9em;"><b>Note:</b> Sending email from these addresses requires Cloudflare's email sending feature (currently in beta waitlist). Once enabled, outbound emails will work automatically.</p>
             </div>
             <div class="email-card">
                 <h2>Send a Test Email</h2>
