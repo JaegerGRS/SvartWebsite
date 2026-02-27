@@ -1644,6 +1644,51 @@ code {
     font-weight: 700;
 }
 
+/* Comparison table */
+.compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.93rem;
+}
+
+.compare-table thead tr {
+    border-bottom: 2px solid var(--primary);
+}
+
+.compare-table th {
+    padding: 14px 16px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.compare-table th.highlight-col {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.compare-table tbody tr {
+    border-bottom: 1px solid rgba(39, 39, 42, 0.4);
+}
+
+.compare-table td {
+    padding: 12px 16px;
+    color: var(--text-muted);
+}
+
+.compare-table td.highlight-col {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+/* Pricing responsive */
+@media (max-width: 768px) {
+    .pricing-grid {
+        grid-template-columns: 1fr;
+        max-width: 420px;
+    }
+}
+
 /* ============ Accessibility ============ */
 @media (prefers-reduced-motion: reduce) {
     * {

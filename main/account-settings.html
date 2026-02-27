@@ -31,20 +31,123 @@
   </nav>
   <div class="nav-overlay" id="navOverlay"></div>
 
-  <section class="settings-section">
+  <section class="account-section">
     <div class="container">
-      <div class="settings-card">
-        <h2>Account Settings</h2>
-        <form id="settingsForm" class="settings-form" novalidate>
-          <div class="form-group">
-            <label for="username">Display Name</label>
-            <input id="username" type="text" placeholder="Change your display name" minlength="3" maxlength="24" required autocomplete="nickname" />
+      <div class="account-header">
+        <h2>Dashboard Settings</h2>
+        <p>Manage your Svart Suite account</p>
+      </div>
+
+      <a href="account.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--primary);text-decoration:none;margin-bottom:30px;font-size:0.95rem;">&larr; Back to Dashboard</a>
+
+      <div class="account-grid">
+        <!-- Profile -->
+        <div class="account-card">
+          <div class="card-header">
+            <span style="font-size:1.5rem;">&#128100;</span>
+            <h3>Profile</h3>
           </div>
-          <button type="submit" class="btn btn-primary">Update Display Name</button>
-        </form>
-        <div class="settings-info">
-          <p><strong>Current Display Name:</strong> <span id="settingsUsername"></span></p>
-          <p><strong>Svart ID:</strong> <span id="settingsSvartId"></span></p>
+          <div class="account-detail-row">
+            <span class="detail-label">Display Name</span>
+            <span class="detail-value" id="currentName">—</span>
+          </div>
+          <div class="account-detail-row">
+            <span class="detail-label">Svart ID</span>
+            <span class="detail-value" id="currentSvartId">—</span>
+          </div>
+          <div class="account-detail-row">
+            <span class="detail-label">Email</span>
+            <span class="detail-value" id="currentEmail">—</span>
+          </div>
+          <div class="account-detail-row">
+            <span class="detail-label">Account Created</span>
+            <span class="detail-value" id="currentCreated">—</span>
+          </div>
+        </div>
+
+        <!-- Change Display Name -->
+        <div class="account-card">
+          <div class="card-header">
+            <span style="font-size:1.5rem;">&#9998;</span>
+            <h3>Change Display Name</h3>
+          </div>
+          <form id="nameForm" novalidate style="margin-top:10px;">
+            <div class="form-group">
+              <label for="newDisplayName" style="color:var(--text-muted);font-size:0.9rem;">New Display Name</label>
+              <input id="newDisplayName" type="text" placeholder="3–24 characters" minlength="3" maxlength="24" required autocomplete="nickname" style="width:100%;padding:12px;border:1px solid var(--border-color);border-radius:8px;background:rgba(24,24,30,0.8);color:var(--text-light);font-size:0.95rem;margin-top:6px;" />
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top:14px;width:100%;">Update Name</button>
+          </form>
+          <p id="nameMsg" style="color:var(--success);font-size:0.85rem;margin-top:10px;display:none;"></p>
+        </div>
+
+        <!-- Change Email -->
+        <div class="account-card">
+          <div class="card-header">
+            <span style="font-size:1.5rem;">&#128231;</span>
+            <h3>Change Email</h3>
+          </div>
+          <form id="emailForm" novalidate style="margin-top:10px;">
+            <div class="form-group">
+              <label for="newEmail" style="color:var(--text-muted);font-size:0.9rem;">New Email Address</label>
+              <input id="newEmail" type="email" placeholder="you@example.com" required autocomplete="email" style="width:100%;padding:12px;border:1px solid var(--border-color);border-radius:8px;background:rgba(24,24,30,0.8);color:var(--text-light);font-size:0.95rem;margin-top:6px;" />
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top:14px;width:100%;">Update Email</button>
+          </form>
+          <p id="emailMsg" style="color:var(--success);font-size:0.85rem;margin-top:10px;display:none;"></p>
+        </div>
+
+        <!-- Change Password -->
+        <div class="account-card">
+          <div class="card-header">
+            <span style="font-size:1.5rem;">&#128274;</span>
+            <h3>Change Password</h3>
+          </div>
+          <form id="passwordForm" novalidate style="margin-top:10px;">
+            <div class="form-group" style="margin-bottom:12px;">
+              <label for="currentPassword" style="color:var(--text-muted);font-size:0.9rem;">Current Password</label>
+              <input id="currentPassword" type="password" placeholder="Enter current password" required autocomplete="current-password" style="width:100%;padding:12px;border:1px solid var(--border-color);border-radius:8px;background:rgba(24,24,30,0.8);color:var(--text-light);font-size:0.95rem;margin-top:6px;" />
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label for="newPassword" style="color:var(--text-muted);font-size:0.9rem;">New Password</label>
+              <input id="newPassword" type="password" placeholder="Minimum 8 characters" required minlength="8" autocomplete="new-password" style="width:100%;padding:12px;border:1px solid var(--border-color);border-radius:8px;background:rgba(24,24,30,0.8);color:var(--text-light);font-size:0.95rem;margin-top:6px;" />
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword" style="color:var(--text-muted);font-size:0.9rem;">Confirm New Password</label>
+              <input id="confirmPassword" type="password" placeholder="Re-enter new password" required minlength="8" autocomplete="new-password" style="width:100%;padding:12px;border:1px solid var(--border-color);border-radius:8px;background:rgba(24,24,30,0.8);color:var(--text-light);font-size:0.95rem;margin-top:6px;" />
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top:14px;width:100%;">Change Password</button>
+          </form>
+          <p id="passwordMsg" style="color:var(--success);font-size:0.85rem;margin-top:10px;display:none;"></p>
+        </div>
+
+        <!-- Session & Security -->
+        <div class="account-card">
+          <div class="card-header">
+            <span style="font-size:1.5rem;">&#128737;</span>
+            <h3>Session &amp; Security</h3>
+          </div>
+          <div class="account-detail-row">
+            <span class="detail-label">Session Status</span>
+            <span class="detail-value" style="color:var(--success);">Active</span>
+          </div>
+          <div class="account-detail-row">
+            <span class="detail-label">Remember Me</span>
+            <span class="detail-value" id="persistentStatus">—</span>
+          </div>
+          <button id="logoutBtn" class="btn btn-secondary" style="width:100%;margin-top:18px;">Sign Out</button>
+          <button id="logoutAllBtn" class="btn btn-secondary" style="width:100%;margin-top:10px;border-color:var(--danger);color:var(--danger);">Sign Out &amp; Clear All Sessions</button>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="account-card" style="border-color:rgba(220,38,38,0.4);">
+          <div class="card-header">
+            <span style="font-size:1.5rem;">&#9888;</span>
+            <h3 style="color:var(--danger);">Danger Zone</h3>
+          </div>
+          <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:18px;">These actions are permanent and cannot be undone.</p>
+          <button id="clearDataBtn" class="btn btn-secondary" style="width:100%;border-color:var(--danger);color:var(--danger);margin-bottom:10px;">Clear Local Data</button>
+          <button id="deleteAccountBtn" class="btn btn-secondary" style="width:100%;border-color:var(--danger);color:var(--danger);">Delete Account</button>
         </div>
       </div>
     </div>
@@ -52,7 +155,7 @@
 
   <script>
   (function() {
-    // Check session
+    // Session check
     let session = JSON.parse(localStorage.getItem('ct_session') || 'null');
     if (!session || !session.loggedIn) {
       session = JSON.parse(localStorage.getItem('ct_persistent_session') || 'null');
@@ -63,28 +166,105 @@
       localStorage.setItem('ct_session', JSON.stringify(session));
     }
 
-    // Load users
     const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
     const user = users[session.svartId] || {};
 
-    // Display name display
-    const displayName = user.username || 'User';
-    document.getElementById('settingsUsername').textContent = displayName;
-    document.getElementById('settingsSvartId').textContent = session.svartId || '—';
+    // Populate profile card
+    document.getElementById('currentName').textContent = user.username || 'User';
+    document.getElementById('currentSvartId').textContent = session.svartId || '—';
+    document.getElementById('currentEmail').textContent = user.email || '—';
+    document.getElementById('currentCreated').textContent = user.registeredAt ? new Date(user.registeredAt).toLocaleDateString() : '—';
 
-    // Display name change
-    document.getElementById('settingsForm').addEventListener('submit', function(e) {
+    // Persistent session status
+    const persistent = JSON.parse(localStorage.getItem('ct_persistent_session') || 'null');
+    document.getElementById('persistentStatus').textContent = (persistent && persistent.loggedIn) ? 'Enabled' : 'Disabled';
+
+    // Helper: show message
+    function showMsg(id, text, isError) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.style.color = isError ? 'var(--danger)' : 'var(--success)';
+      el.style.display = 'block';
+      setTimeout(() => el.style.display = 'none', 4000);
+    }
+
+    // Change display name
+    document.getElementById('nameForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const newDisplayName = document.getElementById('username').value.trim();
-      if (newDisplayName.length < 3 || newDisplayName.length > 24) {
-        alert('Display name must be 3-24 characters.');
-        return;
-      }
-      user.username = newDisplayName;
+      const name = document.getElementById('newDisplayName').value.trim();
+      if (name.length < 3 || name.length > 24) { showMsg('nameMsg', 'Name must be 3–24 characters.', true); return; }
+      user.username = name;
       users[session.svartId] = user;
       localStorage.setItem('ct_users', JSON.stringify(users));
-      document.getElementById('settingsUsername').textContent = newDisplayName;
-      alert('Display name updated!');
+      document.getElementById('currentName').textContent = name;
+      showMsg('nameMsg', 'Display name updated!', false);
+      document.getElementById('newDisplayName').value = '';
+    });
+
+    // Change email
+    document.getElementById('emailForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('newEmail').value.trim();
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { showMsg('emailMsg', 'Enter a valid email address.', true); return; }
+      user.email = email;
+      users[session.svartId] = user;
+      localStorage.setItem('ct_users', JSON.stringify(users));
+      document.getElementById('currentEmail').textContent = email;
+      showMsg('emailMsg', 'Email updated!', false);
+      document.getElementById('newEmail').value = '';
+    });
+
+    // Change password
+    document.getElementById('passwordForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const curr = document.getElementById('currentPassword').value;
+      const next = document.getElementById('newPassword').value;
+      const conf = document.getElementById('confirmPassword').value;
+      if (!curr) { showMsg('passwordMsg', 'Enter your current password.', true); return; }
+      if (user.password && curr !== user.password) { showMsg('passwordMsg', 'Current password is incorrect.', true); return; }
+      if (next.length < 8) { showMsg('passwordMsg', 'New password must be at least 8 characters.', true); return; }
+      if (next !== conf) { showMsg('passwordMsg', 'Passwords do not match.', true); return; }
+      user.password = next;
+      users[session.svartId] = user;
+      localStorage.setItem('ct_users', JSON.stringify(users));
+      showMsg('passwordMsg', 'Password changed!', false);
+      document.getElementById('passwordForm').reset();
+    });
+
+    // Sign out
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+      localStorage.removeItem('ct_session');
+      localStorage.removeItem('ct_persistent_session');
+      window.location.href = 'login.html';
+    });
+
+    // Sign out all
+    document.getElementById('logoutAllBtn').addEventListener('click', function() {
+      if (!confirm('This will sign you out and clear all sessions. Continue?')) return;
+      localStorage.removeItem('ct_session');
+      localStorage.removeItem('ct_persistent_session');
+      window.location.href = 'login.html';
+    });
+
+    // Clear local data
+    document.getElementById('clearDataBtn').addEventListener('click', function() {
+      if (!confirm('This will clear all your local Svart data (settings, cached data). Your account will remain. Continue?')) return;
+      const keep = { ct_session: localStorage.getItem('ct_session'), ct_persistent_session: localStorage.getItem('ct_persistent_session'), ct_users: localStorage.getItem('ct_users') };
+      localStorage.clear();
+      Object.keys(keep).forEach(k => { if (keep[k]) localStorage.setItem(k, keep[k]); });
+      alert('Local data cleared. Account data preserved.');
+    });
+
+    // Delete account
+    document.getElementById('deleteAccountBtn').addEventListener('click', function() {
+      if (!confirm('WARNING: This will permanently delete your Svart Suite account and all local data. This cannot be undone. Continue?')) return;
+      if (!confirm('Are you absolutely sure? Type your Svart ID to confirm.')) return;
+      delete users[session.svartId];
+      localStorage.setItem('ct_users', JSON.stringify(users));
+      localStorage.removeItem('ct_session');
+      localStorage.removeItem('ct_persistent_session');
+      alert('Account deleted.');
+      window.location.href = 'index.html';
     });
   })();
   </script>
