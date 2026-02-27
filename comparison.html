@@ -752,7 +752,7 @@
       if (session && session.loggedIn) {
         // Update signup buttons to dashboard
         document.querySelectorAll('a[href="signup.html"]').forEach(function(btn) {
-          btn.href = 'account-settings.html#plan';
+          btn.href = 'account.html#plan';
           if (btn.textContent.trim() === 'Get Started Free') btn.textContent = 'Your Dashboard';
         });
       }

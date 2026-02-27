@@ -532,7 +532,7 @@
             <div id="pricingUserCta" style="display:none;text-align:center;margin-top:30px;padding:24px;border:1px solid rgba(124,58,237,0.3);border-radius:12px;background:rgba(124,58,237,0.05);">
                 <p style="color:var(--text-light);font-size:1rem;font-weight:600;margin:0 0 8px;">Already have an account?</p>
                 <p style="color:var(--text-muted);font-size:0.85rem;margin:0 0 16px;">Manage your plan, buy top-ups, and view usage from your dashboard.</p>
-                <a href="account-settings.html#plan" class="btn btn-primary btn-sm" style="margin-right:8px;">Manage Plan</a>
+                <a href="account.html#plan" class="btn btn-primary btn-sm" style="margin-right:8px;">Manage Plan</a>
                 <a href="account.html" class="btn btn-secondary btn-sm">Go to Dashboard</a>
             </div>
         </div>
@@ -597,7 +597,7 @@
         var pricingBtns = document.querySelectorAll('.pricing-card .btn');
         pricingBtns.forEach(function(btn) {
           if (btn.href && btn.href.indexOf('signup.html') !== -1) {
-            btn.href = 'account-settings.html#plan';
+            btn.href = 'account.html#plan';
             // Update button text based on context
             if (btn.textContent.trim() === 'Get Started Free') {
               btn.textContent = 'Your Dashboard';

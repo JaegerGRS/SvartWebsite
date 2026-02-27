@@ -1,353 +1,1044 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Svart Suite</title>
-    <meta name="description" content="Your Svart Suite dashboard — activation keys, AI usage, and downloads.">
-    <meta name="theme-color" content="#0a0a0f">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f'/><text x='50' y='70' font-size='80' font-weight='bold' text-anchor='middle' fill='%237c3aed'>&#x25C6;</text></svg>">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Svart Suite</title>
+  <meta name="description" content="Your Svart Suite dashboard — manage your profile, security, plan, tools, downloads, and preferences all in one place.">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f'/><text x='50' y='70' font-size='80' font-weight='bold' text-anchor='middle' fill='%237c3aed'>&#x25C6;</text></svg>">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <div class="nav-brand">
-                <a href="index.html" style="display:flex;align-items:center;gap:10px;color:var(--primary);text-decoration:none;">
-                    <span class="SVART-text">Svart Suite</span>
-                </a>
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <a href="index.html" style="display:flex;align-items:center;gap:10px;color:var(--primary);text-decoration:none;">
+          <span class="SVART-text">Svart Suite</span>
+        </a>
+      </div>
+      <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navMenu">
+          <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="tools.html">Tools</a></li>
+        <li><a href="pricing.html">Pricing</a></li>
+        <li><a href="comparison.html">Compare</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li id="navAuthItem" class="nav-auth"><a href="login.html" class="nav-auth-btn">Login / Sign Up</a></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="nav-overlay" id="navOverlay"></div>
+
+  <section class="settings-section">
+    <div class="container">
+      <div class="settings-header">
+        <h2>Welcome back, <span id="userName" style="font-size:0.75em;font-family:monospace;letter-spacing:1px;">User</span></h2>
+        <p>Your dashboard &mdash; manage everything from one place.</p>
+      </div>
+
+      <!-- Tab navigation -->
+      <div class="settings-nav">
+        <button class="settings-nav-btn active" data-tab="dashboard">Dashboard</button>
+        <button class="settings-nav-btn" data-tab="profile">Profile</button>
+        <button class="settings-nav-btn" data-tab="security">Security</button>
+        <button class="settings-nav-btn" data-tab="plan">Plan &amp; Usage</button>
+        <button class="settings-nav-btn" data-tab="tools">Your Tools</button>
+        <button class="settings-nav-btn" data-tab="preferences">Preferences</button>
+      </div>
+
+      <!-- ===== Dashboard Panel ===== -->
+      <div class="settings-panel active" id="panel-dashboard">
+
+        <!-- Activation Key Card -->
+        <div class="account-grid">
+          <div class="account-card account-key-card">
+            <div class="card-header">
+              <span>&#128273;</span>
+              <h3>Your Activation Key</h3>
             </div>
-            <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navMenu">
-                <span></span><span></span><span></span>
-            </button>
-            <ul class="nav-menu" id="navMenu">
-                <li><a href="tools.html">Tools</a></li>
-                <li><a href="pricing.html">Pricing</a></li>
-                <li><a href="comparison.html">Compare</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="contact.html">Contact</a></li>
-                <li id="navAuthItem" class="nav-auth"><a href="login.html" class="nav-auth-btn">Login / Sign Up</a></li>
-            </ul>
+            <p>Use this key in all Svart Suite desktop apps when prompted for activation.</p>
+            <div class="activation-key-display" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <code id="userKey" style="letter-spacing:2px;">&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;</code>
+              <button id="showKey" class="btn btn-secondary btn-sm" type="button">Show</button>
+              <button id="copyKey" class="btn btn-primary btn-sm" type="button">Copy</button>
+            </div>
+            <div class="key-info">
+              <span>&#128274; This key works with all 6 Svart Suite apps &mdash; <a href="#tools" style="color:var(--primary);" class="dash-tab-link" data-target="tools">view your tools</a></span>
+            </div>
+          </div>
+
+          <div class="account-card">
+            <div class="card-header">
+              <span>&#128200;</span>
+              <h3>Svart AI Usage</h3>
+            </div>
+            <div class="usage-meter">
+              <div class="usage-bar">
+                <div class="usage-fill" id="usageFill" style="width:0%"></div>
+              </div>
+              <div class="usage-labels">
+                <span><strong id="usageCount">0</strong> / <span id="usageMax">750</span> requests used</span>
+                <span class="usage-period" id="usageReset">Resets &mdash;</span>
+              </div>
+            </div>
+            <div id="usagePlan" style="margin-top:8px;font-size:0.85rem;color:var(--text-muted);">Plan: Free Premium</div>
+            <button class="btn btn-secondary btn-sm dash-tab-link" data-target="plan" style="margin-top:12px;" type="button">Manage Plan</button>
+
+            <!-- Recent AI Requests Log -->
+            <div style="margin-top:24px;">
+              <h4 style="font-size:0.95rem;margin-bottom:10px;color:var(--text-light);">Recent AI Chat Requests</h4>
+              <div id="aiRequestLog" style="max-height:200px;overflow-y:auto;font-size:0.82rem;color:var(--text-muted);border:1px solid var(--border-color);border-radius:8px;padding:10px;">
+                <p style="opacity:0.5;">No requests yet. Use Svart AI Chat to see your history here.</p>
+              </div>
+            </div>
+          </div>
         </div>
-    </nav>
-    <div class="nav-overlay" id="navOverlay"></div>
 
-    <section class="account-section">
-        <div class="container">
-            <div class="account-header">
-                <h2>Welcome back, <span id="userName" style="font-size:0.75em;font-family:monospace;letter-spacing:1px;">User</span></h2>
-                <p>Your dashboard — activation keys, AI usage, and downloads.</p>
-                <a href="account-settings.html" class="btn btn-secondary btn-sm" style="margin-top:8px;">&#9881; Dashboard Settings</a>
+        <!-- Downloads -->
+        <h3 class="account-section-title">Your Downloads</h3>
+        <p class="section-subtitle" style="margin-bottom:30px;">Download any Svart Suite app. Use your activation key above to unlock each one.</p>
+
+        <div class="download-grid">
+          <div class="download-tile">
+            <div class="tile-icon">&#128274;</div>
+            <div class="tile-info">
+              <h4>Svart Browser</h4>
+              <span class="tile-version">v1.0.0 &bull; 8.96 MB</span>
             </div>
+            <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+          </div>
 
-            <!-- Activation Key Card -->
-            <div class="account-grid">
-                <div class="account-card account-key-card">
-                    <div class="card-header">
-                        <span>&#128273;</span>
-                        <h3>Your Activation Key</h3>
-                    </div>
-                    <p>Use this key in all Svart Suite desktop apps when prompted for activation.</p>
-                    <div class="activation-key-display" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                        <code id="userKey" style="letter-spacing:2px;">••••-••••-••••-••••</code>
-                        <button id="showKey" class="btn btn-secondary btn-sm" type="button">Show</button>
-                        <button id="copyKey" class="btn btn-primary btn-sm" type="button">Copy</button>
-                    </div>
-                    <div class="key-info">
-                        <span>&#128274; This key works with all 6 Svart Suite apps &mdash; <a href="account-settings.html#tools" style="color:var(--primary);">view your tools</a></span>
-                    </div>
-                </div>
-
-                <div class="account-card">
-                    <div class="card-header">
-                        <span>&#128200;</span>
-                        <h3>Svart AI Usage</h3>
-                    </div>
-                    <div class="usage-meter">
-                        <div class="usage-bar">
-                            <div class="usage-fill" id="usageFill" style="width:0%"></div>
-                        </div>
-                        <div class="usage-labels">
-                            <span><strong id="usageCount">0</strong> / <span id="usageMax">750</span> requests used</span>
-                            <span class="usage-period" id="usageReset">Resets —</span>
-                        </div>
-                    </div>
-                    <div id="usagePlan" style="margin-top:8px;font-size:0.85rem;color:var(--text-muted);">Plan: Free Premium</div>
-                    <a href="account-settings.html#plan" class="btn btn-secondary btn-sm" style="margin-top:12px;">Manage Plan</a>
-
-                    <!-- Recent AI Requests Log -->
-                    <div style="margin-top:24px;">
-                        <h4 style="font-size:0.95rem;margin-bottom:10px;color:var(--text-light);">Recent AI Chat Requests</h4>
-                        <div id="aiRequestLog" style="max-height:200px;overflow-y:auto;font-size:0.82rem;color:var(--text-muted);border:1px solid var(--border-color);border-radius:8px;padding:10px;">
-                            <p style="opacity:0.5;">No requests yet. Use Svart AI Chat to see your history here.</p>
-                        </div>
-                    </div>
-                </div>
+          <div class="download-tile">
+            <div class="tile-icon">&#129302;</div>
+            <div class="tile-info">
+              <h4>Svart AI</h4>
+              <span class="tile-version">v1.0.0 &bull; 8.32 MB</span>
             </div>
+            <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+          </div>
 
-            <!-- Downloads -->
-            <h3 class="account-section-title">Your Downloads</h3>
-            <p class="section-subtitle" style="margin-bottom:30px;">Download any Svart Suite app. Use your activation key above to unlock each one.</p>
-
-            <div class="download-grid">
-                <div class="download-tile">
-                    <div class="tile-icon">&#128274;</div>
-                    <div class="tile-info">
-                        <h4>Svart Browser</h4>
-                        <span class="tile-version">v1.0.0 &bull; 8.96 MB</span>
-                    </div>
-                    <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
-                </div>
-
-                <div class="download-tile">
-                    <div class="tile-icon">&#129302;</div>
-                    <div class="tile-info">
-                        <h4>Svart AI</h4>
-                        <span class="tile-version">v1.0.0 &bull; 8.32 MB</span>
-                    </div>
-                    <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
-                </div>
-
-                <div class="download-tile">
-                    <div class="tile-icon">&#128273;</div>
-                    <div class="tile-info">
-                        <h4>SVART Passwords</h4>
-                        <span class="tile-version">v1.0.0 &bull; 8.09 MB</span>
-                    </div>
-                    <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
-                </div>
-
-                <div class="download-tile">
-                    <div class="tile-icon">&#128221;</div>
-                    <div class="tile-info">
-                        <h4>SVART Notes</h4>
-                        <span class="tile-version">v1.0.0 &bull; 7.97 MB</span>
-                    </div>
-                    <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
-                </div>
-
-                <div class="download-tile">
-                    <div class="tile-icon">&#128196;</div>
-                    <div class="tile-info">
-                        <h4>SVART Docs</h4>
-                        <span class="tile-version">v1.0.0 &bull; 8.08 MB</span>
-                    </div>
-                    <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
-                </div>
-
-                <div class="download-tile">
-                    <div class="tile-icon">&#128172;</div>
-                    <div class="tile-info">
-                        <h4>SVART Chat</h4>
-                        <span class="tile-version">v1.0.0 &bull; 8.34 MB</span>
-                    </div>
-                    <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
-                </div>
+          <div class="download-tile">
+            <div class="tile-icon">&#128273;</div>
+            <div class="tile-info">
+              <h4>SVART Passwords</h4>
+              <span class="tile-version">v1.0.0 &bull; 8.09 MB</span>
             </div>
+            <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+          </div>
 
-            <!-- Account info -->
-            <h3 class="account-section-title" style="margin-top:60px;">Your Details</h3>
-            <div class="account-card" style="max-width:500px;">
-                <div class="account-detail-row">
-                    <span class="detail-label">Email</span>
-                    <span class="detail-value" id="userEmail">&mdash;</span>
-                </div>
-                <div class="account-detail-row">
-                    <span class="detail-label">Activation Key</span>
-                    <span class="detail-value" id="userSvartId" style="font-family:monospace;letter-spacing:1px;">&mdash;</span>
-                </div>
-                <div class="account-detail-row">
-                    <span class="detail-label">Member since</span>
-                    <span class="detail-value" id="userSince">—</span>
-                </div>
-                <div class="account-detail-row">
-                    <span class="detail-label">Plan</span>
-                    <span class="detail-value" id="userPlanDetail">Free Premium (750 requests/month)</span>
-                </div>
+          <div class="download-tile">
+            <div class="tile-icon">&#128221;</div>
+            <div class="tile-info">
+              <h4>SVART Notes</h4>
+              <span class="tile-version">v1.0.0 &bull; 7.97 MB</span>
             </div>
+            <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+          </div>
+
+          <div class="download-tile">
+            <div class="tile-icon">&#128196;</div>
+            <div class="tile-info">
+              <h4>SVART Docs</h4>
+              <span class="tile-version">v1.0.0 &bull; 8.08 MB</span>
+            </div>
+            <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+          </div>
+
+          <div class="download-tile">
+            <div class="tile-icon">&#128172;</div>
+            <div class="tile-info">
+              <h4>SVART Chat</h4>
+              <span class="tile-version">v1.0.0 &bull; 8.34 MB</span>
+            </div>
+            <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+          </div>
         </div>
-    </section>
 
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4><span class="SVART-logo">&#9670;</span> Svart Suite</h4>
-                    <p>Security &amp; Privacy Tools Suite. Built for freedom.</p>
-                </div>
-                <div class="footer-section">
-                    <h4>Product</h4>
-                    <ul>
-                        <li><a href="tools.html">Tools</a></li>
-                        <li><a href="SVART.html">Svart Browser</a></li>
-                        <li><a href="pricing.html">Pricing</a></li>
-                        <li><a href="topup.html">Top-Ups</a></li>
-                        <li><a href="comparison.html">Compare</a></li>
-                        <li><a href="about.html">About</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Community</h4>
-                    <ul>
-                        <li><a href="https://github.com/SVART-browser" target="_blank">GitHub</a></li>
-                        <li><a href="https://github.com/JaegerGRS/SvartWebsite/issues" target="_blank">Issue Tracker</a></li>
-                        <li><a href="contact.html">Support</a></li>
-                        <li><a href="https://github.com/JaegerGRS/SvartWebsite" target="_blank">Contribute</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Legal</h4>
-                    <ul>
-                        <li><a href="eula.html">Privacy Policy</a></li>
-                        <li><a href="eula.html">Terms of Service</a></li>
-                        <li><a href="website-security.html">Security</a></li>
-                        <li><a href="eula.html">EULA</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Svart Suite. Your privacy, your tools, your control &mdash; we protect people, we do not protect crimes.</p>
-            </div>
+        <!-- Account info -->
+        <h3 class="account-section-title" style="margin-top:60px;">Your Details</h3>
+        <div class="account-card" style="max-width:500px;">
+          <div class="account-detail-row">
+            <span class="detail-label">Email</span>
+            <span class="detail-value" id="userEmail">&mdash;</span>
+          </div>
+          <div class="account-detail-row">
+            <span class="detail-label">Activation Key</span>
+            <span class="detail-value" id="userSvartId" style="font-family:monospace;letter-spacing:1px;">&mdash;</span>
+          </div>
+          <div class="account-detail-row">
+            <span class="detail-label">Member since</span>
+            <span class="detail-value" id="userSince">&mdash;</span>
+          </div>
+          <div class="account-detail-row">
+            <span class="detail-label">Plan</span>
+            <span class="detail-value" id="userPlanDetail">Free Premium (750 requests/month)</span>
+          </div>
         </div>
-    </footer>
+      </div>
 
-    <script src="js/script.js"></script>
-    <script>
-    (function() {
-        // Check session
-        let session = JSON.parse(localStorage.getItem('ct_session') || 'null');
-        if (!session || !session.loggedIn) {
-            session = JSON.parse(localStorage.getItem('ct_persistent_session') || 'null');
-            if (!session || !session.loggedIn) {
-                window.location.href = 'login.html';
-                return;
-            }
-            localStorage.setItem('ct_session', JSON.stringify(session));
-        }
+      <!-- ===== Profile Panel ===== -->
+      <div class="settings-panel" id="panel-profile">
+        <div class="settings-card">
+          <h3><span class="card-icon">&#128100;</span> Profile Information</h3>
+          <p>Your public display name and account identifiers.</p>
+          <div class="settings-row">
+            <span class="settings-row-label">Display Name</span>
+            <span class="settings-row-value" id="currentName">&mdash;</span>
+          </div>
+          <div class="settings-row">
+            <span class="settings-row-label">Email</span>
+            <span class="settings-row-value" id="currentEmail">&mdash;</span>
+          </div>
+          <div class="settings-row">
+            <span class="settings-row-label">Svart ID (Activation Key)</span>
+            <span class="settings-row-value" style="display:flex;align-items:center;gap:8px;">
+              <span id="currentSvartId" style="font-family:monospace;letter-spacing:1px;">&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;</span>
+              <button type="button" id="profileShowKeyBtn" style="background:none;border:1px solid var(--border-color);color:var(--text-muted);padding:2px 8px;border-radius:4px;font-size:0.75rem;cursor:pointer;font-family:inherit;" title="Show/Hide">Show</button>
+              <button type="button" id="profileCopyKeyBtn" style="background:none;border:1px solid var(--border-color);color:var(--text-muted);padding:2px 8px;border-radius:4px;font-size:0.75rem;cursor:pointer;font-family:inherit;" title="Copy">Copy</button>
+            </span>
+          </div>
+          <div class="settings-row">
+            <span class="settings-row-label">Member Since</span>
+            <span class="settings-row-value" id="currentSince">&mdash;</span>
+          </div>
+        </div>
 
-        // Load user data
-        const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
-        const user = users[session.svartId] || {};
+        <div class="settings-card">
+          <h3><span class="card-icon">&#9998;</span> Change Display Name</h3>
+          <p>This is the name shown on your dashboard and in Svart apps.</p>
+          <form id="nameForm" class="settings-form" novalidate>
+            <div class="form-group">
+              <label for="newDisplayName">New Display Name</label>
+              <input id="newDisplayName" type="text" placeholder="3–24 characters" minlength="3" maxlength="24" required autocomplete="nickname">
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">Update Name</button>
+          </form>
+          <div id="nameMsg" class="auth-message" style="display:none;margin-top:12px;"></div>
+        </div>
 
-        // Populate page with user data
-        const displayName = user.displayName || user.username || 'User';
-        document.getElementById('userName').textContent = displayName;
-        document.getElementById('userEmail').textContent = user.email || session.email || '—';
-        document.getElementById('userSvartId').textContent = session.svartId || '—';
-        var dashRealKey = user.activationKey || session.svartId || 'XXXX-XXXX-XXXX-XXXX';
-        var dashMaskedKey = dashRealKey.replace(/[A-Za-z0-9]/g, '•');
-        var dashKeyVisible = false;
-        document.getElementById('userKey').textContent = dashMaskedKey;
+        <div class="settings-card">
+          <h3><span class="card-icon">&#9993;</span> Change Email</h3>
+          <p>Update the email address associated with your account. We recommend using an alias or forwarding email for maximum privacy.</p>
+          <form id="emailForm" class="settings-form" novalidate>
+            <div class="form-group">
+              <label for="newEmail">New Email Address</label>
+              <input id="newEmail" type="email" placeholder="you@example.com" required autocomplete="email">
+            </div>
+            <div class="form-group">
+              <label for="emailConfirmPassword">Current Password</label>
+              <input id="emailConfirmPassword" type="password" placeholder="Confirm your password" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">Update Email</button>
+          </form>
+          <div id="emailMsg" class="auth-message" style="display:none;margin-top:12px;"></div>
+        </div>
+      </div>
 
-        if (user.createdAt) {
-            document.getElementById('userSince').textContent = new Date(user.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-        }
+      <!-- ===== Security Panel ===== -->
+      <div class="settings-panel" id="panel-security">
+        <div class="settings-card">
+          <h3><span class="card-icon">&#128274;</span> Change Password</h3>
+          <p>Choose a strong password at least 8 characters long.</p>
+          <form id="passwordForm" class="settings-form" novalidate>
+            <div class="form-group">
+              <label for="currentPassword">Current Password</label>
+              <input id="currentPassword" type="password" placeholder="Enter current password" required autocomplete="current-password">
+            </div>
+            <div class="form-group">
+              <label for="newPassword">New Password</label>
+              <input id="newPassword" type="password" placeholder="At least 8 characters" minlength="8" required autocomplete="new-password">
+            </div>
+            <div class="form-group">
+              <label for="confirmNewPassword">Confirm New Password</label>
+              <input id="confirmNewPassword" type="password" placeholder="Re-enter new password" minlength="8" required autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">Change Password</button>
+          </form>
+          <div id="passwordMsg" class="auth-message" style="display:none;margin-top:12px;"></div>
+        </div>
 
-        // ======== AI Usage Meter ========
-        var maxRequests = 750;
-        var planName = 'Free Premium';
-        // Check if user has upgraded plan stored
-        var userPlan = localStorage.getItem('ai_plan_' + session.svartId) || 'free';
-        if (userPlan === 'pro') { maxRequests = 2000; planName = 'Svart AI (£4.99/mo)'; }
-        else if (userPlan === 'unlimited') { maxRequests = Infinity; planName = 'Svart AI Unlimited (£9.99/mo)'; }
-        document.getElementById('usageMax').textContent = maxRequests === Infinity ? '∞' : maxRequests;
-        document.getElementById('usagePlan').textContent = 'Plan: ' + planName;
+        <div class="settings-card">
+          <h3><span class="card-icon">&#128273;</span> Activation Key</h3>
+          <p>Your activation key is used across all Svart Suite desktop apps. Keep it safe &mdash; it is your unique identifier.</p>
+          <div class="activation-key-display" style="max-width:480px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <code id="settingsKey" style="letter-spacing:2px;">&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;</code>
+            <button id="showKeyBtn" class="btn btn-secondary btn-sm" type="button">Show</button>
+            <button id="copyKeyBtn" class="btn btn-primary btn-sm" type="button">Copy</button>
+          </div>
+          <p style="color:var(--text-muted);font-size:0.8rem;margin-top:12px;">&#128274; This key works with all 6 Svart Suite apps. The server can only see this key and your email &mdash; never your data.</p>
+        </div>
 
-        // Update plan detail row dynamically
-        var planDetailEl = document.getElementById('userPlanDetail');
-        if (planDetailEl) {
-            if (userPlan === 'pro') planDetailEl.textContent = 'Svart AI (2,000 requests/month)';
-            else if (userPlan === 'unlimited') planDetailEl.textContent = 'Svart AI Unlimited (unlimited requests)';
-            else planDetailEl.textContent = 'Free Premium (750 requests/month)';
-        }
+        <div class="settings-card">
+          <h3><span class="card-icon">&#128338;</span> Session Management</h3>
+          <p>Active sessions on this device.</p>
+          <div class="settings-row">
+            <span class="settings-row-label">Current session</span>
+            <span class="settings-row-value" style="color:#22c55e;">&#9679; Active</span>
+          </div>
+          <div class="settings-row">
+            <span class="settings-row-label">Remember me</span>
+            <span class="settings-row-value" id="rememberStatus">&mdash;</span>
+          </div>
+          <div style="margin-top:16px;">
+            <button id="logoutAllBtn" class="btn btn-secondary btn-sm" type="button">Sign Out Everywhere</button>
+          </div>
+        </div>
+      </div>
 
-        // Calculate next reset date (1st of next month)
-        var now = new Date();
-        var nextReset = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-        var resetStr = nextReset.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-        document.getElementById('usageReset').textContent = 'Resets ' + resetStr;
+      <!-- ===== Plan & Usage Panel ===== -->
+      <div class="settings-panel" id="panel-plan">
+        <!-- Sub-tabs for Monthly Plans vs Top-Ups -->
+        <div style="display:flex;gap:0;margin-bottom:24px;border-bottom:2px solid var(--border-color);">
+          <button class="plan-sub-tab active" data-plantab="monthly" style="flex:1;padding:12px 16px;background:none;border:none;border-bottom:2px solid var(--primary);margin-bottom:-2px;color:var(--primary);font-weight:700;font-size:0.95rem;cursor:pointer;font-family:inherit;transition:all 0.2s;">&#128197; Monthly Tiers</button>
+          <button class="plan-sub-tab" data-plantab="topups" style="flex:1;padding:12px 16px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--text-muted);font-weight:600;font-size:0.95rem;cursor:pointer;font-family:inherit;transition:all 0.2s;">&#128176; Request Top-Ups</button>
+        </div>
 
-        // Load usage count
-        var usageKey = 'ai_usage_' + session.svartId;
-        var usageCount = parseInt(localStorage.getItem(usageKey) || '0', 10);
+        <!-- ===== Monthly Tiers Tab ===== -->
+        <div class="plan-sub-panel" id="plantab-monthly">
+          <div class="settings-card" style="border-color:var(--primary);background:rgba(124,58,237,0.04);">
+            <h3><span class="card-icon">&#128200;</span> Current Plan</h3>
+            <div class="settings-row">
+              <span class="settings-row-label">Plan</span>
+              <span class="settings-row-value" id="planName" style="color:var(--primary);">Free Premium</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">AI Requests Used</span>
+              <span class="settings-row-value"><span id="planUsed">0</span> / <span id="planMax">750</span></span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Resets</span>
+              <span class="settings-row-value" id="planReset">&mdash;</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Monthly cost</span>
+              <span class="settings-row-value" id="planCost">&pound;0</span>
+            </div>
+            <div style="margin-top:20px;">
+              <a href="pricing.html" class="btn btn-primary btn-sm">View Plans &amp; Upgrade</a>
+            </div>
+          </div>
 
-        // Reset usage monthly
-        var lastResetKey = 'ai_usage_reset_' + session.svartId;
-        var lastReset = localStorage.getItem(lastResetKey);
-        var currentMonth = now.getFullYear() + '-' + now.getMonth();
-        if (lastReset !== currentMonth) {
-            usageCount = 0;
-            localStorage.setItem(usageKey, '0');
-            localStorage.setItem(lastResetKey, currentMonth);
-            // Also clear the request log for the new month
-            localStorage.setItem('ai_requests_' + session.svartId, '[]');
-        }
+          <div class="settings-card">
+            <h3><span class="card-icon">&#128202;</span> Usage Breakdown</h3>
+            <p>Your AI request activity this billing period.</p>
+            <div class="settings-row">
+              <span class="settings-row-label">AI Chat Messages</span>
+              <span class="settings-row-value" id="usageChat">0</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Web Scraping Queries</span>
+              <span class="settings-row-value" id="usageScrape">0</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Training Sessions</span>
+              <span class="settings-row-value" id="usageTrain">0</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Document Analysis</span>
+              <span class="settings-row-value" id="usageDocs">0</span>
+            </div>
+            <p style="color:var(--text-muted);font-size:0.8rem;margin-top:14px;">Svart Browser, Docs, Notes, Chat &amp; Passwords usage is always free and unlimited.</p>
+          </div>
 
-        function updateUsageMeter() {
-            document.getElementById('usageCount').textContent = usageCount;
-            if (maxRequests === Infinity) {
-                document.getElementById('usageFill').style.width = '100%';
-                document.getElementById('usageFill').style.background = 'var(--primary)';
-            } else {
-                var percent = Math.min(usageCount / maxRequests, 1) * 100;
-                document.getElementById('usageFill').style.width = percent + '%';
-                document.getElementById('usageFill').style.background = usageCount >= maxRequests ? 'var(--danger)' : 'var(--primary)';
-            }
-        }
-        updateUsageMeter();
+          <div class="settings-card">
+            <h3><span class="card-icon">&#128176;</span> Billing</h3>
+            <p>Plans are managed through your Svart Suite account. No credit card is required for Free Premium.</p>
+            <div class="settings-row">
+              <span class="settings-row-label">Payment method</span>
+              <span class="settings-row-value" id="billingMethod">None (Free plan)</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Next billing date</span>
+              <span class="settings-row-value" id="billingDate">N/A</span>
+            </div>
+          </div>
+        </div>
 
-        // ======== AI Request Log ========
-        var requestLogKey = 'ai_requests_' + session.svartId;
-        var requestLog = JSON.parse(localStorage.getItem(requestLogKey) || '[]');
+        <!-- ===== Request Top-Ups Tab ===== -->
+        <div class="plan-sub-panel" id="plantab-topups" style="display:none;">
+          <div class="settings-card" style="border-color:var(--primary);background:rgba(124,58,237,0.04);">
+            <h3><span class="card-icon">&#128176;</span> Buy Request Top-Ups</h3>
+            <p>One-time payments &mdash; no subscription, no expiry. Requests are added to your account instantly and stay until you use them. Works on <strong>any plan</strong> including Free Premium.</p>
 
-        function renderRequestLog() {
-            var logEl = document.getElementById('aiRequestLog');
-            if (requestLog.length === 0) {
-                logEl.innerHTML = '<p style="opacity:0.5;">No requests yet. Use Svart AI Chat to see your history here.</p>';
-                return;
-            }
-            // Show most recent first, max 50
-            var recent = requestLog.slice(-50).reverse();
-            var html = '<table style="width:100%;border-collapse:collapse;">';
-            html += '<tr style="border-bottom:1px solid var(--border-color);"><th style="text-align:left;padding:4px 8px;color:var(--text-light);font-size:0.8rem;">#</th><th style="text-align:left;padding:4px 8px;color:var(--text-light);font-size:0.8rem;">Time</th><th style="text-align:left;padding:4px 8px;color:var(--text-light);font-size:0.8rem;">Prompt</th><th style="text-align:right;padding:4px 8px;color:var(--text-light);font-size:0.8rem;">Tokens</th></tr>';
-            for (var i = 0; i < recent.length; i++) {
-                var r = recent[i];
-                var time = new Date(r.ts).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
-                var prompt = (r.prompt || 'AI request').substring(0, 40);
-                if ((r.prompt || '').length > 40) prompt += '…';
-                var tokens = r.tokens || '—';
-                html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:4px 8px;">' + (requestLog.length - i) + '</td><td style="padding:4px 8px;">' + time + '</td><td style="padding:4px 8px;">' + prompt + '</td><td style="padding:4px 8px;text-align:right;">' + tokens + '</td></tr>';
-            }
-            html += '</table>';
-            logEl.innerHTML = html;
-        }
-        renderRequestLog();
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:20px;">
+              <div style="text-align:center;padding:20px 16px;border:1px solid var(--border-color);border-radius:12px;background:rgba(10,10,15,0.4);transition:border-color 0.2s;">
+                <p style="color:var(--text-light);font-size:1.5rem;font-weight:900;margin:0;">&pound;2.50</p>
+                <p style="color:var(--primary);font-size:0.95rem;font-weight:600;margin:6px 0 4px;">2,500 requests</p>
+                <p style="color:var(--text-muted);font-size:0.75rem;margin:0;">&pound;0.001 per request</p>
+                <button class="btn btn-secondary btn-sm" style="margin-top:12px;width:100%;" disabled>Buy</button>
+              </div>
+              <div style="text-align:center;padding:20px 16px;border:1px solid var(--border-color);border-radius:12px;background:rgba(10,10,15,0.4);transition:border-color 0.2s;">
+                <p style="color:var(--text-light);font-size:1.5rem;font-weight:900;margin:0;">&pound;5.00</p>
+                <p style="color:var(--primary);font-size:0.95rem;font-weight:600;margin:6px 0 4px;">5,000 requests</p>
+                <p style="color:var(--text-muted);font-size:0.75rem;margin:0;">&pound;0.001 per request</p>
+                <button class="btn btn-secondary btn-sm" style="margin-top:12px;width:100%;" disabled>Buy</button>
+              </div>
+              <div style="text-align:center;padding:20px 16px;border:1px solid var(--border-color);border-radius:12px;background:rgba(10,10,15,0.4);transition:border-color 0.2s;">
+                <p style="color:var(--text-light);font-size:1.5rem;font-weight:900;margin:0;">&pound;10.00</p>
+                <p style="color:var(--primary);font-size:0.95rem;font-weight:600;margin:6px 0 4px;">10,000 requests</p>
+                <p style="color:var(--text-muted);font-size:0.75rem;margin:0;">&pound;0.001 per request</p>
+                <button class="btn btn-secondary btn-sm" style="margin-top:12px;width:100%;" disabled>Buy</button>
+              </div>
+              <div style="text-align:center;padding:20px 16px;border:2px solid var(--primary);border-radius:12px;background:rgba(124,58,237,0.06);transition:border-color 0.2s;">
+                <p style="color:var(--primary);font-size:0.7rem;font-weight:700;letter-spacing:1px;margin:0 0 6px;">BEST VALUE</p>
+                <p style="color:var(--text-light);font-size:1.5rem;font-weight:900;margin:0;">&pound;20.00</p>
+                <p style="color:var(--primary);font-size:0.95rem;font-weight:600;margin:6px 0 4px;">25,000 requests</p>
+                <p style="color:var(--text-muted);font-size:0.75rem;margin:0;">&pound;0.0008 per request &mdash; 20% bonus</p>
+                <button class="btn btn-primary btn-sm" style="margin-top:12px;width:100%;" disabled>Buy</button>
+              </div>
+            </div>
+            <p style="color:var(--text-muted);font-size:0.75rem;margin-top:16px;">Payments will be available when Svart AI launches. Top-up requests never expire and stack with your monthly plan allowance.</p>
+            <p style="text-align:center;margin-top:12px;"><a href="topup.html" style="color:var(--primary);font-weight:600;font-size:0.85rem;">See all top-up packs, calculator &amp; FAQ &rarr;</a></p>
+          </div>
 
-        // Global function that Svart AI Chat app calls to log a request
-        window.logAIRequest = function(prompt, tokens) {
-            usageCount++;
-            localStorage.setItem(usageKey, usageCount.toString());
-            requestLog.push({ ts: Date.now(), prompt: prompt || 'AI request', tokens: tokens || 0 });
-            localStorage.setItem(requestLogKey, JSON.stringify(requestLog));
-            updateUsageMeter();
-            renderRequestLog();
-        };
+          <div class="settings-card">
+            <h3><span class="card-icon">&#128230;</span> Your Top-Up Balance</h3>
+            <p>Purchased request packs that haven&rsquo;t been used yet.</p>
+            <div class="settings-row">
+              <span class="settings-row-label">Top-up requests remaining</span>
+              <span class="settings-row-value" id="topupBalance" style="color:var(--primary);font-weight:700;">0</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Total purchased (all time)</span>
+              <span class="settings-row-value" id="topupTotal">0</span>
+            </div>
+            <p style="color:var(--text-muted);font-size:0.8rem;margin-top:14px;">Top-up requests are used <strong>after</strong> your monthly plan allowance runs out. They never expire and carry over between months.</p>
+          </div>
 
-        // Show/hide activation key
-        document.getElementById('showKey').addEventListener('click', function() {
-            dashKeyVisible = !dashKeyVisible;
-            document.getElementById('userKey').textContent = dashKeyVisible ? dashRealKey : dashMaskedKey;
-            this.textContent = dashKeyVisible ? 'Hide' : 'Show';
+          <div class="settings-card">
+            <h3><span class="card-icon">&#128203;</span> Purchase History</h3>
+            <p id="topupHistoryEmpty" style="color:var(--text-muted);">No top-up purchases yet.</p>
+            <div id="topupHistoryList" style="display:none;">
+              <!-- Populated by JS when purchases exist -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Tools Panel ===== -->
+      <div class="settings-panel" id="panel-tools">
+        <div class="settings-card">
+          <h3><span class="card-icon">&#128736;</span> Your Svart Suite Tools</h3>
+          <p>All tools use your activation key. Svart AI is the only tool that uses AI requests &mdash; everything else is free and unlimited forever.</p>
+
+          <div class="settings-tool-grid">
+            <div class="settings-tool-tile">
+              <span class="settings-tool-icon">&#128274;</span>
+              <div class="settings-tool-info">
+                <h4>Svart Browser</h4>
+                <span>Secure browsing, ad blocking, DNS privacy</span>
+              </div>
+              <span class="settings-tool-status status-free">Free</span>
+            </div>
+
+            <div class="settings-tool-tile">
+              <span class="settings-tool-icon">&#129302;</span>
+              <div class="settings-tool-info">
+                <h4>Svart AI</h4>
+                <span id="toolAiPlan">750 req/mo &mdash; Free Premium</span>
+              </div>
+              <span class="settings-tool-status status-ai" id="toolAiStatus">AI Plan</span>
+            </div>
+
+            <div class="settings-tool-tile">
+              <span class="settings-tool-icon">&#128273;</span>
+              <div class="settings-tool-info">
+                <h4>SVART Passwords</h4>
+                <span>AES-256-GCM encrypted vault</span>
+              </div>
+              <span class="settings-tool-status status-free">Free</span>
+            </div>
+
+            <div class="settings-tool-tile">
+              <span class="settings-tool-icon">&#128221;</span>
+              <div class="settings-tool-info">
+                <h4>SVART Notes</h4>
+                <span>Encrypted note-taking</span>
+              </div>
+              <span class="settings-tool-status status-free">Free</span>
+            </div>
+
+            <div class="settings-tool-tile">
+              <span class="settings-tool-icon">&#128196;</span>
+              <div class="settings-tool-info">
+                <h4>SVART Docs</h4>
+                <span>Encrypted document editor</span>
+              </div>
+              <span class="settings-tool-status status-free">Free</span>
+            </div>
+
+            <div class="settings-tool-tile">
+              <span class="settings-tool-icon">&#128172;</span>
+              <div class="settings-tool-info">
+                <h4>SVART Chat</h4>
+                <span>End-to-end encrypted messaging</span>
+              </div>
+              <span class="settings-tool-status status-free">Free</span>
+            </div>
+
+            <div class="settings-tool-tile">
+              <span class="settings-tool-icon">&#9993;</span>
+              <div class="settings-tool-info">
+                <h4>Secure Email</h4>
+                <span>E2E encrypted email &amp; temp addresses</span>
+              </div>
+              <span class="settings-tool-status status-planned">Planned</span>
+            </div>
+
+            <div class="settings-tool-tile">
+              <span class="settings-tool-icon">&#128450;</span>
+              <div class="settings-tool-info">
+                <h4>File Encryption</h4>
+                <span>AES-256 file encrypt/decrypt</span>
+              </div>
+              <span class="settings-tool-status status-planned">Planned</span>
+            </div>
+
+            <div class="settings-tool-tile">
+              <span class="settings-tool-icon">&#128269;</span>
+              <div class="settings-tool-info">
+                <h4>Privacy Checker</h4>
+                <span>Audit &amp; optimise your privacy</span>
+              </div>
+              <span class="settings-tool-status status-planned">Planned</span>
+            </div>
+
+            <div class="settings-tool-tile">
+              <span class="settings-tool-icon">&#128737;</span>
+              <div class="settings-tool-info">
+                <h4>VPN Service</h4>
+                <span>No-log VPN with kill switch</span>
+              </div>
+              <span class="settings-tool-status status-planned">Planned</span>
+            </div>
+          </div>
+
+          <p style="color:var(--text-muted);font-size:0.8rem;margin-top:20px;">Need a tool? <a href="tools.html" style="color:var(--primary);">Browse all tools</a></p>
+        </div>
+      </div>
+
+      <!-- ===== Preferences Panel ===== -->
+      <div class="settings-panel" id="panel-preferences">
+        <div class="settings-card">
+          <h3><span class="card-icon">&#127912;</span> Appearance</h3>
+          <p>Customise how the Svart Suite dashboard and website look.</p>
+          <div class="settings-row">
+            <span class="settings-row-label">Theme</span>
+            <span class="settings-row-value">
+              <select id="themePref" style="background:rgba(10,10,15,0.6);border:1px solid var(--border-color);color:var(--text-light);padding:6px 12px;border-radius:6px;font-family:inherit;font-size:0.85rem;">
+                <option value="dark" selected>Dark (default)</option>
+                <option value="midnight">Midnight</option>
+                <option value="light" disabled>Light (coming soon)</option>
+              </select>
+            </span>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3><span class="card-icon">&#128276;</span> Notifications</h3>
+          <p>Control what alerts you receive.</p>
+          <div class="settings-row">
+            <span class="settings-row-label">Usage warnings (80% &amp; 100%)</span>
+            <span class="settings-row-value">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" id="prefUsageWarnings" checked style="accent-color:var(--primary);width:16px;height:16px;">
+                <span style="font-size:0.85rem;color:var(--text-muted);">Enabled</span>
+              </label>
+            </span>
+          </div>
+          <div class="settings-row">
+            <span class="settings-row-label">Monthly usage report</span>
+            <span class="settings-row-value">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" id="prefMonthlyReport" checked style="accent-color:var(--primary);width:16px;height:16px;">
+                <span style="font-size:0.85rem;color:var(--text-muted);">Enabled</span>
+              </label>
+            </span>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3><span class="card-icon">&#128338;</span> Session &amp; Privacy</h3>
+          <p>Control session behaviour and data retention.</p>
+          <div class="settings-row">
+            <span class="settings-row-label">Session timeout</span>
+            <span class="settings-row-value">
+              <select id="prefTimeout" style="background:rgba(10,10,15,0.6);border:1px solid var(--border-color);color:var(--text-light);padding:6px 12px;border-radius:6px;font-family:inherit;font-size:0.85rem;">
+                <option value="30">30 minutes (default)</option>
+                <option value="60">1 hour</option>
+                <option value="120">2 hours</option>
+                <option value="0">Never (not recommended)</option>
+              </select>
+            </span>
+          </div>
+          <div class="settings-row">
+            <span class="settings-row-label">Clear AI request log on reset</span>
+            <span class="settings-row-value">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" id="prefClearLog" checked style="accent-color:var(--primary);width:16px;height:16px;">
+                <span style="font-size:0.85rem;color:var(--text-muted);">Enabled</span>
+              </label>
+            </span>
+          </div>
+        </div>
+
+        <div style="margin-top:8px;">
+          <button id="savePrefsBtn" class="btn btn-primary btn-sm" type="button">Save Preferences</button>
+          <div id="prefsMsg" class="auth-message" style="display:none;margin-top:12px;"></div>
+        </div>
+      </div>
+
+      <!-- ===== Danger Zone (always visible at bottom) ===== -->
+      <div class="settings-card settings-danger" style="margin-top:40px;">
+        <h3><span class="card-icon">&#9888;</span> Danger Zone</h3>
+        <p>These actions are permanent and cannot be undone.</p>
+        <div class="settings-row">
+          <span class="settings-row-label">Clear all local data (AI logs, preferences, cached data)</span>
+          <button id="clearDataBtn" class="btn-danger" type="button">Clear Local Data</button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-row-label">Delete account &mdash; removes all data from our servers</span>
+          <button id="deleteAccountBtn" class="btn-danger" type="button">Delete Account</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4><span class="SVART-logo">&#9670;</span> Svart Suite</h4>
+          <p>Security &amp; Privacy Tools Suite. Built for freedom.</p>
+        </div>
+        <div class="footer-section">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="tools.html">Tools</a></li>
+            <li><a href="SVART.html">Svart Browser</a></li>
+            <li><a href="pricing.html">Pricing</a></li>
+            <li><a href="topup.html">Top-Ups</a></li>
+            <li><a href="comparison.html">Compare</a></li>
+            <li><a href="about.html">About</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Community</h4>
+          <ul>
+            <li><a href="https://github.com/SVART-browser" target="_blank">GitHub</a></li>
+            <li><a href="https://github.com/JaegerGRS/SvartWebsite/issues" target="_blank">Issue Tracker</a></li>
+            <li><a href="contact.html">Support</a></li>
+            <li><a href="https://github.com/JaegerGRS/SvartWebsite" target="_blank">Contribute</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="eula.html">Privacy Policy</a></li>
+            <li><a href="eula.html">Terms of Service</a></li>
+            <li><a href="website-security.html">Security</a></li>
+            <li><a href="eula.html">EULA</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Svart Suite. Your privacy, your tools, your control &mdash; we protect people, we do not protect crimes.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/script.js"></script>
+  <script>
+  (function() {
+    // ===== Session check =====
+    var session = JSON.parse(localStorage.getItem('ct_session') || 'null');
+    if (!session || !session.loggedIn) {
+      session = JSON.parse(localStorage.getItem('ct_persistent_session') || 'null');
+      if (!session || !session.loggedIn) { window.location.href = 'login.html'; return; }
+      localStorage.setItem('ct_session', JSON.stringify(session));
+    }
+
+    var users = JSON.parse(localStorage.getItem('ct_users') || '{}');
+    var user = users[session.svartId] || {};
+    var svartId = session.svartId || '';
+
+    // ===== Helper: show message =====
+    function showMsg(el, text, type) {
+      el.textContent = text;
+      el.className = 'auth-message ' + type;
+      el.style.display = 'block';
+      setTimeout(function() { el.style.display = 'none'; }, 4000);
+    }
+
+    // ===== Helper: simple hash =====
+    function simpleHash(str) {
+      var hash = 0;
+      for (var i = 0; i < str.length; i++) {
+        var c = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + c;
+        hash |= 0;
+      }
+      return hash.toString(36);
+    }
+
+    // ===== Tab navigation =====
+    var tabs = document.querySelectorAll('.settings-nav-btn');
+    var panels = document.querySelectorAll('.settings-panel');
+    tabs.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        tabs.forEach(function(t) { t.classList.remove('active'); });
+        panels.forEach(function(p) { p.classList.remove('active'); });
+        btn.classList.add('active');
+        var panel = document.getElementById('panel-' + btn.dataset.tab);
+        if (panel) panel.classList.add('active');
+        // Update URL hash without scrolling
+        history.replaceState(null, '', '#' + btn.dataset.tab);
+      });
+    });
+
+    // In-page tab links (e.g. "view your tools", "Manage Plan")
+    document.querySelectorAll('.dash-tab-link').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        var target = this.getAttribute('data-target');
+        var targetBtn = document.querySelector('.settings-nav-btn[data-tab="' + target + '"]');
+        if (targetBtn) targetBtn.click();
+      });
+    });
+
+    // ===== Populate user data =====
+    var displayName = user.displayName || user.username || 'User';
+
+    // Dashboard panel
+    document.getElementById('userName').textContent = displayName;
+    document.getElementById('userEmail').textContent = user.email || session.email || '\u2014';
+    document.getElementById('userSvartId').textContent = svartId || '\u2014';
+
+    // Profile panel
+    document.getElementById('currentName').textContent = displayName;
+    document.getElementById('currentEmail').textContent = user.email || session.email || '\u2014';
+
+    if (user.createdAt) {
+      var dateStr = new Date(user.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      document.getElementById('userSince').textContent = dateStr;
+      document.getElementById('currentSince').textContent = dateStr;
+    }
+
+    // ===== Activation key (synced across all panels) =====
+    var realKey = user.activationKey || svartId || 'XXXX-XXXX-XXXX-XXXX';
+    var maskedKey = realKey.replace(/[A-Za-z0-9]/g, '\u2022');
+    var keyVisible = false;
+
+    function syncKeyDisplay() {
+      var text = keyVisible ? realKey : maskedKey;
+      var label = keyVisible ? 'Hide' : 'Show';
+      document.getElementById('userKey').textContent = text;
+      document.getElementById('settingsKey').textContent = text;
+      document.getElementById('currentSvartId').textContent = text;
+      document.getElementById('showKey').textContent = label;
+      document.getElementById('showKeyBtn').textContent = label;
+      document.getElementById('profileShowKeyBtn').textContent = label;
+    }
+
+    // Initialise masked
+    document.getElementById('userKey').textContent = maskedKey;
+    document.getElementById('settingsKey').textContent = maskedKey;
+    document.getElementById('currentSvartId').textContent = maskedKey;
+
+    // Show/hide — all three buttons toggle the same state
+    ['showKey', 'showKeyBtn', 'profileShowKeyBtn'].forEach(function(id) {
+      document.getElementById(id).addEventListener('click', function() {
+        keyVisible = !keyVisible;
+        syncKeyDisplay();
+      });
+    });
+
+    // Copy — all three copy buttons
+    ['copyKey', 'copyKeyBtn', 'profileCopyKeyBtn'].forEach(function(id) {
+      document.getElementById(id).addEventListener('click', function() {
+        var btn = this;
+        navigator.clipboard.writeText(realKey).then(function() {
+          btn.textContent = 'Copied!';
+          setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
         });
+      });
+    });
 
-        // Copy activation key
-        document.getElementById('copyKey').addEventListener('click', function() {
-            navigator.clipboard.writeText(dashRealKey).then(() => {
-                this.textContent = 'Copied!';
-                setTimeout(() => { this.textContent = 'Copy'; }, 2000);
-            });
+    // ===== AI Usage Meter (Dashboard panel) =====
+    var maxRequests = 750;
+    var planNameStr = 'Free Premium';
+    var userPlan = localStorage.getItem('ai_plan_' + svartId) || 'free';
+    if (userPlan === 'pro') { maxRequests = 2000; planNameStr = 'Svart AI (\u00A34.99/mo)'; }
+    else if (userPlan === 'unlimited') { maxRequests = Infinity; planNameStr = 'Svart AI Unlimited (\u00A39.99/mo)'; }
+    document.getElementById('usageMax').textContent = maxRequests === Infinity ? '\u221E' : maxRequests;
+    document.getElementById('usagePlan').textContent = 'Plan: ' + planNameStr;
+
+    // Update plan detail row
+    var planDetailEl = document.getElementById('userPlanDetail');
+    if (planDetailEl) {
+      if (userPlan === 'pro') planDetailEl.textContent = 'Svart AI (2,000 requests/month)';
+      else if (userPlan === 'unlimited') planDetailEl.textContent = 'Svart AI Unlimited (unlimited requests)';
+      else planDetailEl.textContent = 'Free Premium (750 requests/month)';
+    }
+
+    // Calculate next reset date (1st of next month)
+    var now = new Date();
+    var nextReset = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    var resetStr = nextReset.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    document.getElementById('usageReset').textContent = 'Resets ' + resetStr;
+
+    // Load usage count
+    var usageKey = 'ai_usage_' + svartId;
+    var usageCount = parseInt(localStorage.getItem(usageKey) || '0', 10);
+
+    // Reset usage monthly
+    var lastResetKey = 'ai_usage_reset_' + svartId;
+    var lastReset = localStorage.getItem(lastResetKey);
+    var currentMonth = now.getFullYear() + '-' + now.getMonth();
+    if (lastReset !== currentMonth) {
+      usageCount = 0;
+      localStorage.setItem(usageKey, '0');
+      localStorage.setItem(lastResetKey, currentMonth);
+      localStorage.setItem('ai_requests_' + svartId, '[]');
+    }
+
+    function updateUsageMeter() {
+      document.getElementById('usageCount').textContent = usageCount;
+      if (maxRequests === Infinity) {
+        document.getElementById('usageFill').style.width = '100%';
+        document.getElementById('usageFill').style.background = 'var(--primary)';
+      } else {
+        var percent = Math.min(usageCount / maxRequests, 1) * 100;
+        document.getElementById('usageFill').style.width = percent + '%';
+        document.getElementById('usageFill').style.background = usageCount >= maxRequests ? 'var(--danger)' : 'var(--primary)';
+      }
+    }
+    updateUsageMeter();
+
+    // ===== AI Request Log =====
+    var requestLogKey = 'ai_requests_' + svartId;
+    var requestLog = JSON.parse(localStorage.getItem(requestLogKey) || '[]');
+
+    function renderRequestLog() {
+      var logEl = document.getElementById('aiRequestLog');
+      if (requestLog.length === 0) {
+        logEl.innerHTML = '<p style="opacity:0.5;">No requests yet. Use Svart AI Chat to see your history here.</p>';
+        return;
+      }
+      var recent = requestLog.slice(-50).reverse();
+      var html = '<table style="width:100%;border-collapse:collapse;">';
+      html += '<tr style="border-bottom:1px solid var(--border-color);"><th style="text-align:left;padding:4px 8px;color:var(--text-light);font-size:0.8rem;">#</th><th style="text-align:left;padding:4px 8px;color:var(--text-light);font-size:0.8rem;">Time</th><th style="text-align:left;padding:4px 8px;color:var(--text-light);font-size:0.8rem;">Prompt</th><th style="text-align:right;padding:4px 8px;color:var(--text-light);font-size:0.8rem;">Tokens</th></tr>';
+      for (var i = 0; i < recent.length; i++) {
+        var r = recent[i];
+        var time = new Date(r.ts).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+        var prompt = (r.prompt || 'AI request').substring(0, 40);
+        if ((r.prompt || '').length > 40) prompt += '\u2026';
+        var tokens = r.tokens || '\u2014';
+        html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:4px 8px;">' + (requestLog.length - i) + '</td><td style="padding:4px 8px;">' + time + '</td><td style="padding:4px 8px;">' + prompt + '</td><td style="padding:4px 8px;text-align:right;">' + tokens + '</td></tr>';
+      }
+      html += '</table>';
+      logEl.innerHTML = html;
+    }
+    renderRequestLog();
+
+    // Global function that Svart AI Chat app calls to log a request
+    window.logAIRequest = function(prompt, tokens) {
+      usageCount++;
+      localStorage.setItem(usageKey, usageCount.toString());
+      requestLog.push({ ts: Date.now(), prompt: prompt || 'AI request', tokens: tokens || 0 });
+      localStorage.setItem(requestLogKey, JSON.stringify(requestLog));
+      updateUsageMeter();
+      renderRequestLog();
+    };
+
+    // ===== Profile panel — forms =====
+    // Display name change
+    document.getElementById('nameForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var name = document.getElementById('newDisplayName').value.trim();
+      if (name.length < 3 || name.length > 24) { showMsg(document.getElementById('nameMsg'), 'Display name must be 3\u201324 characters.', 'error'); return; }
+      user.username = name;
+      users[svartId] = user;
+      localStorage.setItem('ct_users', JSON.stringify(users));
+      document.getElementById('currentName').textContent = name;
+      document.getElementById('userName').textContent = name;
+      showMsg(document.getElementById('nameMsg'), 'Display name updated!', 'success');
+      document.getElementById('newDisplayName').value = '';
+    });
+
+    // Email change
+    document.getElementById('emailForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var newEmail = document.getElementById('newEmail').value.trim();
+      var pwd = document.getElementById('emailConfirmPassword').value;
+      if (!newEmail || !newEmail.includes('@')) { showMsg(document.getElementById('emailMsg'), 'Enter a valid email.', 'error'); return; }
+      if (simpleHash(pwd) !== user.passwordHash) { showMsg(document.getElementById('emailMsg'), 'Incorrect password.', 'error'); return; }
+      user.email = newEmail;
+      users[svartId] = user;
+      localStorage.setItem('ct_users', JSON.stringify(users));
+      document.getElementById('currentEmail').textContent = newEmail;
+      document.getElementById('userEmail').textContent = newEmail;
+      showMsg(document.getElementById('emailMsg'), 'Email updated!', 'success');
+      document.getElementById('emailForm').reset();
+    });
+
+    // ===== Security panel =====
+    // Remember me status
+    var persistent = JSON.parse(localStorage.getItem('ct_persistent_session') || 'null');
+    document.getElementById('rememberStatus').textContent = persistent && persistent.loggedIn ? 'Yes \u2014 persistent session' : 'No \u2014 session only';
+
+    // Password change
+    document.getElementById('passwordForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var cur = document.getElementById('currentPassword').value;
+      var newP = document.getElementById('newPassword').value;
+      var conf = document.getElementById('confirmNewPassword').value;
+      if (simpleHash(cur) !== user.passwordHash) { showMsg(document.getElementById('passwordMsg'), 'Current password is incorrect.', 'error'); return; }
+      if (newP.length < 8) { showMsg(document.getElementById('passwordMsg'), 'New password must be at least 8 characters.', 'error'); return; }
+      if (newP !== conf) { showMsg(document.getElementById('passwordMsg'), 'Passwords do not match.', 'error'); return; }
+      user.passwordHash = simpleHash(newP);
+      users[svartId] = user;
+      localStorage.setItem('ct_users', JSON.stringify(users));
+      showMsg(document.getElementById('passwordMsg'), 'Password changed successfully!', 'success');
+      document.getElementById('passwordForm').reset();
+    });
+
+    // Sign out everywhere
+    document.getElementById('logoutAllBtn').addEventListener('click', function() {
+      if (!confirm('Sign out of all sessions on this device?')) return;
+      localStorage.removeItem('ct_session');
+      localStorage.removeItem('ct_persistent_session');
+      window.location.href = 'login.html';
+    });
+
+    // ===== Plan & Usage panel =====
+    var maxReq = 750, planLabel = 'Free Premium', costLabel = '\u00A30';
+    if (userPlan === 'pro') { maxReq = 2000; planLabel = 'Svart AI'; costLabel = '\u00A34.99/mo'; }
+    else if (userPlan === 'unlimited') { maxReq = Infinity; planLabel = 'Svart AI Unlimited'; costLabel = '\u00A39.99/mo'; }
+
+    document.getElementById('planName').textContent = planLabel;
+    document.getElementById('planCost').textContent = costLabel;
+    document.getElementById('planMax').textContent = maxReq === Infinity ? '\u221E' : maxReq;
+    document.getElementById('planReset').textContent = nextReset.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    document.getElementById('planUsed').textContent = usageCount;
+
+    // Usage breakdown
+    var chatCount = 0, scrapeCount = 0, trainCount = 0, docsCount = 0;
+    requestLog.forEach(function(r) {
+      var t = (r.type || 'chat').toLowerCase();
+      if (t === 'scrape') scrapeCount++;
+      else if (t === 'train') trainCount++;
+      else if (t === 'docs') docsCount++;
+      else chatCount++;
+    });
+    document.getElementById('usageChat').textContent = chatCount || usageCount;
+    document.getElementById('usageScrape').textContent = scrapeCount;
+    document.getElementById('usageTrain').textContent = trainCount;
+    document.getElementById('usageDocs').textContent = docsCount;
+
+    // Billing
+    if (userPlan !== 'free') {
+      document.getElementById('billingMethod').textContent = 'Card on file';
+      document.getElementById('billingDate').textContent = nextReset.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    // ===== Tools panel — AI plan label =====
+    if (userPlan === 'pro') {
+      document.getElementById('toolAiPlan').textContent = '2,000 req/mo \u2014 Svart AI';
+    } else if (userPlan === 'unlimited') {
+      document.getElementById('toolAiPlan').textContent = 'Unlimited \u2014 Svart AI Unlimited';
+    }
+
+    // ===== Preferences panel =====
+    var prefs = JSON.parse(localStorage.getItem('svart_prefs_' + svartId) || '{}');
+    if (prefs.theme) document.getElementById('themePref').value = prefs.theme;
+    if (prefs.usageWarnings === false) document.getElementById('prefUsageWarnings').checked = false;
+    if (prefs.monthlyReport === false) document.getElementById('prefMonthlyReport').checked = false;
+    if (prefs.timeout !== undefined) document.getElementById('prefTimeout').value = prefs.timeout;
+    if (prefs.clearLog === false) document.getElementById('prefClearLog').checked = false;
+
+    document.getElementById('savePrefsBtn').addEventListener('click', function() {
+      var newPrefs = {
+        theme: document.getElementById('themePref').value,
+        usageWarnings: document.getElementById('prefUsageWarnings').checked,
+        monthlyReport: document.getElementById('prefMonthlyReport').checked,
+        timeout: document.getElementById('prefTimeout').value,
+        clearLog: document.getElementById('prefClearLog').checked
+      };
+      localStorage.setItem('svart_prefs_' + svartId, JSON.stringify(newPrefs));
+      showMsg(document.getElementById('prefsMsg'), 'Preferences saved!', 'success');
+    });
+
+    // ===== Plan sub-tabs (Monthly Tiers / Request Top-Ups) =====
+    document.querySelectorAll('.plan-sub-tab').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.plan-sub-tab').forEach(function(b) {
+          b.classList.remove('active');
+          b.style.borderBottomColor = 'transparent';
+          b.style.color = 'var(--text-muted)';
         });
-    })();
-    </script>
+        btn.classList.add('active');
+        btn.style.borderBottomColor = 'var(--primary)';
+        btn.style.color = 'var(--primary)';
+        document.querySelectorAll('.plan-sub-panel').forEach(function(p) { p.style.display = 'none'; });
+        document.getElementById('plantab-' + btn.getAttribute('data-plantab')).style.display = 'block';
+      });
+    });
+
+    // Top-up balance from localStorage
+    var topupBalance = parseInt(localStorage.getItem('ai_topup_balance_' + svartId) || '0', 10);
+    var topupTotal = parseInt(localStorage.getItem('ai_topup_total_' + svartId) || '0', 10);
+    document.getElementById('topupBalance').textContent = topupBalance.toLocaleString();
+    document.getElementById('topupTotal').textContent = topupTotal.toLocaleString();
+
+    // ===== Danger zone =====
+    document.getElementById('clearDataBtn').addEventListener('click', function() {
+      if (!confirm('Clear all local Svart data (AI logs, preferences, cached data)? Your account and activation key will not be affected.')) return;
+      localStorage.removeItem('ai_usage_' + svartId);
+      localStorage.removeItem('ai_usage_reset_' + svartId);
+      localStorage.removeItem('ai_requests_' + svartId);
+      localStorage.removeItem('svart_prefs_' + svartId);
+      alert('Local data cleared. Refresh to see changes.');
+      location.reload();
+    });
+
+    document.getElementById('deleteAccountBtn').addEventListener('click', function() {
+      if (!confirm('DELETE YOUR ACCOUNT? This will remove all your data from this device. This cannot be undone.')) return;
+      if (!confirm('Are you absolutely sure? Type your activation key in the next prompt to confirm.')) return;
+      var typed = prompt('Type your activation key to confirm deletion:');
+      if (typed !== svartId && typed !== (user.activationKey || '')) { alert('Activation key does not match. Deletion cancelled.'); return; }
+      delete users[svartId];
+      localStorage.setItem('ct_users', JSON.stringify(users));
+      localStorage.removeItem('ct_session');
+      localStorage.removeItem('ct_persistent_session');
+      localStorage.removeItem('ai_usage_' + svartId);
+      localStorage.removeItem('ai_usage_reset_' + svartId);
+      localStorage.removeItem('ai_requests_' + svartId);
+      localStorage.removeItem('ai_plan_' + svartId);
+      localStorage.removeItem('svart_prefs_' + svartId);
+      alert('Account deleted. You will be redirected to the home page.');
+      window.location.href = 'index.html';
+    });
+
+    // ===== Deep link: open tab from URL hash =====
+    var hash = window.location.hash.replace('#', '');
+    if (hash) {
+      // Support plan-topups and plan-monthly deep links
+      var subTab = null;
+      if (hash === 'plan-topups') { hash = 'plan'; subTab = 'topups'; }
+      else if (hash === 'plan-monthly') { hash = 'plan'; subTab = 'monthly'; }
+      var targetBtn = document.querySelector('.settings-nav-btn[data-tab="' + hash + '"]');
+      if (targetBtn) targetBtn.click();
+      if (subTab) {
+        var subBtn = document.querySelector('.plan-sub-tab[data-plantab="' + subTab + '"]');
+        if (subBtn) subBtn.click();
+      }
+    }
+  })();
+  </script>
 </body>
 </html>
