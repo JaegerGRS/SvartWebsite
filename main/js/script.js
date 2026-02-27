@@ -4,6 +4,7 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize all interactive features
+    initHamburger();
     initNavigation();
     initContactForm();
     initScrollAnimations();
@@ -11,60 +12,77 @@ document.addEventListener('DOMContentLoaded', function() {
     adaptNavForSession();
 });
 
-// ============ Navigation ============
-// ============ Nav Adaptation ============
+// ============ Hamburger Menu ============
+function initHamburger() {
+    const hamburger = document.getElementById('navHamburger');
+    const navMenu = document.getElementById('navMenu');
+    const overlay = document.getElementById('navOverlay');
+    if (!hamburger || !navMenu) return;
+
+    function toggleMenu() {
+        const isOpen = navMenu.classList.contains('active');
+        navMenu.classList.toggle('active');
+        hamburger.classList.toggle('active');
+        hamburger.setAttribute('aria-expanded', !isOpen);
+        if (overlay) overlay.classList.toggle('active');
+        document.body.style.overflow = isOpen ? '' : 'hidden';
+    }
+    function closeMenu() {
+        navMenu.classList.remove('active');
+        hamburger.classList.remove('active');
+        hamburger.setAttribute('aria-expanded', 'false');
+        if (overlay) overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    hamburger.addEventListener('click', toggleMenu);
+    if (overlay) overlay.addEventListener('click', closeMenu);
+
+    // Close menu when a nav link is clicked
+    navMenu.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', closeMenu);
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeMenu();
+    });
+}
+
+// ============ Nav Auth State ============
 function adaptNavForSession() {
     // Check session
     let session = JSON.parse(localStorage.getItem('ct_session') || 'null');
     if (!session || !session.loggedIn) {
         session = JSON.parse(localStorage.getItem('ct_persistent_session') || 'null');
     }
-    const navMenu = document.querySelector('.nav-menu');
-    if (!navMenu) return;
-    // Remove cog except on account page
-    if (!window.location.pathname.endsWith('account.html')) {
-        const cog = navMenu.querySelector('#navSettings');
-        if (cog) cog.style.display = 'none';
-    }
-    // Adapt nav for logged in
+    const authItem = document.getElementById('navAuthItem');
+    if (!authItem) return;
+
     if (session && session.loggedIn) {
-        // Username
+        // Get username
         const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
         const user = users[session.svartId] || {};
         const username = user.username || 'Account';
-        let navUser = navMenu.querySelector('#navUser');
-        if (navUser) {
-            navUser.style.display = '';
-            // Update username text
-            const navUsername = navUser.querySelector('#navUsername');
-            if (navUsername) navUsername.textContent = username;
-            navUser.setAttribute('href', 'account.html');
-        }
-        // Replace signup with logout
-        const signup = navMenu.querySelector('a[href="signup.html"]');
-        if (signup) {
-            signup.textContent = 'Log Out';
-            signup.setAttribute('href', '#');
-            signup.onclick = function(e) {
+        authItem.innerHTML =
+            '<a href="account.html" class="nav-auth-btn"><span class="nav-user-name">' + username + '</span></a>' +
+            ' <a href="#" class="nav-auth-btn nav-logout-btn" id="navLogoutBtn">Logout</a>';
+        var logoutBtn = document.getElementById('navLogoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 localStorage.removeItem('ct_session');
+                localStorage.removeItem('ct_persistent_session');
                 window.location.href = 'index.html';
-            };
+            });
         }
     } else {
-        // Not logged in: show signup, hide navUser
-        const navUser = navMenu.querySelector('#navUser');
-        if (navUser) navUser.style.display = 'none';
-        // Show signup
-        const signup = navMenu.querySelector('a[href="signup.html"]');
-        if (signup) {
-            signup.textContent = 'Sign Up';
-            signup.setAttribute('href', 'signup.html');
-            signup.onclick = null;
-        }
+        // Not logged in
+        authItem.innerHTML = '<a href="login.html" class="nav-auth-btn">Login / Sign Up</a>';
     }
 }
-function initNavigation() {
+
+// ============ Navigation ============
     const navMenu = document.querySelector('.nav-menu');
     const navLinks = document.querySelectorAll('.nav-menu a');
     

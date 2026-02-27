@@ -17,16 +17,21 @@
                     <span class="SVART-text">Svart Suite</span>
                 </a>
             </div>
-            <ul class="nav-menu">
-                <li><a href="index.html">Home</a></li>
+            <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navMenu">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
                 <li><a href="tools.html">Tools</a></li>
                 <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="SVART.html">Svart Browser</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="contact.html">Contact</a></li>
-                <li><a href="email.html" class="active">Email</a></li>
+                <li><a href="email.html">Email</a></li>
+                <li id="navAuthItem" class="nav-auth"></li>
             </ul>
         </div>
     </nav>
+    <div class="nav-overlay" id="navOverlay"></div>
     <section class="page-hero" style="padding:80px 0 40px;text-align:center;">
         <div class="container">
             <h1 class="section-title">Email Management</h1>
@@ -61,6 +66,7 @@
         </div>
     </section>
     <script src="js/email.js"></script>
+    <script src="js/script.js"></script>
     <script>
     // Demo email form handler (future: integrate with Cloudflare)
     document.getElementById('emailForm').addEventListener('submit', function(e) {

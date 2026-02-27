@@ -1,15 +1,3 @@
-<section class="account-section">
-    <div class="container">
-        <div class="account-card">
-            <h2>Account Settings</h2>
-            <!-- Account settings moved to account-settings.html, accessible via cog icon -->
-            <div class="account-info">
-                <p><strong>Svart ID:</strong> <span id="accountSvartId"></span></p>
-                <p><strong>Current Username:</strong> <span id="accountUsername"></span></p>
-            </div>
-        </div>
-    </div>
-</section>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,18 +18,21 @@
                     <span class="SVART-text">Svart Suite</span>
                 </a>
             </div>
-            <ul class="nav-menu">
+            <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navMenu">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
                 <li><a href="tools.html">Tools</a></li>
                 <li><a href="pricing.html">Pricing</a></li>
                 <li><a href="SVART.html">Svart Browser</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="contact.html">Contact</a></li>
-                <li class="nav-auth"><a href="#" id="navUser" class="nav-user-link"><span id="navUsername">Account</span></a></li>
-                <li class="nav-auth"><a href="account-settings.html" id="navSettings" title="Account Settings"><span style="font-size:1.2em;">&#9881;</span></a></li>
-                <li class="nav-auth"><a href="#" id="logoutBtn">Log Out</a></li>
+                <li><a href="email.html">Email</a></li>
+                <li id="navAuthItem" class="nav-auth"></li>
             </ul>
         </div>
     </nav>
+    <div class="nav-overlay" id="navOverlay"></div>
 
     <section class="account-section">
         <div class="container">

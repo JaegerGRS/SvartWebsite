@@ -182,14 +182,132 @@ code {
     width: 100%;
 }
 
-@media (max-width: 768px) {
+/* ============ Hamburger Menu ============ */
+.nav-hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 200;
+    padding: 0;
+    transition: border-color 0.3s;
+}
+.nav-hamburger:hover {
+    border-color: var(--primary);
+}
+.nav-hamburger span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    margin: 3px 0;
+    background: var(--primary);
+    border-radius: 2px;
+    transition: all 0.3s;
+}
+.nav-hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+.nav-hamburger.active span:nth-child(2) {
+    opacity: 0;
+}
+.nav-hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* ============ Nav Auth ============ */
+.nav-auth-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border: 1px solid var(--primary);
+    border-radius: 6px;
+    color: var(--primary) !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+.nav-auth-btn:hover {
+    background: rgba(124, 58, 237, 0.15);
+    color: var(--accent) !important;
+}
+.nav-auth-btn::after {
+    display: none !important;
+}
+.nav-user-name {
+    color: var(--accent);
+    font-weight: 600;
+}
+.nav-logout-btn {
+    color: var(--danger) !important;
+    border-color: var(--danger);
+}
+.nav-logout-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+@media (max-width: 900px) {
+    .nav-hamburger {
+        display: flex;
+    }
     .nav-menu {
+        position: fixed;
+        top: 0;
+        right: -280px;
+        width: 270px;
+        height: 100vh;
+        background: rgba(5, 5, 7, 0.98);
+        backdrop-filter: blur(20px);
         flex-direction: column;
-        gap: 15px;
-        display: none;
+        gap: 0;
+        padding: 80px 0 30px;
+        border-left: 1px solid var(--border-color);
+        box-shadow: -8px 0 32px rgba(0,0,0,0.4);
+        transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 150;
+        overflow-y: auto;
     }
     .nav-menu.active {
         display: flex;
+        right: 0;
+    }
+    .nav-menu li {
+        margin: 0;
+        padding: 0;
+    }
+    .nav-menu a {
+        display: block;
+        padding: 14px 28px;
+        font-size: 1.05rem;
+        border-bottom: 1px solid rgba(39,39,42,0.4);
+    }
+    .nav-menu a:hover {
+        background: rgba(124, 58, 237, 0.08);
+    }
+    .nav-menu .nav-auth-btn {
+        margin: 8px 20px;
+        justify-content: center;
+        border: 1px solid var(--primary);
+    }
+    .nav-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 140;
+    }
+    .nav-overlay.active {
+        display: block;
     }
 }
 
