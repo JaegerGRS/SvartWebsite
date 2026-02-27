@@ -160,7 +160,7 @@
                 </div>
                 <div class="account-detail-row">
                     <span class="detail-label">Plan</span>
-                    <span class="detail-value">Free Premium (750 requests/month)</span>
+                    <span class="detail-value" id="userPlanDetail">Free Premium (750 requests/month)</span>
                 </div>
             </div>
         </div>
@@ -245,6 +245,14 @@
         else if (userPlan === 'unlimited') { maxRequests = Infinity; planName = 'Svart AI Unlimited (£9.99/mo)'; }
         document.getElementById('usageMax').textContent = maxRequests === Infinity ? '∞' : maxRequests;
         document.getElementById('usagePlan').textContent = 'Plan: ' + planName;
+
+        // Update plan detail row dynamically
+        var planDetailEl = document.getElementById('userPlanDetail');
+        if (planDetailEl) {
+            if (userPlan === 'pro') planDetailEl.textContent = 'Svart AI (2,000 requests/month)';
+            else if (userPlan === 'unlimited') planDetailEl.textContent = 'Svart AI Unlimited (unlimited requests)';
+            else planDetailEl.textContent = 'Free Premium (750 requests/month)';
+        }
 
         // Calculate next reset date (1st of next month)
         var now = new Date();
