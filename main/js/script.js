@@ -83,6 +83,7 @@ function adaptNavForSession() {
 }
 
 // ============ Navigation ============
+function initNavigation() {
     const navMenu = document.querySelector('.nav-menu');
     const navLinks = document.querySelectorAll('.nav-menu a');
     
