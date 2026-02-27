@@ -955,7 +955,10 @@
 
     // ===== Preferences panel =====
     var prefs = JSON.parse(localStorage.getItem('svart_prefs_' + svartId) || '{}');
-    if (prefs.theme) document.getElementById('themePref').value = prefs.theme;
+    if (prefs.theme) {
+      document.getElementById('themePref').value = prefs.theme;
+      if (window.applyTheme) window.applyTheme(prefs.theme);
+    }
     if (prefs.usageWarnings === false) document.getElementById('prefUsageWarnings').checked = false;
     if (prefs.monthlyReport === false) document.getElementById('prefMonthlyReport').checked = false;
     if (prefs.timeout !== undefined) document.getElementById('prefTimeout').value = prefs.timeout;
@@ -970,6 +973,7 @@
         clearLog: document.getElementById('prefClearLog').checked
       };
       localStorage.setItem('svart_prefs_' + svartId, JSON.stringify(newPrefs));
+      if (window.applyTheme) window.applyTheme(newPrefs.theme);
       showMsg(document.getElementById('prefsMsg'), 'Preferences saved!', 'success');
     });
 

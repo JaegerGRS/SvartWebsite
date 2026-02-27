@@ -2,6 +2,14 @@
 // Svart Suite - Website Interactivity
 // ============================================
 
+// ===== Apply saved theme immediately (before DOMContentLoaded to reduce flash) =====
+(function() {
+    var theme = localStorage.getItem('svart_theme');
+    if (theme && theme !== 'dark') {
+        document.documentElement.setAttribute('data-theme', theme);
+    }
+})();
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize all interactive features — each wrapped so one failure doesn't block the rest
     try { initHamburger(); } catch(e) { console.error('initHamburger:', e); }
@@ -479,13 +487,25 @@ document.querySelectorAll('.btn-primary').forEach(btn => {
 
 // ============ Dynamic Features ============
 
-// Theme toggle (dark/light) - optional
+// Theme toggle (dark/midnight) - reads saved preference
 function initThemeToggle() {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (prefersDark) {
-        document.documentElement.style.colorScheme = 'dark';
+    var theme = localStorage.getItem('svart_theme') || 'dark';
+    if (theme && theme !== 'dark') {
+        document.documentElement.setAttribute('data-theme', theme);
+    } else {
+        document.documentElement.removeAttribute('data-theme');
     }
 }
+
+// Global helper: apply theme from any page
+window.applyTheme = function(theme) {
+    if (theme && theme !== 'dark') {
+        document.documentElement.setAttribute('data-theme', theme);
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
+    localStorage.setItem('svart_theme', theme || 'dark');
+};
 
 // Add loading states for buttons
 function addButtonLoadingState() {
