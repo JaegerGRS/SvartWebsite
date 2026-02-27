@@ -47,8 +47,9 @@
                         <h3>Your Activation Key</h3>
                     </div>
                     <p>Use this key in all Svart Suite desktop apps when prompted for activation.</p>
-                    <div class="activation-key-display">
-                        <code id="userKey">XXXX-XXXX-XXXX-XXXX</code>
+                    <div class="activation-key-display" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                        <code id="userKey" style="letter-spacing:2px;">••••-••••-••••-••••</code>
+                        <button id="showKey" class="btn btn-secondary btn-sm" type="button">Show</button>
                         <button id="copyKey" class="btn btn-primary btn-sm" type="button">Copy</button>
                     </div>
                     <div class="key-info">
@@ -230,7 +231,10 @@
         document.getElementById('userName').textContent = displayName;
         document.getElementById('userEmail').textContent = user.email || session.email || '—';
         document.getElementById('userSvartId').textContent = session.svartId || '—';
-        document.getElementById('userKey').textContent = user.activationKey || session.svartId || 'XXXX-XXXX-XXXX-XXXX';
+        var dashRealKey = user.activationKey || session.svartId || 'XXXX-XXXX-XXXX-XXXX';
+        var dashMaskedKey = dashRealKey.replace(/[A-Za-z0-9]/g, '•');
+        var dashKeyVisible = false;
+        document.getElementById('userKey').textContent = dashMaskedKey;
 
         if (user.createdAt) {
             document.getElementById('userSince').textContent = new Date(user.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -326,9 +330,16 @@
             renderRequestLog();
         };
 
+        // Show/hide activation key
+        document.getElementById('showKey').addEventListener('click', function() {
+            dashKeyVisible = !dashKeyVisible;
+            document.getElementById('userKey').textContent = dashKeyVisible ? dashRealKey : dashMaskedKey;
+            this.textContent = dashKeyVisible ? 'Hide' : 'Show';
+        });
+
         // Copy activation key
         document.getElementById('copyKey').addEventListener('click', function() {
-            navigator.clipboard.writeText(document.getElementById('userKey').textContent).then(() => {
+            navigator.clipboard.writeText(dashRealKey).then(() => {
                 this.textContent = 'Copied!';
                 setTimeout(() => { this.textContent = 'Copy'; }, 2000);
             });

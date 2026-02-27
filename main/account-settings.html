@@ -62,7 +62,11 @@
           </div>
           <div class="settings-row">
             <span class="settings-row-label">Svart ID (Activation Key)</span>
-            <span class="settings-row-value" id="currentSvartId" style="font-family:monospace;letter-spacing:1px;">—</span>
+            <span class="settings-row-value" style="display:flex;align-items:center;gap:8px;">
+              <span id="currentSvartId" style="font-family:monospace;letter-spacing:1px;">••••-••••-••••-••••</span>
+              <button type="button" id="profileShowKeyBtn" style="background:none;border:1px solid var(--border-color);color:var(--text-muted);padding:2px 8px;border-radius:4px;font-size:0.75rem;cursor:pointer;font-family:inherit;" title="Show/Hide">Show</button>
+              <button type="button" id="profileCopyKeyBtn" style="background:none;border:1px solid var(--border-color);color:var(--text-muted);padding:2px 8px;border-radius:4px;font-size:0.75rem;cursor:pointer;font-family:inherit;" title="Copy">Copy</button>
+            </span>
           </div>
           <div class="settings-row">
             <span class="settings-row-label">Member Since</span>
@@ -127,8 +131,9 @@
         <div class="settings-card">
           <h3><span class="card-icon">&#128273;</span> Activation Key</h3>
           <p>Your activation key is used across all Svart Suite desktop apps. Keep it safe — it is your unique identifier.</p>
-          <div class="activation-key-display" style="max-width:480px;">
-            <code id="settingsKey">XXXX-XXXX-XXXX-XXXX</code>
+          <div class="activation-key-display" style="max-width:480px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <code id="settingsKey" style="letter-spacing:2px;">••••-••••-••••-••••</code>
+            <button id="showKeyBtn" class="btn btn-secondary btn-sm" type="button">Show</button>
             <button id="copyKeyBtn" class="btn btn-primary btn-sm" type="button">Copy</button>
           </div>
           <p style="color:var(--text-muted);font-size:0.8rem;margin-top:12px;">&#128274; This key works with all 6 Svart Suite apps. The server can only see this key and your email — never your data.</p>
@@ -554,11 +559,41 @@
     });
 
     // ===== Security panel =====
-    document.getElementById('settingsKey').textContent = user.activationKey || svartId || 'XXXX-XXXX-XXXX-XXXX';
+    var realKey = user.activationKey || svartId || 'XXXX-XXXX-XXXX-XXXX';
+    var maskedKey = realKey.replace(/[A-Za-z0-9]/g, '•');
+    var keyVisible = false;
 
+    // Security panel key
+    document.getElementById('settingsKey').textContent = maskedKey;
+    document.getElementById('showKeyBtn').addEventListener('click', function() {
+      keyVisible = !keyVisible;
+      document.getElementById('settingsKey').textContent = keyVisible ? realKey : maskedKey;
+      this.textContent = keyVisible ? 'Hide' : 'Show';
+      // Sync profile panel
+      document.getElementById('currentSvartId').textContent = keyVisible ? realKey : maskedKey;
+      document.getElementById('profileShowKeyBtn').textContent = keyVisible ? 'Hide' : 'Show';
+    });
     document.getElementById('copyKeyBtn').addEventListener('click', function() {
       var btn = this;
-      navigator.clipboard.writeText(document.getElementById('settingsKey').textContent).then(function() {
+      navigator.clipboard.writeText(realKey).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      });
+    });
+
+    // Profile panel key
+    document.getElementById('currentSvartId').textContent = maskedKey;
+    document.getElementById('profileShowKeyBtn').addEventListener('click', function() {
+      keyVisible = !keyVisible;
+      document.getElementById('currentSvartId').textContent = keyVisible ? realKey : maskedKey;
+      this.textContent = keyVisible ? 'Hide' : 'Show';
+      // Sync security panel
+      document.getElementById('settingsKey').textContent = keyVisible ? realKey : maskedKey;
+      document.getElementById('showKeyBtn').textContent = keyVisible ? 'Hide' : 'Show';
+    });
+    document.getElementById('profileCopyKeyBtn').addEventListener('click', function() {
+      var btn = this;
+      navigator.clipboard.writeText(realKey).then(function() {
         btn.textContent = 'Copied!';
         setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
       });
