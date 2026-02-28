@@ -274,10 +274,17 @@
                 });
                 const data = await resp.json();
                 if (data.success) {
+                    // Clear all local user data so wiped accounts can't persist
+                    localStorage.removeItem('ct_users');
+                    localStorage.removeItem('ct_session');
+                    // Clear any AI plan keys
+                    Object.keys(localStorage).forEach(function(k) {
+                        if (k.startsWith('ai_plan_') || k.startsWith('ai_requests_')) localStorage.removeItem(k);
+                    });
                     sendTodayMsg.style.display = '';
                     sendTodayMsg.style.background = 'rgba(239,68,68,0.15)';
                     sendTodayMsg.style.color = '#ef4444';
-                    sendTodayMsg.textContent = '✓ ' + (data.message || 'All accounts wiped.');
+                    sendTodayMsg.textContent = '✓ ' + (data.message || 'All accounts wiped. Local sessions cleared — you will need to log in again.');
                     loadRegistrations();
                     loadResetRequests();
                 } else {

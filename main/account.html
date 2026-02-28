@@ -38,8 +38,8 @@
       <div class="settings-header">
         <h2>Welcome back, <span id="userName" style="font-size:0.75em;font-family:monospace;letter-spacing:1px;">User</span> <span id="adminBadge" style="display:none;font-size:0.55em;background:var(--primary);color:#000;padding:3px 10px;border-radius:6px;vertical-align:middle;font-family:inherit;letter-spacing:0;">ADMIN</span> <span id="modBadge" style="display:none;font-size:0.55em;background:#22c55e;color:#000;padding:3px 10px;border-radius:6px;vertical-align:middle;font-family:inherit;letter-spacing:0;">MOD</span></h2>
         <p>Your dashboard &mdash; manage everything from one place.</p>
-        <div id="adminQuickLink" style="display:none;margin-top:8px;display:inline-block;"><a href="admin.html" class="btn btn-primary btn-sm" style="font-size:0.82rem;">&#128736; Admin Panel</a></div>
-        <div id="modQuickLink" style="display:none;margin-top:8px;display:inline-block;margin-left:8px;"><a href="mod-panel.html" class="btn btn-primary btn-sm" style="font-size:0.82rem;">&#128737; Mod Panel</a></div>
+        <div id="adminQuickLink" style="display:none;margin-top:8px;margin-left:0;"><a href="admin.html" class="btn btn-primary btn-sm" style="font-size:0.82rem;">&#128736; Admin Panel</a></div>
+        <div id="modQuickLink" style="display:none;margin-top:8px;margin-left:8px;"><a href="mod-panel.html" class="btn btn-primary btn-sm" style="font-size:0.82rem;">&#128737; Mod Panel</a></div>
       </div>
 
       <!-- Tab navigation -->
@@ -881,13 +881,13 @@
     // Show admin badge & link if admin
     if (isAdmin) {
       document.getElementById('adminBadge').style.display = 'inline';
-      document.getElementById('adminQuickLink').style.display = '';
+      document.getElementById('adminQuickLink').style.display = 'inline-block';
     }
 
     // Show mod badge & link if mod
     if (isMod) {
       document.getElementById('modBadge').style.display = 'inline';
-      document.getElementById('modQuickLink').style.display = '';
+      document.getElementById('modQuickLink').style.display = 'inline-block';
     }
 
     // ===== Activation key (synced across all panels) =====
