@@ -782,7 +782,7 @@
 
   <script src="js/script.js"></script>
   <script>
-  (function() {
+  (async function() {
     // ===== Session check =====
     var session = JSON.parse(localStorage.getItem('ct_session') || 'null');
     if (!session || !session.loggedIn) {
@@ -795,6 +795,33 @@
     var user = users[session.svartId] || {};
     var svartId = session.svartId || '';
 
+    // ===== Server-side session validation =====
+    // Check if the account still exists on the server (blocks wiped accounts)
+    try {
+      var email = (user.email || session.email || '').toLowerCase();
+      if (email) {
+        var checkResp = await fetch('/api/auth?email=' + encodeURIComponent(email));
+        if (checkResp.ok) {
+          var checkData = await checkResp.json();
+          if (checkData.success && !checkData.exists) {
+            // Account no longer exists on server — force logout
+            localStorage.removeItem('ct_session');
+            localStorage.removeItem('ct_persistent_session');
+            // Clean up local user data
+            delete users[svartId];
+            localStorage.setItem('ct_users', JSON.stringify(users));
+            Object.keys(localStorage).forEach(function(k) {
+              if (k.startsWith('ai_plan_') || k.startsWith('ai_requests_')) localStorage.removeItem(k);
+            });
+            window.location.href = 'login.html';
+            return;
+          }
+        }
+      }
+    } catch (e) {
+      // Server unreachable — allow local session (offline mode)
+    }
+
     // ===== Helper: show message =====
     function showMsg(el, text, type) {
       el.textContent = text;
@@ -803,7 +830,7 @@
       setTimeout(function() { el.style.display = 'none'; }, 4000);
     }
 
-    // ===== Helper: simple hash =====
+    // ===== Helper: simple hash (matches hashPassword in login/signup/server) =====
     function simpleHash(str) {
       var hash = 0;
       for (var i = 0; i < str.length; i++) {
@@ -811,7 +838,7 @@
         hash = ((hash << 5) - hash) + c;
         hash |= 0;
       }
-      return hash.toString(36);
+      return 'h' + Math.abs(hash).toString(36);
     }
 
     // ===== Tab navigation =====
@@ -995,6 +1022,18 @@
       user.username = name;
       users[svartId] = user;
       localStorage.setItem('ct_users', JSON.stringify(users));
+      // Sync display name to server
+      try {
+        fetch('/api/auth', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: user.email || session.email,
+            activationKey: user.activationKey || svartId,
+            updates: { displayName: name }
+          })
+        });
+      } catch (e) { /* Server offline */ }
       document.getElementById('currentName').textContent = name;
       document.getElementById('userName').textContent = name;
       showMsg(document.getElementById('nameMsg'), 'Display name updated!', 'success');
@@ -1007,7 +1046,8 @@
       var newEmail = document.getElementById('newEmail').value.trim();
       var pwd = document.getElementById('emailConfirmPassword').value;
       if (!newEmail || !newEmail.includes('@')) { showMsg(document.getElementById('emailMsg'), 'Enter a valid email.', 'error'); return; }
-      if (simpleHash(pwd) !== user.passwordHash) { showMsg(document.getElementById('emailMsg'), 'Incorrect password.', 'error'); return; }
+      var storedHash = user.password || user.passwordHash || '';
+      if (simpleHash(pwd) !== storedHash) { showMsg(document.getElementById('emailMsg'), 'Incorrect password.', 'error'); return; }
       user.email = newEmail;
       users[svartId] = user;
       localStorage.setItem('ct_users', JSON.stringify(users));
@@ -1023,17 +1063,34 @@
     document.getElementById('rememberStatus').textContent = persistent && persistent.loggedIn ? 'Yes \u2014 persistent session' : 'No \u2014 session only';
 
     // Password change
-    document.getElementById('passwordForm').addEventListener('submit', function(e) {
+    document.getElementById('passwordForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       var cur = document.getElementById('currentPassword').value;
       var newP = document.getElementById('newPassword').value;
       var conf = document.getElementById('confirmNewPassword').value;
-      if (simpleHash(cur) !== user.passwordHash) { showMsg(document.getElementById('passwordMsg'), 'Current password is incorrect.', 'error'); return; }
+      var curHash = simpleHash(cur);
+      // Check against both field names (password from signup, passwordHash from account changes)
+      var storedHash = user.password || user.passwordHash || '';
+      if (curHash !== storedHash) { showMsg(document.getElementById('passwordMsg'), 'Current password is incorrect.', 'error'); return; }
       if (newP.length < 8) { showMsg(document.getElementById('passwordMsg'), 'New password must be at least 8 characters.', 'error'); return; }
       if (newP !== conf) { showMsg(document.getElementById('passwordMsg'), 'Passwords do not match.', 'error'); return; }
-      user.passwordHash = simpleHash(newP);
+      var newHash = simpleHash(newP);
+      user.password = newHash;
+      user.passwordHash = newHash;
       users[svartId] = user;
       localStorage.setItem('ct_users', JSON.stringify(users));
+      // Sync to server
+      try {
+        await fetch('/api/auth', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: user.email || session.email,
+            activationKey: user.activationKey || svartId,
+            updates: { passwordHash: newHash }
+          })
+        });
+      } catch (e) { /* Server offline */ }
       showMsg(document.getElementById('passwordMsg'), 'Password changed successfully!', 'success');
       document.getElementById('passwordForm').reset();
     });
@@ -1148,11 +1205,27 @@
       location.reload();
     });
 
-    document.getElementById('deleteAccountBtn').addEventListener('click', function() {
-      if (!confirm('DELETE YOUR ACCOUNT? This will remove all your data from this device. This cannot be undone.')) return;
+    document.getElementById('deleteAccountBtn').addEventListener('click', async function() {
+      if (!confirm('DELETE YOUR ACCOUNT? This will permanently remove all your data from our servers and this device. This cannot be undone.')) return;
       if (!confirm('Are you absolutely sure? Type your activation key in the next prompt to confirm.')) return;
       var typed = prompt('Type your activation key to confirm deletion:');
       if (typed !== svartId && typed !== (user.activationKey || '')) { alert('Activation key does not match. Deletion cancelled.'); return; }
+
+      // Delete from server first
+      try {
+        await fetch('/api/auth', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: user.email || session.email,
+            activationKey: user.activationKey || svartId
+          })
+        });
+      } catch (e) {
+        // Server offline — still delete locally
+      }
+
+      // Delete locally
       delete users[svartId];
       localStorage.setItem('ct_users', JSON.stringify(users));
       localStorage.removeItem('ct_session');
@@ -1162,7 +1235,7 @@
       localStorage.removeItem('ai_requests_' + svartId);
       localStorage.removeItem('ai_plan_' + svartId);
       localStorage.removeItem('svart_prefs_' + svartId);
-      alert('Account deleted. You will be redirected to the home page.');
+      alert('Account deleted from our servers. You will be redirected to the home page.');
       window.location.href = 'index.html';
     });
 

@@ -110,16 +110,22 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     let email = "";
     let activationKey = "";
     let displayName = "";
+    let passwordHash = "";
+    let role = "user";
 
     try {
       const body = (await context.request.json()) as {
         email: string;
         activationKey: string;
         displayName?: string;
+        passwordHash?: string;
+        role?: string;
       };
       email = (body.email || "").trim().toLowerCase();
       activationKey = (body.activationKey || "").trim();
       displayName = (body.displayName || "").trim();
+      passwordHash = (body.passwordHash || "").trim();
+      role = (body.role || "user").trim();
     } catch {
       return errorResponse("Invalid request body", 400);
     }
@@ -156,6 +162,22 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     await context.env.USAGE_DATA.put(
       `reg:email:${email}`,
       JSON.stringify([activationKey])
+    );
+
+    // Store full account data server-side (source of truth for auth)
+    const accountData = {
+      email,
+      activationKey,
+      displayName,
+      passwordHash,
+      role,
+      createdAt: record.registeredAt,
+      ip: record.ip,
+      country: record.country,
+    };
+    await context.env.USAGE_DATA.put(
+      `account:${email}`,
+      JSON.stringify(accountData)
     );
 
     // Add to the master registration log (ordered list)
@@ -400,9 +422,10 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
       await context.env.USAGE_DATA.delete(`reg:key:${key}`);
     }
 
-    // Delete all reg:email:* entries
+    // Delete all reg:email:* entries and account:* entries
     for (const email of emails) {
       await context.env.USAGE_DATA.delete(`reg:email:${email}`);
+      await context.env.USAGE_DATA.delete(`account:${email}`);
     }
 
     // Clear the master log

@@ -199,8 +199,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         // Store the hashed temp password + forceChange flag by email so login can pick it up
         // Key: reset:credentials:<email>
         if (entry.email) {
+          const emailLower = entry.email.toLowerCase();
           await context.env.USAGE_DATA.put(
-            `reset:credentials:${entry.email.toLowerCase()}`,
+            `reset:credentials:${emailLower}`,
             JSON.stringify({
               hashedPassword: hashedTempPassword,
               forcePasswordChange: true,
@@ -208,6 +209,16 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
             }),
             { expirationTtl: 60 * 60 * 24 * 7 } // Expires in 7 days
           );
+
+          // Also update the server-side account password directly
+          const accountRaw = await context.env.USAGE_DATA.get(`account:${emailLower}`);
+          if (accountRaw) {
+            const account = JSON.parse(accountRaw);
+            account.passwordHash = hashedTempPassword;
+            account.forcePasswordChange = true;
+            account.updatedAt = entry.resolvedAt;
+            await context.env.USAGE_DATA.put(`account:${emailLower}`, JSON.stringify(account));
+          }
         }
 
         return jsonResponse({

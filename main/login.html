@@ -196,22 +196,124 @@
             btn.disabled = true;
             btn.textContent = 'Logging in...';
 
-            // Check server for temp password credentials first (from admin/mod reset)
-            let serverCreds = null;
+            var pwHash = hashPassword(password);
+
+            // ===== Server-side authentication (source of truth) =====
+            var serverAccount = null;
+            var serverForceChange = false;
+            var serverError = null;
             try {
-                const credResp = await fetch('/api/password-reset?checkCredentials=' + encodeURIComponent(email));
-                if (credResp.ok) {
-                    const credData = await credResp.json();
-                    if (credData.success && credData.hasCredentials) {
-                        serverCreds = credData;
+                const authResp = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, passwordHash: pwHash })
+                });
+                const authData = await authResp.json();
+                if (authData.success) {
+                    serverAccount = authData.account;
+                    serverForceChange = authData.forcePasswordChange || false;
+                } else {
+                    serverError = authData.error || 'Login failed.';
+                    if (authResp.status === 404) {
+                        serverError = 'no_account';
+                    } else if (authResp.status === 401) {
+                        serverError = 'wrong_password';
                     }
                 }
             } catch (e) {
-                // Server unavailable, continue with local-only check
+                // Server unreachable — fall back to local
+                serverError = 'offline';
             }
 
-            // Find user by email locally
-            const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
+            // If server says no account, block login (account was wiped)
+            if (serverError === 'no_account') {
+                // Also clear any stale local data for this email
+                var users = JSON.parse(localStorage.getItem('ct_users') || '{}');
+                for (var k in users) {
+                    if (users[k].email && users[k].email.toLowerCase() === email) {
+                        delete users[k];
+                    }
+                }
+                localStorage.setItem('ct_users', JSON.stringify(users));
+                showMsg('No account found with that email. It may have been deleted. <a href="signup.html">Sign up</a>', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Log In';
+                return;
+            }
+
+            if (serverError === 'wrong_password') {
+                showMsg('Incorrect password.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Log In';
+                return;
+            }
+
+            // Server authenticated successfully — sync local storage
+            if (serverAccount) {
+                var users = JSON.parse(localStorage.getItem('ct_users') || '{}');
+                var svartId = serverAccount.svartId || serverAccount.activationKey;
+
+                // Create or update local user data from server
+                users[svartId] = {
+                    username: serverAccount.displayName,
+                    displayName: serverAccount.displayName,
+                    password: pwHash,
+                    email: serverAccount.email,
+                    activationKey: serverAccount.activationKey,
+                    role: serverAccount.role,
+                    createdAt: serverAccount.createdAt,
+                    isAdmin: serverAccount.role === 'admin',
+                    forcePasswordChange: serverForceChange
+                };
+                localStorage.setItem('ct_users', JSON.stringify(users));
+
+                // Admin unlimited AI
+                if (serverAccount.role === 'admin') {
+                    localStorage.setItem('ai_plan_' + svartId, 'unlimited');
+                }
+                // Mod unlimited AI
+                if (serverAccount.role === 'mod') {
+                    localStorage.setItem('ai_plan_' + svartId, 'unlimited');
+                }
+
+                // Force password change if required
+                if (serverForceChange) {
+                    localStorage.setItem('ct_session', JSON.stringify({
+                        svartId: svartId,
+                        email: email,
+                        loggedIn: true,
+                        ts: Date.now(),
+                        persistent: false,
+                        forcePasswordChange: true
+                    }));
+                    showMsg('Your password was reset. You must set a new password now.', 'warning');
+                    setTimeout(function() {
+                        showForcePasswordChange(svartId, users[svartId], users);
+                    }, 500);
+                    return;
+                }
+
+                const remember = document.getElementById('remember').checked;
+                var sessionData = {
+                    svartId: svartId,
+                    email: email,
+                    loggedIn: true,
+                    ts: Date.now(),
+                    persistent: remember
+                };
+                localStorage.setItem('ct_session', JSON.stringify(sessionData));
+                if (remember) {
+                    localStorage.setItem('ct_persistent_session', JSON.stringify(sessionData));
+                } else {
+                    localStorage.removeItem('ct_persistent_session');
+                }
+                showMsg('Login successful! Redirecting...', 'success');
+                setTimeout(function() { window.location.href = 'account.html'; }, 1000);
+                return;
+            }
+
+            // ===== Fallback: server offline, check local only =====
+            var users = JSON.parse(localStorage.getItem('ct_users') || '{}');
             var foundKey = null;
             var foundUser = null;
             for (var key in users) {
@@ -222,76 +324,32 @@
                 }
             }
 
-            // If server has temp credentials for this email, apply them to local account
-            if (serverCreds && foundUser && serverCreds.hashedPassword) {
-                // The server generated a temp password — check if user is entering it
-                if (hashPassword(password) === serverCreds.hashedPassword) {
-                    // Temp password matches — set it locally and force change
-                    foundUser.password = serverCreds.hashedPassword;
-                    foundUser.forcePasswordChange = true;
-                    users[foundKey] = foundUser;
-                    localStorage.setItem('ct_users', JSON.stringify(users));
-                }
-            }
-
             if (foundUser) {
-                if (foundUser.password === hashPassword(password)) {
-                        // Admin account auto-setup
-                        if (email === 'admin@svartsecurity.org') {
-                            foundUser.isAdmin = true;
-                            foundUser.role = 'admin';
-                            users[foundKey] = foundUser;
-                            localStorage.setItem('ct_users', JSON.stringify(users));
-                            localStorage.setItem('ai_plan_' + foundKey, 'unlimited');
-                        }
-
-                        // Mod accounts get unlimited AI too
-                        if (foundUser.role === 'mod') {
-                            localStorage.setItem('ai_plan_' + foundKey, 'unlimited');
-                        }
-
-                        // Check if forced password change is required (after admin/mod reset)
-                        if (foundUser.forcePasswordChange) {
-                            // Store temp session so they can change password
-                            localStorage.setItem('ct_session', JSON.stringify({
-                                svartId: foundKey,
-                                email: email,
-                                loggedIn: true,
-                                ts: Date.now(),
-                                persistent: false,
-                                forcePasswordChange: true
-                            }));
-                            showMsg('Your password was reset. You must set a new password now.', 'warning');
-                            setTimeout(function() {
-                                showForcePasswordChange(foundKey, foundUser, users);
-                            }, 500);
-                            return;
-                        }
-
-                        const remember = document.getElementById('remember').checked;
-                        var sessionData = {
-                            svartId: foundKey,
-                            email: email,
-                            loggedIn: true,
-                            ts: Date.now(),
-                            persistent: remember
-                        };
-                        localStorage.setItem('ct_session', JSON.stringify(sessionData));
-                        if (remember) {
-                            localStorage.setItem('ct_persistent_session', JSON.stringify(sessionData));
-                        } else {
-                            localStorage.removeItem('ct_persistent_session');
-                        }
-                        showMsg('Login successful! Redirecting...', 'success');
-                        setTimeout(function() { window.location.href = 'account.html'; }, 1000);
-                        return;
+                if (foundUser.password === pwHash) {
+                    const remember = document.getElementById('remember').checked;
+                    var sessionData = {
+                        svartId: foundKey,
+                        email: email,
+                        loggedIn: true,
+                        ts: Date.now(),
+                        persistent: remember
+                    };
+                    localStorage.setItem('ct_session', JSON.stringify(sessionData));
+                    if (remember) {
+                        localStorage.setItem('ct_persistent_session', JSON.stringify(sessionData));
+                    } else {
+                        localStorage.removeItem('ct_persistent_session');
                     }
-                    showMsg('Incorrect password.', 'error');
-                } else {
-                    showMsg('No account found with that email. <a href=\"signup.html\">Sign up</a>', 'error');
+                    showMsg('Login successful (offline mode). Redirecting...', 'success');
+                    setTimeout(function() { window.location.href = 'account.html'; }, 1000);
+                    return;
                 }
-                btn.disabled = false;
-                btn.textContent = 'Log In';
+                showMsg('Incorrect password.', 'error');
+            } else {
+                showMsg('No account found with that email. <a href="signup.html">Sign up</a>', 'error');
+            }
+            btn.disabled = false;
+            btn.textContent = 'Log In';
         });
 
         function showMsg(html, type) {
@@ -328,7 +386,7 @@
             overlay.appendChild(modal);
             document.body.appendChild(overlay);
 
-            document.getElementById('forceChangePwBtn').addEventListener('click', function() {
+            document.getElementById('forceChangePwBtn').addEventListener('click', async function() {
                 var newPw = document.getElementById('forceNewPw').value;
                 var confirmPw = document.getElementById('forceConfirmPw').value;
                 var errEl = document.getElementById('forceChangeError');
@@ -344,8 +402,25 @@
                     return;
                 }
 
-                // Update password and remove force flag
-                user.password = hashPassword(newPw);
+                var newHash = hashPassword(newPw);
+
+                // Update password on server
+                try {
+                    await fetch('/api/auth', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: user.email,
+                            activationKey: user.activationKey,
+                            updates: { passwordHash: newHash, forcePasswordChange: false }
+                        })
+                    });
+                } catch (e) {
+                    // Server offline — still update locally
+                }
+
+                // Update password locally and remove force flag
+                user.password = newHash;
                 delete user.forcePasswordChange;
                 users[svartId] = user;
                 localStorage.setItem('ct_users', JSON.stringify(users));

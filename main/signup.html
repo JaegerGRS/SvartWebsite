@@ -357,7 +357,11 @@
                 localStorage.setItem('ai_plan_' + svartId, 'unlimited');
             }
 
-            // Register on server (enforces unique email server-side)
+            // Determine role for server
+            var serverRole = 'user';
+            if (email.toLowerCase() === 'admin@svartsecurity.org') serverRole = 'admin';
+
+            // Register on server (enforces unique email server-side + stores full account)
             try {
                 const resp = await fetch('/api/registrations', {
                     method: 'POST',
@@ -365,7 +369,9 @@
                     body: JSON.stringify({
                         email: email,
                         activationKey: activationKey,
-                        displayName: document.getElementById('displayName').value.trim()
+                        displayName: document.getElementById('displayName').value.trim(),
+                        passwordHash: hashPassword(password),
+                        role: serverRole
                     })
                 });
                 const data = await resp.json();
