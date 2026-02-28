@@ -265,69 +265,88 @@
             color: var(--primary);
         }
 
-        /* Gift card panel */
-        .gift-box {
-            max-width: 480px;
-            margin: 0 auto;
+        /* Crypto panel */
+        .crypto-box {
             text-align: center;
+            max-width: 520px;
+            margin: 0 auto;
         }
-        .gift-box p {
+        .crypto-box p {
             color: var(--text-muted);
             font-size: 0.9rem;
-            margin: 0 0 20px;
+            margin: 0 0 16px;
             line-height: 1.6;
         }
-        .gift-input-wrap {
+        .crypto-coins {
             display: flex;
-            gap: 10px;
-            margin-bottom: 16px;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 16px 0;
         }
-        .gift-input-wrap input {
-            flex: 1;
-            padding: 14px 16px;
-            background: rgba(var(--bg-dark-rgb,10,10,15),0.8);
-            border: 1px solid var(--border-color);
+        .crypto-coin {
+            padding: 8px 16px;
+            border: 1px solid rgba(var(--primary-rgb),0.25);
             border-radius: 8px;
             color: var(--text-light);
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            background: rgba(var(--primary-rgb),0.04);
         }
-        .gift-input-wrap input:focus {
-            outline: none;
-            border-color: var(--primary);
+        .crypto-pay-btn {
+            display: inline-block;
+            padding: 14px 40px;
+            background: linear-gradient(135deg, #f7931a, #e2761b);
+            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.3s, transform 0.2s;
         }
-        .gift-input-wrap input::placeholder {
-            text-transform: none;
-            letter-spacing: 0;
+        .crypto-pay-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .crypto-confirm {
+            display: none;
+            margin-top: 24px;
+            padding: 20px;
+            border: 1px solid rgba(34,197,94,0.3);
+            border-radius: 12px;
+            background: rgba(34,197,94,0.05);
+        }
+        .crypto-confirm p {
             color: var(--text-muted);
-            opacity: 0.5;
+            font-size: 0.88rem;
+            margin: 0 0 12px;
         }
-        .gift-redeem-btn {
-            padding: 14px 28px;
-            background: var(--primary);
+        .crypto-confirm .done-btn {
+            padding: 10px 28px;
+            background: #22c55e;
             color: #fff;
             font-weight: 700;
-            border: 2px solid var(--primary);
+            border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             transition: background 0.2s;
-            white-space: nowrap;
         }
-        .gift-redeem-btn:hover {
-            background: transparent;
-            color: var(--primary);
-        }
-        .gift-info {
-            color: var(--text-muted);
-            font-size: 0.78rem;
-            margin: 0;
+        .crypto-confirm .done-btn:hover { background: #16a34a; }
+        .crypto-info {
+            margin-top: 20px;
             padding: 14px 16px;
             border-radius: 8px;
             background: rgba(var(--primary-rgb),0.04);
             border: 1px solid rgba(var(--primary-rgb),0.1);
             text-align: left;
+        }
+        .crypto-info p {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            margin: 0 0 6px;
             line-height: 1.7;
         }
 
@@ -485,9 +504,9 @@
                         <span class="pay-tab-icon">&#128179;</span>
                         Card
                     </button>
-                    <button class="pay-tab" data-tab="gift">
-                        <span class="pay-tab-icon">&#127873;</span>
-                        Gift Card
+                    <button class="pay-tab" data-tab="crypto">
+                        <span class="pay-tab-icon">&#9823;</span>
+                        Crypto
                     </button>
                 </div>
 
@@ -553,24 +572,37 @@
                     </div>
                 </div>
 
-                <!-- Gift card panel -->
-                <div class="pay-panel" id="panel-gift">
-                    <div class="gift-box">
-                        <p><strong>Redeem a PayPal Gift Card</strong><br>
-                        Enter your PayPal gift card code below. Once the gift card balance is verified and applied, your plan or top-up will be activated automatically.</p>
+                <!-- Crypto panel -->
+                <div class="pay-panel" id="panel-crypto">
+                    <div class="crypto-box">
+                        <div style="font-size:2.5rem;margin-bottom:12px;">&#9823;</div>
+                        <p><strong>Pay with Cryptocurrency</strong><br>
+                        We accept Bitcoin (BTC), Ethereum (ETH), Litecoin (LTC), and other major cryptocurrencies.<br>
+                        All crypto payments are converted and processed through our PayPal account.</p>
 
-                        <div class="gift-input-wrap">
-                            <input type="text" id="giftCode" placeholder="Enter gift card code" maxlength="30" />
-                            <button class="gift-redeem-btn" id="giftRedeemBtn">Redeem</button>
+                        <div class="crypto-coins">
+                            <span class="crypto-coin" title="Bitcoin">&#8383; BTC</span>
+                            <span class="crypto-coin" title="Ethereum">&#926; ETH</span>
+                            <span class="crypto-coin" title="Litecoin">&#321; LTC</span>
+                            <span class="crypto-coin" title="USDT">&#36; USDT</span>
                         </div>
 
-                        <div class="gift-info">
+                        <p style="font-size:0.88rem;color:var(--text-muted);margin:16px 0 20px;">Click below to open PayPal and complete your <strong id="cryptoAmount">&pound;0.00</strong> payment using your crypto-linked PayPal wallet or any supported cryptocurrency method.</p>
+
+                        <a id="cryptoPayBtn" href="#" target="_blank" class="crypto-pay-btn">Pay <span id="cryptoPayAmount">&pound;0.00</span> with Crypto</a>
+
+                        <div class="crypto-confirm" id="cryptoConfirm">
+                            <p>&#10003; Opened PayPal? Once your crypto payment is confirmed, click the button below.</p>
+                            <p style="font-size:0.8rem;color:var(--text-muted);margin:0 0 12px;">Crypto payments may take a few minutes to confirm on the blockchain. Your plan or top-up will be activated once verified.</p>
+                            <button class="done-btn" id="cryptoDoneBtn">&#10003; I've Completed Payment</button>
+                        </div>
+
+                        <div class="crypto-info">
                             <p><strong>How it works:</strong></p>
-                            <p>1. Purchase a PayPal gift card from any retailer or online store</p>
-                            <p>2. Enter the gift card code above</p>
-                            <p>3. Once the balance is verified, your purchase is activated instantly</p>
-                            <p style="margin-top:8px;"><strong>Accepted:</strong> PayPal gift cards, PayPal balance codes, and PayPal e-gift cards.</p>
-                            <p style="margin-top:4px;">Gift card must cover the full purchase amount of <strong id="giftAmount">&pound;0.00</strong>. Any remaining balance stays on your PayPal account.</p>
+                            <p>1. Click the button above to open PayPal</p>
+                            <p>2. Pay using your crypto balance or linked crypto wallet</p>
+                            <p>3. Your plan or top-up is activated once payment is confirmed</p>
+                            <p style="margin-top:8px;"><strong>Privacy:</strong> Crypto payments offer enhanced privacy. We only see the PayPal transaction &mdash; not your wallet address.</p>
                         </div>
                     </div>
                 </div>
@@ -735,7 +767,8 @@
         // Set amounts in payment panels
         document.getElementById('paypalAmount').textContent = priceStr;
         document.getElementById('cardPayAmount').textContent = priceStr;
-        document.getElementById('giftAmount').textContent = priceStr;
+        document.getElementById('cryptoAmount').textContent = priceStr;
+        document.getElementById('cryptoPayAmount').textContent = priceStr;
 
         // PayPal button link
         var paypalLink = PAYPAL_URL + '/' + product.price.toFixed(2) + 'GBP';
@@ -841,21 +874,20 @@
             }, 1500);
         });
 
-        // Gift card redeem
-        document.getElementById('giftRedeemBtn').addEventListener('click', function() {
-            var code = document.getElementById('giftCode').value.trim();
-            if (!code) { showMsg('Please enter a gift card code.', 'error'); return; }
-            if (code.length < 6) { showMsg('Gift card code is too short. Please check and try again.', 'error'); return; }
-
-            var btn = this;
-            btn.disabled = true;
-            btn.textContent = 'Verifying...';
-
-            // Simulate verification (in production, this would verify with PayPal API)
+        // Crypto flow
+        var cryptoPayBtn = document.getElementById('cryptoPayBtn');
+        var cryptoConfirm = document.getElementById('cryptoConfirm');
+        cryptoPayBtn.href = paypalLink;
+        cryptoPayBtn.addEventListener('click', function() {
             setTimeout(function() {
-                showMsg('&#10003; Gift card code submitted! We are verifying the balance. Once confirmed, your ' + (product.type === 'plan' ? 'plan' : 'top-up') + ' will be activated automatically. You will receive an email confirmation.', 'info');
-                btn.textContent = 'Submitted';
-            }, 2000);
+                cryptoConfirm.style.display = 'block';
+            }, 1000);
+        });
+
+        document.getElementById('cryptoDoneBtn').addEventListener('click', function() {
+            showMsg('&#10003; Thank you! Your crypto payment is being verified. Your ' + (product.type === 'plan' ? 'plan' : 'top-up') + ' will be activated once the transaction is confirmed. Check your email for confirmation.', 'success');
+            this.disabled = true;
+            this.textContent = 'Payment Submitted';
         });
 
         // Luhn algorithm for card validation
