@@ -54,6 +54,7 @@
             .reg-table th, .reg-table td { padding: 8px 10px; }
             .admin-stats { flex-direction: column; }
         }
+        .role-select:focus { border-color: var(--primary); outline: none; }
     </style>
 </head>
 <body>
@@ -115,27 +116,8 @@
         </div>
         <div id="searchResult" style="display:none;"></div>
 
-        <!-- Full Registration Table -->
-        <div style="overflow-x:auto;">
-            <table class="reg-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Email</th>
-                        <th>Activation Key</th>
-                        <th>Display Name</th>
-                        <th>Date</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody id="regTableBody">
-                    <tr><td colspan="6" class="no-data">Loading...</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Password Reset Requests -->
-        <h2 class="section-title">&#128274; Password Reset Requests</h2>
+        <!-- Password Reset Requests (TOP) -->
+        <h2 class="section-title" style="margin-top:0;border-top:none;padding-top:0;">&#128274; Password Reset Requests</h2>
         <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Users who forgot their password and requested help. Search their email above to find their activation key, then contact them.</p>
         <div style="overflow-x:auto;">
             <table class="reg-table">
@@ -151,6 +133,49 @@
                 </thead>
                 <tbody id="resetTableBody">
                     <tr><td colspan="6" class="no-data">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Role Management -->
+        <h2 class="section-title">&#128101; Role Management</h2>
+        <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Assign roles to users. Mods get access to the mod panel for password resets and reporting. Changes take effect on the user's next page load.</p>
+        <div id="roleMsg" style="display:none;margin-bottom:16px;padding:12px 16px;border-radius:8px;font-size:0.9rem;"></div>
+        <div style="overflow-x:auto;">
+            <table class="reg-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Email</th>
+                        <th>Display Name</th>
+                        <th>Current Role</th>
+                        <th>Change To</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="roleTableBody">
+                    <tr><td colspan="6" class="no-data">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Full Registration Table -->
+        <h2 class="section-title">&#128203; Registration Log</h2>
+        <div style="overflow-x:auto;">
+            <table class="reg-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Email</th>
+                        <th>Activation Key</th>
+                        <th>Display Name</th>
+                        <th>Role</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="regTableBody">
+                    <tr><td colspan="7" class="no-data">Loading...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -350,10 +375,13 @@
             panel.style.display = '';
             loadRegistrations();
             loadResetRequests();
+            loadRoles();
         }
 
+        var cachedRegs = []; // shared between reg table and role table
+
         async function loadRegistrations() {
-            tableBody.innerHTML = '<tr><td colspan="6" class="no-data">Loading...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="7" class="no-data">Loading...</td></tr>';
             try {
                 const resp = await fetch(API_BASE, {
                     headers: { 'Authorization': 'Bearer ' + adminToken }
@@ -368,11 +396,12 @@
                         loginScreen.style.display = '';
                         return;
                     }
-                    tableBody.innerHTML = '<tr><td colspan="6" class="no-data">Error: ' + (data.error || 'Unknown') + '</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="7" class="no-data">Error: ' + (data.error || 'Unknown') + '</td></tr>';
                     return;
                 }
 
                 const regs = data.registrations || [];
+                cachedRegs = regs;
                 totalUsers.textContent = data.total || 0;
 
                 // Count today
@@ -381,7 +410,8 @@
                 todayUsers.textContent = todayCount;
 
                 if (regs.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="6" class="no-data">No registrations yet.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="7" class="no-data">No registrations yet.</td></tr>';
+                    renderRoleTable(regs);
                     return;
                 }
 
@@ -390,17 +420,24 @@
                 tableBody.innerHTML = sorted.map(function(r, i) {
                     const num = regs.length - i;
                     const dateStr = r.date ? new Date(r.date).toLocaleString() : '-';
+                    var roleBadge = r.role === 'admin' ? '<span style="color:#ef4444;font-weight:600;">admin</span>'
+                        : r.role === 'mod' ? '<span style="color:#f59e0b;font-weight:600;">mod</span>'
+                        : '<span style="color:var(--text-muted);">user</span>';
                     return '<tr>' +
                         '<td>' + num + '</td>' +
                         '<td class="email-cell">' + escHtml(r.email) + '</td>' +
                         '<td class="key-cell">' + escHtml(r.key) + '</td>' +
                         '<td>' + escHtml(r.displayName || '-') + '</td>' +
+                        '<td>' + roleBadge + '</td>' +
                         '<td>' + dateStr + '</td>' +
                         '<td><button class="copy-btn" onclick="copyText(\'' + escAttr(r.key) + '\')">Copy Key</button></td>' +
                         '</tr>';
                 }).join('');
+
+                // Also populate role table
+                renderRoleTable(regs);
             } catch (e) {
-                tableBody.innerHTML = '<tr><td colspan="6" class="no-data">Network error. Is the API running?</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="7" class="no-data">Network error. Is the API running?</td></tr>';
             }
         }
 
@@ -447,6 +484,97 @@
 
         function escAttr(str) {
             return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        // ======== Role Management ========
+        var roleTableBody = document.getElementById('roleTableBody');
+        var roleMsg = document.getElementById('roleMsg');
+
+        function renderRoleTable(regs) {
+            if (!regs || regs.length === 0) {
+                roleTableBody.innerHTML = '<tr><td colspan="6" class="no-data">No users registered yet.</td></tr>';
+                return;
+            }
+
+            var sorted = regs.slice().reverse();
+            roleTableBody.innerHTML = sorted.map(function(r, i) {
+                var num = regs.length - i;
+                var currentRole = r.role || 'user';
+                var roleBadge = currentRole === 'admin' ? '<span style="color:#ef4444;font-weight:600;">admin</span>'
+                    : currentRole === 'mod' ? '<span style="color:#f59e0b;font-weight:600;">mod</span>'
+                    : '<span style="color:var(--text-muted);">user</span>';
+                var isAdminEmail = r.email.toLowerCase() === ADMIN_EMAIL;
+                var selectHtml = isAdminEmail
+                    ? '<span style="color:var(--text-muted);font-size:0.8rem;">Protected</span>'
+                    : '<select data-email="' + escAttr(r.email) + '" class="role-select" style="background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:6px;color:var(--text-light);padding:6px 10px;font-size:0.85rem;">' +
+                        '<option value="user"' + (currentRole === 'user' ? ' selected' : '') + '>User</option>' +
+                        '<option value="mod"' + (currentRole === 'mod' ? ' selected' : '') + '>Mod</option>' +
+                        '<option value="admin"' + (currentRole === 'admin' ? ' selected' : '') + '>Admin</option>' +
+                        '</select>';
+                var actionHtml = isAdminEmail
+                    ? ''
+                    : '<button class="resolve-btn role-save-btn" data-email="' + escAttr(r.email) + '" style="font-size:0.8rem;">Save</button>';
+                return '<tr>' +
+                    '<td>' + num + '</td>' +
+                    '<td class="email-cell">' + escHtml(r.email) + '</td>' +
+                    '<td>' + escHtml(r.displayName || '-') + '</td>' +
+                    '<td>' + roleBadge + '</td>' +
+                    '<td>' + selectHtml + '</td>' +
+                    '<td>' + actionHtml + '</td>' +
+                    '</tr>';
+            }).join('');
+
+            // Bind save buttons
+            roleTableBody.querySelectorAll('.role-save-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var email = btn.dataset.email;
+                    var select = roleTableBody.querySelector('select[data-email="' + email + '"]');
+                    if (select) changeRole(email, select.value, btn);
+                });
+            });
+        }
+
+        function loadRoles() {
+            // Role table is populated from the same data as registrations
+            renderRoleTable(cachedRegs);
+        }
+
+        async function changeRole(email, newRole, btn) {
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+            roleMsg.style.display = 'none';
+            try {
+                var resp = await fetch('/api/auth', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        adminSecret: ADMIN_API_SECRET,
+                        updates: { role: newRole }
+                    })
+                });
+                var data = await resp.json();
+                if (data.success) {
+                    roleMsg.style.display = '';
+                    roleMsg.style.background = 'rgba(34,197,94,0.15)';
+                    roleMsg.style.color = '#22c55e';
+                    roleMsg.textContent = '\u2713 Role for ' + email + ' changed to ' + newRole;
+                    // Refresh tables
+                    loadRegistrations();
+                } else {
+                    roleMsg.style.display = '';
+                    roleMsg.style.background = 'rgba(239,68,68,0.15)';
+                    roleMsg.style.color = '#ef4444';
+                    roleMsg.textContent = 'Error: ' + (data.error || 'Failed to update role.');
+                }
+            } catch (e) {
+                roleMsg.style.display = '';
+                roleMsg.style.background = 'rgba(239,68,68,0.15)';
+                roleMsg.style.color = '#ef4444';
+                roleMsg.textContent = 'Network error updating role.';
+            }
+            btn.disabled = false;
+            btn.textContent = 'Save';
         }
 
         // ======== Password Reset Requests ========

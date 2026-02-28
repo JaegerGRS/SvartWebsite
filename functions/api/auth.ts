@@ -185,23 +185,26 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
 
     let email = "";
     let activationKey = "";
-    let updates: { passwordHash?: string; displayName?: string; forcePasswordChange?: boolean } = {};
+    let updates: { passwordHash?: string; displayName?: string; forcePasswordChange?: boolean; role?: string } = {};
+    let adminSecret = "";
 
     try {
       const body = (await context.request.json()) as {
         email: string;
-        activationKey: string;
-        updates: { passwordHash?: string; displayName?: string; forcePasswordChange?: boolean };
+        activationKey?: string;
+        adminSecret?: string;
+        updates: { passwordHash?: string; displayName?: string; forcePasswordChange?: boolean; role?: string };
       };
       email = (body.email || "").trim().toLowerCase();
       activationKey = (body.activationKey || "").trim();
+      adminSecret = (body.adminSecret || "").trim();
       updates = body.updates || {};
     } catch {
       return errorResponse("Invalid request body", 400);
     }
 
-    if (!email || !activationKey) {
-      return errorResponse("Email and activation key are required", 400);
+    if (!email) {
+      return errorResponse("Email is required", 400);
     }
 
     const accountRaw = await context.env.USAGE_DATA.get(`account:${email}`);
@@ -211,12 +214,32 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
 
     const account = JSON.parse(accountRaw);
 
+    // Admin role management: admin can update any account's role via adminSecret
+    const ADMIN_API_SECRET = "svart-admin-2026";
+    if (adminSecret === ADMIN_API_SECRET) {
+      // Admin-only: allow role changes
+      if (updates.role && ['user', 'mod', 'admin'].includes(updates.role)) {
+        account.role = updates.role;
+      }
+      if (updates.displayName !== undefined) {
+        account.displayName = updates.displayName;
+      }
+      account.updatedAt = new Date().toISOString();
+      await context.env.USAGE_DATA.put(`account:${email}`, JSON.stringify(account));
+      return jsonResponse({ success: true, message: "Account updated by admin", role: account.role });
+    }
+
+    // Normal user self-update: requires activation key
+    if (!activationKey) {
+      return errorResponse("Activation key is required", 400);
+    }
+
     // Verify ownership via activation key
     if (account.activationKey !== activationKey) {
       return errorResponse("Invalid activation key", 403);
     }
 
-    // Apply updates
+    // Apply updates (users cannot change their own role)
     if (updates.passwordHash) {
       account.passwordHash = updates.passwordHash;
     }

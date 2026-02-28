@@ -374,10 +374,26 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       }
     }
 
+    // Enrich with displayName and role from account data
+    const enriched = [];
+    for (const entry of log) {
+      const acctRaw = await context.env.USAGE_DATA.get(`account:${entry.email.toLowerCase()}`);
+      let displayName = '';
+      let role = 'user';
+      if (acctRaw) {
+        try {
+          const acct = JSON.parse(acctRaw);
+          displayName = acct.displayName || '';
+          role = acct.role || 'user';
+        } catch {}
+      }
+      enriched.push({ ...entry, displayName, role });
+    }
+
     return jsonResponse({
       success: true,
-      total: log.length,
-      registrations: log,
+      total: enriched.length,
+      registrations: enriched,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Internal server error";
