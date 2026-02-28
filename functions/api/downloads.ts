@@ -1,5 +1,5 @@
 interface Env {
-  CIPHER_KV: KVNamespace;
+  USAGE_DATA: KVNamespace;
 }
 
 const VALID_PLATFORMS = ["windows", "macos", "linux"] as const;
@@ -21,6 +21,14 @@ function jsonResponse(data: unknown, status = 200): Response {
   });
 }
 
+function errorResponse(error: string, status = 500): Response {
+  return jsonResponse({ success: false, error }, status);
+}
+
+function checkKV(env: Env): boolean {
+  return !!(env && env.USAGE_DATA);
+}
+
 export const onRequestOptions: PagesFunction<Env> = async () => {
   return new Response(null, {
     status: 204,
@@ -29,59 +37,71 @@ export const onRequestOptions: PagesFunction<Env> = async () => {
 };
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const counts: Record<string, number> = {};
+  try {
+    if (!checkKV(context.env)) {
+      return errorResponse("Server storage not configured.", 503);
+    }
 
-  for (const platform of VALID_PLATFORMS) {
-    const value = await context.env.CIPHER_KV.get(`downloads:${platform}`);
-    counts[platform] = value ? parseInt(value, 10) : 0;
+    const counts: Record<string, number> = {};
+
+    for (const platform of VALID_PLATFORMS) {
+      const value = await context.env.USAGE_DATA.get(`downloads:${platform}`);
+      counts[platform] = value ? parseInt(value, 10) : 0;
+    }
+
+    const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
+
+    return jsonResponse({
+      success: true,
+      data: {
+        platforms: counts,
+        total,
+      },
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Internal server error";
+    return errorResponse(message, 500);
   }
-
-  const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
-
-  return jsonResponse({
-    success: true,
-    data: {
-      platforms: counts,
-      total,
-    },
-  });
 };
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  let body: { platform?: string };
-
   try {
-    body = await context.request.json();
-  } catch {
-    return jsonResponse(
-      { success: false, error: "Invalid JSON body" },
-      400
-    );
-  }
+    if (!checkKV(context.env)) {
+      return errorResponse("Server storage not configured.", 503);
+    }
 
-  const platform = body.platform?.toLowerCase();
+    let body: { platform?: string };
 
-  if (!platform || !VALID_PLATFORMS.includes(platform as Platform)) {
-    return jsonResponse(
-      {
-        success: false,
-        error: `Invalid platform. Must be one of: ${VALID_PLATFORMS.join(", ")}`,
+    try {
+      body = await context.request.json();
+    } catch {
+      return errorResponse("Invalid JSON body", 400);
+    }
+
+    const platform = body.platform?.toLowerCase();
+
+    if (!platform || !VALID_PLATFORMS.includes(platform as Platform)) {
+      return errorResponse(
+        `Invalid platform. Must be one of: ${VALID_PLATFORMS.join(", ")}`,
+        400
+      );
+    }
+
+    const key = `downloads:${platform}`;
+    const current = await context.env.USAGE_DATA.get(key);
+    const newCount = (current ? parseInt(current, 10) : 0) + 1;
+
+    await context.env.USAGE_DATA.put(key, newCount.toString());
+
+    return jsonResponse({
+      success: true,
+      data: {
+        platform,
+        count: newCount,
       },
-      400
-    );
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Internal server error";
+    return errorResponse(message, 500);
   }
-
-  const key = `downloads:${platform}`;
-  const current = await context.env.CIPHER_KV.get(key);
-  const newCount = (current ? parseInt(current, 10) : 0) + 1;
-
-  await context.env.CIPHER_KV.put(key, newCount.toString());
-
-  return jsonResponse({
-    success: true,
-    data: {
-      platform,
-      count: newCount,
-    },
-  });
 };
