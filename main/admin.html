@@ -57,14 +57,25 @@
     </style>
 </head>
 <body>
-    <!-- Login Screen -->
-    <div id="adminLoginScreen">
+    <!-- Not Admin Screen -->
+    <div id="notAdminScreen" style="display:none;">
         <div class="admin-login">
-            <h2>Admin Access</h2>
-            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your admin secret to view registrations.</p>
-            <input type="password" id="adminSecret" placeholder="Admin secret key" autocomplete="off">
-            <button class="btn btn-primary btn-full" id="adminLoginBtn">Access Panel</button>
+            <h2 style="color:#ef4444;">&#128683; Access Denied</h2>
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">You must be logged in as the admin account to access this panel.</p>
+            <a href="account.html" class="btn btn-primary btn-full" style="text-align:center;text-decoration:none;display:block;">Back to Dashboard</a>
+            <a href="login.html" class="btn btn-secondary btn-full" style="text-align:center;text-decoration:none;display:block;margin-top:8px;">Log In</a>
+        </div>
+    </div>
+
+    <!-- Login Screen (activation key verification) -->
+    <div id="adminLoginScreen" style="display:none;">
+        <div class="admin-login">
+            <h2>&#128272; Admin Verification</h2>
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your activation key (secret key) to access the admin panel.</p>
+            <input type="password" id="adminSecret" placeholder="Your activation key (XXXX-XXXX-XXXX-XXXX)" autocomplete="off">
+            <button class="btn btn-primary btn-full" id="adminLoginBtn">Verify &amp; Access</button>
             <p id="adminLoginError" style="color:#ef4444;margin-top:12px;display:none;font-size:0.9rem;"></p>
+            <a href="account.html" style="display:block;text-align:center;margin-top:16px;color:var(--text-muted);font-size:0.85rem;text-decoration:none;">&#8592; Back to Dashboard</a>
         </div>
     </div>
 
@@ -73,6 +84,7 @@
         <div class="admin-header">
             <h1>Registration Log</h1>
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <a href="account.html" class="btn btn-secondary" style="padding:8px 16px;font-size:0.85rem;text-decoration:none;">&#8592; Dashboard</a>
                 <button class="btn btn-primary" id="sendTodayBtn" style="padding:8px 16px;font-size:0.85rem;background:var(--accent,#22c55e);border-color:var(--accent,#22c55e);">&#128231; Email Today's Signups</button>
                 <button class="btn btn-primary" id="refreshBtn" style="padding:8px 16px;font-size:0.85rem;">Refresh</button>
                 <button class="admin-logout" id="wipeAllBtn" style="border-color:#ef4444;color:#ef4444;">&#9888; Wipe All Accounts</button>
@@ -148,8 +160,11 @@
     (function() {
         let adminToken = '';
         const API_BASE = '/api/registrations';
+        const ADMIN_EMAIL = 'admin@svartsecurity.org';
+        const ADMIN_API_SECRET = 'svart-admin-2026';
 
         // Elements
+        const notAdminScreen = document.getElementById('notAdminScreen');
         const loginScreen = document.getElementById('adminLoginScreen');
         const panel = document.getElementById('adminPanel');
         const secretInput = document.getElementById('adminSecret');
@@ -167,17 +182,43 @@
         const resetStatCard = document.getElementById('resetStatCard');
         const pendingResetsEl = document.getElementById('pendingResets');
 
-        // Check if already authed this session
-        const stored = sessionStorage.getItem('svart_admin_token');
-        if (stored) {
-            adminToken = stored;
-            showPanel();
+        // Check if the logged-in user is the admin
+        function getAdminUser() {
+            try {
+                var session = JSON.parse(localStorage.getItem('ct_session') || '{}');
+                if (!session.loggedIn || !session.email) return null;
+                if (session.email.toLowerCase() !== ADMIN_EMAIL) return null;
+                var users = JSON.parse(localStorage.getItem('ct_users') || '{}');
+                var user = users[session.svartId];
+                if (!user) return null;
+                return { svartId: session.svartId, email: session.email, activationKey: user.activationKey };
+            } catch (e) { return null; }
+        }
+
+        var adminUser = getAdminUser();
+
+        // Gate: must be logged in as admin
+        if (!adminUser) {
+            notAdminScreen.style.display = '';
+            loginScreen.style.display = 'none';
+            panel.style.display = 'none';
+        } else {
+            // Check if already verified this session
+            var stored = sessionStorage.getItem('svart_admin_verified');
+            if (stored === 'true') {
+                adminToken = ADMIN_API_SECRET;
+                showPanel();
+            } else {
+                notAdminScreen.style.display = 'none';
+                loginScreen.style.display = '';
+                panel.style.display = 'none';
+            }
         }
 
         loginBtn.addEventListener('click', doLogin);
         secretInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
         logoutBtn.addEventListener('click', function() {
-            sessionStorage.removeItem('svart_admin_token');
+            sessionStorage.removeItem('svart_admin_verified');
             adminToken = '';
             panel.style.display = 'none';
             loginScreen.style.display = '';
@@ -263,10 +304,23 @@
         });
 
         function doLogin() {
-            const secret = secretInput.value.trim();
-            if (!secret) return;
-            adminToken = secret;
-            sessionStorage.setItem('svart_admin_token', secret);
+            var enteredKey = secretInput.value.trim();
+            if (!enteredKey) return;
+            if (!adminUser) {
+                loginError.textContent = 'Not logged in as admin.';
+                loginError.style.display = '';
+                return;
+            }
+            // Verify activation key matches the admin's stored key
+            if (enteredKey !== adminUser.activationKey) {
+                loginError.textContent = 'Invalid activation key. This must match your admin account\'s secret key.';
+                loginError.style.display = '';
+                secretInput.value = '';
+                return;
+            }
+            loginError.style.display = 'none';
+            adminToken = ADMIN_API_SECRET;
+            sessionStorage.setItem('svart_admin_verified', 'true');
             showPanel();
         }
 
