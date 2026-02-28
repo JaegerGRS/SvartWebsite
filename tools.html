@@ -24,8 +24,20 @@
         .tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px;margin-bottom:48px}
 
         /* Card */
-        .tc{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .15s;position:relative}
-        .tc:hover{border-color:var(--primary);box-shadow:0 0 28px rgba(124,58,237,.12);transform:translateY(-2px)}
+        .tc{background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:28px;cursor:pointer;transition:border-color .25s,box-shadow .25s,transform .2s,background .25s;position:relative}
+        .tc:hover{border-color:var(--primary);box-shadow:0 12px 40px rgba(124,58,237,.18);transform:translateY(-4px);background:rgba(124,58,237,.04)}
+        /* Featured / In Dev cards — purple hue */
+        .tc.glow-purple{border-color:rgba(124,58,237,.35);background:rgba(124,58,237,.06)}
+        .tc.glow-purple:hover{border-color:var(--primary);box-shadow:0 16px 60px rgba(124,58,237,.25);background:rgba(124,58,237,.1)}
+        .tc.glow-purple .icon-wrap{background:rgba(124,58,237,.15)}
+        /* Core cards — green hue */
+        .tc.glow-green{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.05)}
+        .tc.glow-green:hover{border-color:#22c55e;box-shadow:0 16px 60px rgba(34,197,94,.2);background:rgba(34,197,94,.08)}
+        .tc.glow-green .icon-wrap{background:rgba(34,197,94,.12)}
+        /* Planned cards — amber hue */
+        .tc.glow-amber{border-color:rgba(250,204,21,.2);background:rgba(250,204,21,.03)}
+        .tc.glow-amber:hover{border-color:rgba(250,204,21,.5);box-shadow:0 12px 40px rgba(250,204,21,.12);background:rgba(250,204,21,.06)}
+        .tc.glow-amber .icon-wrap{background:rgba(250,204,21,.1)}
         .tc .badge{position:absolute;top:16px;right:16px;font-size:.7rem;padding:3px 10px;border-radius:10px;font-weight:600;letter-spacing:.3px}
         .tc .badge.dev{background:rgba(124,58,237,.15);color:var(--primary)}
         .tc .badge.planned{background:rgba(250,204,21,.12);color:#facc15}
@@ -57,7 +69,7 @@
         .tm-body p{color:var(--text-muted);font-size:.9rem;line-height:1.65;margin-bottom:10px}
         .tm-body ul{list-style:none;padding:0;margin:0 0 14px}
         .tm-body ul li{color:var(--text-muted);font-size:.88rem;padding:4px 0 4px 18px;position:relative}
-        .tm-body ul li::before{content:'&#10003;';position:absolute;left:0;color:var(--primary);font-weight:700}
+        .tm-body ul li::before{content:'\2713';position:absolute;left:0;color:var(--primary);font-weight:700}
         .tm-specs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 20px}
         .tm-specs .sp{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px}
         .tm-specs .sp .label{font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
@@ -122,7 +134,7 @@
     <section class="container">
         <div class="tg" id="toolsGrid">
             <!-- Svart Browser -->
-            <div class="tc" data-tool="browser" data-tags="core,security,privacy" onclick="openTool('browser')">
+            <div class="tc glow-purple" data-tool="browser" data-tags="core,security,privacy" onclick="openTool('browser')">
                 <span class="badge dev">In Development</span>
                 <div class="icon-wrap">&#128274;</div>
                 <h3>Svart Browser</h3>
@@ -135,7 +147,7 @@
             </div>
 
             <!-- Svart AI -->
-            <div class="tc" data-tool="ai" data-tags="core" onclick="openTool('ai')">
+            <div class="tc glow-green" data-tool="ai" data-tags="core" onclick="openTool('ai')">
                 <span class="badge core">Core</span>
                 <div class="icon-wrap">&#129302;</div>
                 <h3>Svart AI</h3>
@@ -148,7 +160,7 @@
             </div>
 
             <!-- SVART Passwords -->
-            <div class="tc" data-tool="passwords" data-tags="security" onclick="openTool('passwords')">
+            <div class="tc glow-amber" data-tool="passwords" data-tags="security" onclick="openTool('passwords')">
                 <span class="badge planned">Planned</span>
                 <div class="icon-wrap">&#128273;</div>
                 <h3>SVART Passwords</h3>
@@ -161,7 +173,7 @@
             </div>
 
             <!-- SVART Notes -->
-            <div class="tc" data-tool="notes" data-tags="security,privacy" onclick="openTool('notes')">
+            <div class="tc glow-amber" data-tool="notes" data-tags="security,privacy" onclick="openTool('notes')">
                 <span class="badge planned">Planned</span>
                 <div class="icon-wrap">&#128221;</div>
                 <h3>SVART Notes</h3>
@@ -174,7 +186,7 @@
             </div>
 
             <!-- SVART Docs -->
-            <div class="tc" data-tool="docs" data-tags="security,privacy" onclick="openTool('docs')">
+            <div class="tc glow-amber" data-tool="docs" data-tags="security,privacy" onclick="openTool('docs')">
                 <span class="badge planned">Planned</span>
                 <div class="icon-wrap">&#128196;</div>
                 <h3>SVART Docs</h3>
@@ -187,7 +199,7 @@
             </div>
 
             <!-- SVART Chat -->
-            <div class="tc" data-tool="chat" data-tags="communication,security,privacy" onclick="openTool('chat')">
+            <div class="tc glow-amber" data-tool="chat" data-tags="communication,security,privacy" onclick="openTool('chat')">
                 <span class="badge planned">Planned</span>
                 <div class="icon-wrap">&#128172;</div>
                 <h3>SVART Chat</h3>
@@ -200,7 +212,7 @@
             </div>
 
             <!-- Secure Email -->
-            <div class="tc" data-tool="email" data-tags="communication,privacy" onclick="openTool('email')">
+            <div class="tc glow-amber" data-tool="email" data-tags="communication,privacy" onclick="openTool('email')">
                 <span class="badge planned">Planned</span>
                 <div class="icon-wrap">&#9993;</div>
                 <h3>Secure Email</h3>
@@ -213,7 +225,7 @@
             </div>
 
             <!-- File Encryption -->
-            <div class="tc" data-tool="files" data-tags="security" onclick="openTool('files')">
+            <div class="tc glow-amber" data-tool="files" data-tags="security" onclick="openTool('files')">
                 <span class="badge planned">Planned</span>
                 <div class="icon-wrap">&#128450;</div>
                 <h3>File Encryption</h3>
@@ -226,7 +238,7 @@
             </div>
 
             <!-- Privacy Checker -->
-            <div class="tc" data-tool="checker" data-tags="privacy" onclick="openTool('checker')">
+            <div class="tc glow-amber" data-tool="checker" data-tags="privacy" onclick="openTool('checker')">
                 <span class="badge planned">Planned</span>
                 <div class="icon-wrap">&#128269;</div>
                 <h3>Privacy Checker</h3>
@@ -239,7 +251,7 @@
             </div>
 
             <!-- VPN Service -->
-            <div class="tc" data-tool="vpn" data-tags="privacy,security" onclick="openTool('vpn')">
+            <div class="tc glow-amber" data-tool="vpn" data-tags="privacy,security" onclick="openTool('vpn')">
                 <span class="badge planned">Planned</span>
                 <div class="icon-wrap">&#128737;</div>
                 <h3>VPN Service</h3>
