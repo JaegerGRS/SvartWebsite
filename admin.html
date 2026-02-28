@@ -72,11 +72,13 @@
     <div id="adminPanel" class="admin-panel" style="display:none;">
         <div class="admin-header">
             <h1>Registration Log</h1>
-            <div style="display:flex;gap:10px;align-items:center;">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <button class="btn btn-primary" id="sendTodayBtn" style="padding:8px 16px;font-size:0.85rem;background:var(--accent,#22c55e);border-color:var(--accent,#22c55e);">&#128231; Email Today's Signups</button>
                 <button class="btn btn-primary" id="refreshBtn" style="padding:8px 16px;font-size:0.85rem;">Refresh</button>
                 <button class="admin-logout" id="adminLogoutBtn">Logout</button>
             </div>
         </div>
+        <div id="sendTodayMsg" style="display:none;margin-bottom:16px;padding:12px 16px;border-radius:8px;font-size:0.9rem;"></div>
 
         <div class="admin-stats">
             <div class="stat-card">
@@ -183,6 +185,39 @@
         refreshBtn.addEventListener('click', function() { loadRegistrations(); loadResetRequests(); });
         searchBtn.addEventListener('click', doSearch);
         searchEmail.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
+
+        // Send today's signups to admin email
+        const sendTodayBtn = document.getElementById('sendTodayBtn');
+        const sendTodayMsg = document.getElementById('sendTodayMsg');
+        sendTodayBtn.addEventListener('click', async function() {
+            sendTodayBtn.disabled = true;
+            sendTodayBtn.textContent = 'Sending...';
+            sendTodayMsg.style.display = 'none';
+            try {
+                const resp = await fetch(API_BASE + '?sendToday=true', {
+                    headers: { 'Authorization': 'Bearer ' + adminToken }
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    sendTodayMsg.style.display = '';
+                    sendTodayMsg.style.background = 'rgba(34,197,94,0.15)';
+                    sendTodayMsg.style.color = '#22c55e';
+                    sendTodayMsg.textContent = data.message || ('Sent ' + (data.count || 0) + ' registration(s) to admin.');
+                } else {
+                    sendTodayMsg.style.display = '';
+                    sendTodayMsg.style.background = 'rgba(239,68,68,0.15)';
+                    sendTodayMsg.style.color = '#ef4444';
+                    sendTodayMsg.textContent = data.error || 'Failed to send.';
+                }
+            } catch (e) {
+                sendTodayMsg.style.display = '';
+                sendTodayMsg.style.background = 'rgba(239,68,68,0.15)';
+                sendTodayMsg.style.color = '#ef4444';
+                sendTodayMsg.textContent = 'Network error sending email.';
+            }
+            sendTodayBtn.disabled = false;
+            sendTodayBtn.innerHTML = '&#128231; Email Today\'s Signups';
+        });
 
         function doLogin() {
             const secret = secretInput.value.trim();

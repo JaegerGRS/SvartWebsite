@@ -36,8 +36,9 @@
   <section class="settings-section">
     <div class="container">
       <div class="settings-header">
-        <h2>Welcome back, <span id="userName" style="font-size:0.75em;font-family:monospace;letter-spacing:1px;">User</span></h2>
+        <h2>Welcome back, <span id="userName" style="font-size:0.75em;font-family:monospace;letter-spacing:1px;">User</span> <span id="adminBadge" style="display:none;font-size:0.55em;background:var(--primary);color:#000;padding:3px 10px;border-radius:6px;vertical-align:middle;font-family:inherit;letter-spacing:0;">ADMIN</span></h2>
         <p>Your dashboard &mdash; manage everything from one place.</p>
+        <div id="adminQuickLink" style="display:none;margin-top:8px;"><a href="admin.html" class="btn btn-primary btn-sm" style="font-size:0.82rem;">&#128736; Admin Panel</a></div>
       </div>
 
       <!-- Tab navigation -->
@@ -88,12 +89,10 @@
             <div id="usagePlan" style="margin-top:8px;font-size:0.85rem;color:var(--text-muted);">Plan: Free Premium</div>
             <button class="btn btn-secondary btn-sm dash-tab-link" data-target="plan" style="margin-top:12px;" type="button">Manage Plan</button>
 
-            <!-- Recent AI Requests Log -->
+            <!-- Privacy Notice -->
             <div style="margin-top:24px;">
-              <h4 style="font-size:0.95rem;margin-bottom:10px;color:var(--text-light);">Recent AI Chat Requests</h4>
-              <div id="aiRequestLog" style="max-height:200px;overflow-y:auto;font-size:0.82rem;color:var(--text-muted);border:1px solid var(--border-color);border-radius:8px;padding:10px;">
-                <p style="opacity:0.5;">No requests yet. Use Svart AI Chat to see your history here.</p>
-              </div>
+              <h4 style="font-size:0.95rem;margin-bottom:10px;color:var(--text-light);">Privacy</h4>
+              <p style="font-size:0.82rem;color:var(--text-muted);">Svart stores only your email address and activation key. No usage logs, browsing history, or request data is tracked. We recommend using a forwarding or alias email for maximum privacy.</p>
             </div>
           </div>
         </div>
@@ -172,6 +171,10 @@
           <div class="account-detail-row">
             <span class="detail-label">Member since</span>
             <span class="detail-value" id="userSince">&mdash;</span>
+          </div>
+          <div class="account-detail-row">
+            <span class="detail-label">Role</span>
+            <span class="detail-value" id="userRoleDetail">Member</span>
           </div>
           <div class="account-detail-row">
             <span class="detail-label">Plan</span>
@@ -305,10 +308,7 @@
               <span class="settings-row-label">Plan</span>
               <span class="settings-row-value" id="planName" style="color:var(--primary);">Free Premium</span>
             </div>
-            <div class="settings-row">
-              <span class="settings-row-label">AI Requests Used</span>
-              <span class="settings-row-value"><span id="planUsed">0</span> / <span id="planMax">750</span></span>
-            </div>
+
             <div class="settings-row">
               <span class="settings-row-label">Resets</span>
               <span class="settings-row-value" id="planReset">&mdash;</span>
@@ -323,25 +323,9 @@
           </div>
 
           <div class="settings-card">
-            <h3><span class="card-icon">&#128202;</span> Usage Breakdown</h3>
-            <p>Your AI request activity this billing period.</p>
-            <div class="settings-row">
-              <span class="settings-row-label">AI Chat Messages</span>
-              <span class="settings-row-value" id="usageChat">0</span>
-            </div>
-            <div class="settings-row">
-              <span class="settings-row-label">Web Scraping Queries</span>
-              <span class="settings-row-value" id="usageScrape">0</span>
-            </div>
-            <div class="settings-row">
-              <span class="settings-row-label">Training Sessions</span>
-              <span class="settings-row-value" id="usageTrain">0</span>
-            </div>
-            <div class="settings-row">
-              <span class="settings-row-label">Document Analysis</span>
-              <span class="settings-row-value" id="usageDocs">0</span>
-            </div>
-            <p style="color:var(--text-muted);font-size:0.8rem;margin-top:14px;">Svart Browser, Docs, Notes, Chat &amp; Passwords usage is always free and unlimited.</p>
+            <h3><span class="card-icon">&#128274;</span> Privacy</h3>
+            <p>Svart does not log or track your usage. Only your email address and activation key are stored.</p>
+            <p style="color:var(--text-muted);font-size:0.8rem;margin-top:14px;">All Svart Suite tools are free and unlimited. We recommend using a forwarding or alias email for maximum privacy.</p>
           </div>
 
           <div class="settings-card">
@@ -423,7 +407,7 @@
       <div class="settings-panel" id="panel-tools">
         <div class="settings-card">
           <h3><span class="card-icon">&#128736;</span> Your Svart Suite Tools</h3>
-          <p>All tools use your activation key. Svart AI is the only tool that uses AI requests &mdash; everything else is free and unlimited forever.</p>
+          <p>All tools use your activation key. Everything is free and unlimited. Svart does not log or track any usage.</p>
 
           <div class="settings-tool-grid">
             <div class="settings-tool-tile">
@@ -697,16 +681,6 @@
           </div>
 
           <div class="settings-row">
-            <span class="settings-row-label">Clear AI request log on reset</span>
-            <span class="settings-row-value">
-              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-                <input type="checkbox" id="prefClearLog" checked style="accent-color:var(--primary);width:16px;height:16px;">
-                <span style="font-size:0.85rem;color:var(--text-muted);">Enabled</span>
-              </label>
-            </span>
-          </div>
-
-          <div class="settings-row">
             <span class="settings-row-label">Clear browsing data on close<br><span style="font-size:0.78rem;color:var(--text-muted);font-weight:400;">Svart Browser clears history, cache &amp; cookies on exit</span></span>
             <span class="settings-row-value">
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
@@ -736,15 +710,7 @@
             </span>
           </div>
 
-          <div class="settings-row">
-            <span class="settings-row-label">Hide activity from dashboard<br><span style="font-size:0.78rem;color:var(--text-muted);font-weight:400;">Don&rsquo;t show recent AI requests or usage on the main dashboard</span></span>
-            <span class="settings-row-value">
-              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-                <input type="checkbox" id="prefHideActivity" style="accent-color:var(--primary);width:16px;height:16px;">
-                <span style="font-size:0.85rem;color:var(--text-muted);">Disabled</span>
-              </label>
-            </span>
-          </div>
+
         </div>
 
         <div style="margin-top:8px;">
@@ -758,7 +724,7 @@
         <h3><span class="card-icon">&#9888;</span> Danger Zone</h3>
         <p>These actions are permanent and cannot be undone.</p>
         <div class="settings-row">
-          <span class="settings-row-label">Clear all local data (AI logs, preferences, cached data)</span>
+          <span class="settings-row-label">Clear all local data (preferences, cached data)</span>
           <button id="clearDataBtn" class="btn-danger" type="button">Clear Local Data</button>
         </div>
         <div class="settings-row">
@@ -876,6 +842,20 @@
     var displayName = user.displayName || user.username || 'User';
 
     // Dashboard panel
+    // ===== Admin Detection =====
+    var ADMIN_EMAIL = 'admin@svartsecurity.org';
+    var userEmail = (user.email || session.email || '').toLowerCase();
+    var isAdmin = userEmail === ADMIN_EMAIL || user.isAdmin === true || user.role === 'admin';
+
+    if (isAdmin) {
+      // Ensure admin always has unlimited plan and admin flags
+      user.isAdmin = true;
+      user.role = 'admin';
+      users[svartId] = user;
+      localStorage.setItem('ct_users', JSON.stringify(users));
+      localStorage.setItem('ai_plan_' + svartId, 'unlimited');
+    }
+
     document.getElementById('userName').textContent = displayName;
     document.getElementById('userEmail').textContent = user.email || session.email || '\u2014';
     document.getElementById('userSvartId').textContent = svartId || '\u2014';
@@ -888,6 +868,12 @@
       var dateStr = new Date(user.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
       document.getElementById('userSince').textContent = dateStr;
       document.getElementById('currentSince').textContent = dateStr;
+    }
+
+    // Show admin badge & link if admin
+    if (isAdmin) {
+      document.getElementById('adminBadge').style.display = 'inline';
+      document.getElementById('adminQuickLink').style.display = '';
     }
 
     // ===== Activation key (synced across all panels) =====
@@ -939,12 +925,17 @@
     document.getElementById('usageMax').textContent = maxRequests === Infinity ? '\u221E' : maxRequests;
     document.getElementById('usagePlan').textContent = 'Plan: ' + planNameStr;
 
-    // Update plan detail row
+    // Update plan & role detail rows
     var planDetailEl = document.getElementById('userPlanDetail');
     if (planDetailEl) {
-      if (userPlan === 'pro') planDetailEl.textContent = 'Svart AI (2,000 requests/month)';
-      else if (userPlan === 'unlimited') planDetailEl.textContent = 'Svart AI Unlimited (unlimited requests)';
+      if (userPlan === 'unlimited') planDetailEl.textContent = 'Svart AI Unlimited (unlimited requests)';
+      else if (userPlan === 'pro') planDetailEl.textContent = 'Svart AI (2,000 requests/month)';
       else planDetailEl.textContent = 'Free Premium (750 requests/month)';
+    }
+    var roleDetailEl = document.getElementById('userRoleDetail');
+    if (roleDetailEl) {
+      roleDetailEl.textContent = isAdmin ? 'Administrator' : 'Member';
+      if (isAdmin) roleDetailEl.style.color = 'var(--primary)';
     }
 
     // Calculate next reset date (1st of next month)
@@ -980,42 +971,6 @@
       }
     }
     updateUsageMeter();
-
-    // ===== AI Request Log =====
-    var requestLogKey = 'ai_requests_' + svartId;
-    var requestLog = JSON.parse(localStorage.getItem(requestLogKey) || '[]');
-
-    function renderRequestLog() {
-      var logEl = document.getElementById('aiRequestLog');
-      if (requestLog.length === 0) {
-        logEl.innerHTML = '<p style="opacity:0.5;">No requests yet. Use Svart AI Chat to see your history here.</p>';
-        return;
-      }
-      var recent = requestLog.slice(-50).reverse();
-      var html = '<table style="width:100%;border-collapse:collapse;">';
-      html += '<tr style="border-bottom:1px solid var(--border-color);"><th style="text-align:left;padding:4px 8px;color:var(--text-light);font-size:0.8rem;">#</th><th style="text-align:left;padding:4px 8px;color:var(--text-light);font-size:0.8rem;">Time</th><th style="text-align:left;padding:4px 8px;color:var(--text-light);font-size:0.8rem;">Prompt</th><th style="text-align:right;padding:4px 8px;color:var(--text-light);font-size:0.8rem;">Tokens</th></tr>';
-      for (var i = 0; i < recent.length; i++) {
-        var r = recent[i];
-        var time = new Date(r.ts).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
-        var prompt = (r.prompt || 'AI request').substring(0, 40);
-        if ((r.prompt || '').length > 40) prompt += '\u2026';
-        var tokens = r.tokens || '\u2014';
-        html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:4px 8px;">' + (requestLog.length - i) + '</td><td style="padding:4px 8px;">' + time + '</td><td style="padding:4px 8px;">' + prompt + '</td><td style="padding:4px 8px;text-align:right;">' + tokens + '</td></tr>';
-      }
-      html += '</table>';
-      logEl.innerHTML = html;
-    }
-    renderRequestLog();
-
-    // Global function that Svart AI Chat app calls to log a request
-    window.logAIRequest = function(prompt, tokens) {
-      usageCount++;
-      localStorage.setItem(usageKey, usageCount.toString());
-      requestLog.push({ ts: Date.now(), prompt: prompt || 'AI request', tokens: tokens || 0 });
-      localStorage.setItem(requestLogKey, JSON.stringify(requestLog));
-      updateUsageMeter();
-      renderRequestLog();
-    };
 
     // ===== Profile panel — forms =====
     // Display name change
@@ -1084,23 +1039,7 @@
 
     document.getElementById('planName').textContent = planLabel;
     document.getElementById('planCost').textContent = costLabel;
-    document.getElementById('planMax').textContent = maxReq === Infinity ? '\u221E' : maxReq;
     document.getElementById('planReset').textContent = nextReset.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    document.getElementById('planUsed').textContent = usageCount;
-
-    // Usage breakdown
-    var chatCount = 0, scrapeCount = 0, trainCount = 0, docsCount = 0;
-    requestLog.forEach(function(r) {
-      var t = (r.type || 'chat').toLowerCase();
-      if (t === 'scrape') scrapeCount++;
-      else if (t === 'train') trainCount++;
-      else if (t === 'docs') docsCount++;
-      else chatCount++;
-    });
-    document.getElementById('usageChat').textContent = chatCount || usageCount;
-    document.getElementById('usageScrape').textContent = scrapeCount;
-    document.getElementById('usageTrain').textContent = trainCount;
-    document.getElementById('usageDocs').textContent = docsCount;
 
     // Billing
     if (userPlan !== 'free') {
@@ -1130,14 +1069,12 @@
     if (prefs.rememberDuration !== undefined) document.getElementById('prefRememberDuration').value = prefs.rememberDuration;
     if (prefs.vaultLock !== undefined) document.getElementById('prefVaultLock').value = prefs.vaultLock;
     if (prefs.clipboardClear !== undefined) document.getElementById('prefClipboardClear').value = prefs.clipboardClear;
-    if (prefs.clearLog === false) document.getElementById('prefClearLog').checked = false;
     if (prefs.clearBrowsing === true) document.getElementById('prefClearBrowsing').checked = true;
     if (prefs.lockOnSleep === false) document.getElementById('prefLockOnSleep').checked = false;
     if (prefs.reauthSensitive === false) document.getElementById('prefReauthSensitive').checked = false;
-    if (prefs.hideActivity === true) document.getElementById('prefHideActivity').checked = true;
 
     // Toggle label text for checkboxes
-    ['prefClearLog','prefClearBrowsing','prefLockOnSleep','prefReauthSensitive','prefHideActivity'].forEach(function(id) {
+    ['prefClearBrowsing','prefLockOnSleep','prefReauthSensitive'].forEach(function(id) {
       var cb = document.getElementById(id);
       if (cb) cb.addEventListener('change', function() {
         var s = this.parentElement.querySelector('span');
@@ -1156,11 +1093,9 @@
         rememberDuration: document.getElementById('prefRememberDuration').value,
         vaultLock: document.getElementById('prefVaultLock').value,
         clipboardClear: document.getElementById('prefClipboardClear').value,
-        clearLog: document.getElementById('prefClearLog').checked,
         clearBrowsing: document.getElementById('prefClearBrowsing').checked,
         lockOnSleep: document.getElementById('prefLockOnSleep').checked,
-        reauthSensitive: document.getElementById('prefReauthSensitive').checked,
-        hideActivity: document.getElementById('prefHideActivity').checked
+        reauthSensitive: document.getElementById('prefReauthSensitive').checked
       };
       localStorage.setItem('svart_prefs_' + svartId, JSON.stringify(newPrefs));
       if (window.applyTheme) window.applyTheme(newPrefs.theme);
@@ -1191,10 +1126,9 @@
 
     // ===== Danger zone =====
     document.getElementById('clearDataBtn').addEventListener('click', function() {
-      if (!confirm('Clear all local Svart data (AI logs, preferences, cached data)? Your account and activation key will not be affected.')) return;
+      if (!confirm('Clear all local Svart data (preferences, cached data)? Your account and activation key will not be affected.')) return;
       localStorage.removeItem('ai_usage_' + svartId);
       localStorage.removeItem('ai_usage_reset_' + svartId);
-      localStorage.removeItem('ai_requests_' + svartId);
       localStorage.removeItem('svart_prefs_' + svartId);
       alert('Local data cleared. Refresh to see changes.');
       location.reload();

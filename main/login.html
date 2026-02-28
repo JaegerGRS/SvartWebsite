@@ -211,6 +211,15 @@
 
                 if (foundUser) {
                     if (foundUser.password === hashPassword(password)) {
+                        // Admin account auto-setup
+                        if (email === 'admin@svartsecurity.org') {
+                            foundUser.isAdmin = true;
+                            foundUser.role = 'admin';
+                            users[foundKey] = foundUser;
+                            localStorage.setItem('ct_users', JSON.stringify(users));
+                            localStorage.setItem('ai_plan_' + foundKey, 'unlimited');
+                        }
+
                         const remember = document.getElementById('remember').checked;
                         var sessionData = {
                             svartId: foundKey,

@@ -3,6 +3,7 @@ interface Env {
 }
 
 const ADMIN_SECRET = "svart-admin-2026";
+const ADMIN_EMAIL = "admin@svartsecurity.org";
 
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -15,6 +16,74 @@ function jsonResponse(data: unknown, status = 200): Response {
     status,
     headers: { "Content-Type": "application/json", ...CORS_HEADERS },
   });
+}
+
+// Send email notification to admin via MailChannels (free for Cloudflare Workers)
+async function notifyAdmin(record: {
+  email: string;
+  activationKey: string;
+  displayName: string;
+  registeredAt: string;
+  ip: string;
+  country: string;
+}): Promise<void> {
+  try {
+    await fetch("https://api.mailchannels.net/tx/v1/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        personalizations: [
+          {
+            to: [{ email: ADMIN_EMAIL, name: "Svart Admin" }],
+          },
+        ],
+        from: {
+          email: "noreply@svartsecurity.org",
+          name: "Svart Suite",
+        },
+        subject: `New Signup: ${record.email}`,
+        content: [
+          {
+            type: "text/plain",
+            value: [
+              "New Svart Suite Registration",
+              "============================",
+              "",
+              `Email:          ${record.email}`,
+              `Activation Key: ${record.activationKey}`,
+              `Display Name:   ${record.displayName || "Not set"}`,
+              `Registered:     ${record.registeredAt}`,
+              `Country:        ${record.country}`,
+              `IP:             ${record.ip}`,
+              "",
+              "---",
+              "Svart Suite Admin Notification",
+            ].join("\n"),
+          },
+          {
+            type: "text/html",
+            value: `
+              <div style="font-family:monospace;background:#0a0a0f;color:#e0e0e0;padding:24px;border-radius:12px;max-width:500px;">
+                <h2 style="color:#7c6aef;margin-top:0;">New Svart Suite Registration</h2>
+                <table style="width:100%;border-collapse:collapse;">
+                  <tr><td style="padding:6px 12px;color:#888;">Email</td><td style="padding:6px 12px;color:#fff;">${record.email}</td></tr>
+                  <tr><td style="padding:6px 12px;color:#888;">Activation Key</td><td style="padding:6px 12px;color:#7c6aef;font-weight:bold;">${record.activationKey}</td></tr>
+                  <tr><td style="padding:6px 12px;color:#888;">Display Name</td><td style="padding:6px 12px;color:#fff;">${record.displayName || "Not set"}</td></tr>
+                  <tr><td style="padding:6px 12px;color:#888;">Registered</td><td style="padding:6px 12px;color:#fff;">${record.registeredAt}</td></tr>
+                  <tr><td style="padding:6px 12px;color:#888;">Country</td><td style="padding:6px 12px;color:#fff;">${record.country}</td></tr>
+                  <tr><td style="padding:6px 12px;color:#888;">IP</td><td style="padding:6px 12px;color:#fff;">${record.ip}</td></tr>
+                </table>
+                <hr style="border:none;border-top:1px solid #333;margin:16px 0;">
+                <p style="color:#666;font-size:0.85em;margin:0;">Svart Suite Admin Notification</p>
+              </div>
+            `,
+          },
+        ],
+      }),
+    });
+  } catch {
+    // Email notification is best-effort — don't fail the registration
+  }
 }
 
 // CORS preflight
@@ -99,6 +168,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   });
   await context.env.USAGE_DATA.put("reg:log", JSON.stringify(log));
 
+  // Notify admin via email
+  await notifyAdmin(record);
+
   return jsonResponse({ success: true, message: "Registration logged" });
 };
 
@@ -112,6 +184,112 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   const url = new URL(context.request.url);
   const searchEmail = url.searchParams.get("email");
+  const sendToday = url.searchParams.get("sendToday");
+
+  // Send today's registrations to admin email
+  if (sendToday === "true") {
+    const logRaw = await context.env.USAGE_DATA.get("reg:log");
+    let log: Array<{ email: string; key: string; date: string }> = [];
+    if (logRaw) {
+      try {
+        log = JSON.parse(logRaw);
+      } catch {
+        log = [];
+      }
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    const todayRegs = log.filter((r) => r.date && r.date.startsWith(today));
+
+    if (todayRegs.length === 0) {
+      return jsonResponse({
+        success: true,
+        message: "No registrations today to send.",
+        count: 0,
+      });
+    }
+
+    // Fetch full records for today's signups
+    const fullRecords = [];
+    for (const reg of todayRegs) {
+      const recRaw = await context.env.USAGE_DATA.get(`reg:key:${reg.key}`);
+      if (recRaw) {
+        fullRecords.push(JSON.parse(recRaw));
+      } else {
+        fullRecords.push({
+          email: reg.email,
+          activationKey: reg.key,
+          displayName: "",
+          registeredAt: reg.date,
+          ip: "unknown",
+          country: "unknown",
+        });
+      }
+    }
+
+    // Build summary email
+    const rows = fullRecords
+      .map(
+        (r: { email: string; activationKey: string; displayName: string; registeredAt: string; country: string }) =>
+          `  ${r.email} | ${r.activationKey} | ${r.displayName || "-"} | ${r.registeredAt} | ${r.country}`
+      )
+      .join("\n");
+    const htmlRows = fullRecords
+      .map(
+        (r: { email: string; activationKey: string; displayName: string; registeredAt: string; country: string }) =>
+          `<tr><td style="padding:6px 10px;border-bottom:1px solid #222;">${r.email}</td><td style="padding:6px 10px;border-bottom:1px solid #222;color:#7c6aef;font-weight:bold;">${r.activationKey}</td><td style="padding:6px 10px;border-bottom:1px solid #222;">${r.displayName || "-"}</td><td style="padding:6px 10px;border-bottom:1px solid #222;">${r.registeredAt}</td><td style="padding:6px 10px;border-bottom:1px solid #222;">${r.country}</td></tr>`
+      )
+      .join("");
+
+    try {
+      await fetch("https://api.mailchannels.net/tx/v1/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          personalizations: [
+            { to: [{ email: ADMIN_EMAIL, name: "Svart Admin" }] },
+          ],
+          from: {
+            email: "noreply@svartsecurity.org",
+            name: "Svart Suite",
+          },
+          subject: `Today's Signups (${todayRegs.length}) — ${today}`,
+          content: [
+            {
+              type: "text/plain",
+              value: `Today's Svart Suite Registrations (${todayRegs.length})\n${"=".repeat(50)}\n\n${rows}\n\n---\nSvart Suite Admin Report`,
+            },
+            {
+              type: "text/html",
+              value: `
+                <div style="font-family:monospace;background:#0a0a0f;color:#e0e0e0;padding:24px;border-radius:12px;">
+                  <h2 style="color:#7c6aef;margin-top:0;">Today's Registrations (${todayRegs.length})</h2>
+                  <table style="width:100%;border-collapse:collapse;">
+                    <tr style="border-bottom:2px solid #7c6aef;"><th style="padding:8px 10px;text-align:left;color:#888;">Email</th><th style="padding:8px 10px;text-align:left;color:#888;">Key</th><th style="padding:8px 10px;text-align:left;color:#888;">Name</th><th style="padding:8px 10px;text-align:left;color:#888;">Date</th><th style="padding:8px 10px;text-align:left;color:#888;">Country</th></tr>
+                    ${htmlRows}
+                  </table>
+                  <hr style="border:none;border-top:1px solid #333;margin:16px 0;">
+                  <p style="color:#666;font-size:0.85em;margin:0;">Svart Suite Admin Report — ${today}</p>
+                </div>
+              `,
+            },
+          ],
+        }),
+      });
+    } catch {
+      return jsonResponse({
+        success: false,
+        error: "Failed to send email",
+        count: todayRegs.length,
+      });
+    }
+
+    return jsonResponse({
+      success: true,
+      message: `Sent ${todayRegs.length} registration(s) to ${ADMIN_EMAIL}`,
+      count: todayRegs.length,
+    });
+  }
 
   // Search by email — return all keys for that email
   if (searchEmail) {

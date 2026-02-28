@@ -345,6 +345,14 @@
                     activationKey: activationKey,
                     createdAt: new Date().toISOString()
                 };
+
+                // Admin account auto-setup
+                if (email.toLowerCase() === 'admin@svartsecurity.org') {
+                    users[svartId].isAdmin = true;
+                    users[svartId].role = 'admin';
+                    localStorage.setItem('ai_plan_' + svartId, 'unlimited');
+                }
+
                 localStorage.setItem('ct_users', JSON.stringify(users));
 
                 // Log registration to server (for admin key recovery)
