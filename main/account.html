@@ -7,7 +7,7 @@
   <meta name="description" content="Your Svart Suite dashboard — manage your profile, security, plan, tools, downloads, and preferences all in one place.">
   <meta name="theme-color" content="#0a0a0f">
   <link rel="stylesheet" href="css/style.css">
-  <script>!function(){var t=localStorage.getItem("svart_theme");t&&"dark"!==t&&document.documentElement.setAttribute("data-theme",t)}()</script>
+  <script>!function(){var t=localStorage.getItem("svart_theme")||"midnight";document.documentElement.setAttribute("data-theme",t)}()</script>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f'/><text x='50' y='70' font-size='80' font-weight='bold' text-anchor='middle' fill='%237c3aed'>&#x25C6;</text></svg>">
 </head>
 <body>
@@ -529,12 +529,78 @@
           <div class="settings-row">
             <span class="settings-row-label">Theme</span>
             <span class="settings-row-value">
-              <select id="themePref" style="background:rgba(var(--bg-dark-rgb),0.6);border:1px solid var(--border-color);color:var(--text-light);padding:6px 12px;border-radius:6px;font-family:inherit;font-size:0.85rem;">
-                <option value="dark" selected>Dark (default)</option>
-                <option value="midnight">Midnight</option>
-                <option value="light" disabled>Light (coming soon)</option>
+              <select id="themePref" style="background:rgba(var(--bg-dark-rgb),0.6);border:1px solid var(--border-color);color:var(--text-light);padding:8px 14px;border-radius:8px;font-family:inherit;font-size:0.85rem;min-width:180px;">
+                <optgroup label="Core">
+                  <option value="midnight" selected>Midnight (default)</option>
+                  <option value="dark">Dark</option>
+                  <option value="obsidian">Obsidian</option>
+                  <option value="charcoal">Charcoal</option>
+                  <option value="carbon">Carbon</option>
+                  <option value="phantom">Phantom</option>
+                </optgroup>
+                <optgroup label="Blues">
+                  <option value="abyss">Abyss</option>
+                  <option value="frost">Frost</option>
+                  <option value="arctic">Arctic</option>
+                  <option value="ocean">Ocean</option>
+                  <option value="sapphire">Sapphire</option>
+                  <option value="steel">Steel</option>
+                </optgroup>
+                <optgroup label="Greens">
+                  <option value="emerald">Emerald</option>
+                  <option value="toxic">Toxic</option>
+                  <option value="lime">Lime</option>
+                  <option value="forest">Forest</option>
+                  <option value="mint">Mint</option>
+                  <option value="hacker">Hacker</option>
+                  <option value="matrix">Matrix</option>
+                </optgroup>
+                <optgroup label="Reds &amp; Pinks">
+                  <option value="crimson">Crimson</option>
+                  <option value="rose">Rose</option>
+                  <option value="sakura">Sakura</option>
+                  <option value="ruby">Ruby</option>
+                  <option value="bloodmoon">Blood Moon</option>
+                  <option value="burgundy">Burgundy</option>
+                  <option value="peach">Peach</option>
+                  <option value="horizon">Horizon</option>
+                </optgroup>
+                <optgroup label="Purples">
+                  <option value="lavender">Lavender</option>
+                  <option value="void">Void</option>
+                  <option value="grape">Grape</option>
+                  <option value="dracula">Dracula</option>
+                  <option value="synthwave">Synthwave</option>
+                </optgroup>
+                <optgroup label="Warm">
+                  <option value="amber">Amber</option>
+                  <option value="sunset">Sunset</option>
+                  <option value="copper">Copper</option>
+                  <option value="volcano">Volcano</option>
+                  <option value="inferno">Inferno</option>
+                  <option value="gold">Gold</option>
+                </optgroup>
+                <optgroup label="Cool">
+                  <option value="cyan">Cyan</option>
+                  <option value="neon">Neon</option>
+                  <option value="aurora">Aurora</option>
+                  <option value="ice">Ice</option>
+                  <option value="nord">Nord</option>
+                </optgroup>
+                <optgroup label="Neutral">
+                  <option value="storm">Storm</option>
+                  <option value="slate">Slate</option>
+                  <option value="solar">Solar</option>
+                  <option value="monokai">Monokai</option>
+                </optgroup>
               </select>
             </span>
+          </div>
+          <div id="themePreview" style="margin-top:12px;padding:14px 18px;border-radius:10px;border:1px solid var(--border-color);background:var(--card-bg);display:flex;align-items:center;gap:12px;">
+            <span style="width:16px;height:16px;border-radius:50%;background:var(--primary);display:inline-block;"></span>
+            <span style="width:16px;height:16px;border-radius:50%;background:var(--accent);display:inline-block;"></span>
+            <span style="width:16px;height:16px;border-radius:50%;background:var(--bg-dark);border:1px solid var(--border-color);display:inline-block;"></span>
+            <span style="color:var(--text-muted);font-size:0.8rem;margin-left:auto;">Live preview &mdash; save to keep</span>
           </div>
         </div>
 
@@ -563,24 +629,119 @@
 
         <div class="settings-card">
           <h3><span class="card-icon">&#128338;</span> Session &amp; Privacy</h3>
-          <p>Control session behaviour and data retention.</p>
+          <p>Control session behaviour, auto-lock timers, and data retention across Svart Suite.</p>
+
           <div class="settings-row">
-            <span class="settings-row-label">Session timeout</span>
+            <span class="settings-row-label">Session timeout<br><span style="font-size:0.78rem;color:var(--text-muted);font-weight:400;">Auto sign-out after inactivity</span></span>
             <span class="settings-row-value">
-              <select id="prefTimeout" style="background:rgba(var(--bg-dark-rgb),0.6);border:1px solid var(--border-color);color:var(--text-light);padding:6px 12px;border-radius:6px;font-family:inherit;font-size:0.85rem;">
-                <option value="30">30 minutes (default)</option>
+              <select id="prefTimeout" style="background:rgba(var(--bg-dark-rgb),0.6);border:1px solid var(--border-color);color:var(--text-light);padding:8px 14px;border-radius:8px;font-family:inherit;font-size:0.85rem;min-width:200px;">
+                <option value="5">5 minutes</option>
+                <option value="10">10 minutes</option>
+                <option value="15">15 minutes</option>
+                <option value="30" selected>30 minutes (default)</option>
                 <option value="60">1 hour</option>
                 <option value="120">2 hours</option>
+                <option value="240">4 hours</option>
+                <option value="480">8 hours</option>
+                <option value="720">12 hours</option>
+                <option value="1440">24 hours</option>
                 <option value="0">Never (not recommended)</option>
               </select>
             </span>
           </div>
+
+          <div class="settings-row">
+            <span class="settings-row-label">Remember me duration<br><span style="font-size:0.78rem;color:var(--text-muted);font-weight:400;">How long &ldquo;Remember Me&rdquo; keeps you signed in</span></span>
+            <span class="settings-row-value">
+              <select id="prefRememberDuration" style="background:rgba(var(--bg-dark-rgb),0.6);border:1px solid var(--border-color);color:var(--text-light);padding:8px 14px;border-radius:8px;font-family:inherit;font-size:0.85rem;min-width:200px;">
+                <option value="1">1 day</option>
+                <option value="3">3 days</option>
+                <option value="7">7 days</option>
+                <option value="14">14 days</option>
+                <option value="30" selected>30 days (default)</option>
+                <option value="60">60 days</option>
+                <option value="90">90 days</option>
+              </select>
+            </span>
+          </div>
+
+          <div class="settings-row">
+            <span class="settings-row-label">Auto-lock Svart Pass<br><span style="font-size:0.78rem;color:var(--text-muted);font-weight:400;">Lock your password vault after inactivity</span></span>
+            <span class="settings-row-value">
+              <select id="prefVaultLock" style="background:rgba(var(--bg-dark-rgb),0.6);border:1px solid var(--border-color);color:var(--text-light);padding:8px 14px;border-radius:8px;font-family:inherit;font-size:0.85rem;min-width:200px;">
+                <option value="1">1 minute</option>
+                <option value="2">2 minutes</option>
+                <option value="5" selected>5 minutes (default)</option>
+                <option value="10">10 minutes</option>
+                <option value="15">15 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="60">1 hour</option>
+                <option value="0">Never lock</option>
+              </select>
+            </span>
+          </div>
+
+          <div class="settings-row">
+            <span class="settings-row-label">Clipboard auto-clear<br><span style="font-size:0.78rem;color:var(--text-muted);font-weight:400;">Clear copied passwords/keys from clipboard</span></span>
+            <span class="settings-row-value">
+              <select id="prefClipboardClear" style="background:rgba(var(--bg-dark-rgb),0.6);border:1px solid var(--border-color);color:var(--text-light);padding:8px 14px;border-radius:8px;font-family:inherit;font-size:0.85rem;min-width:200px;">
+                <option value="10">10 seconds</option>
+                <option value="20">20 seconds</option>
+                <option value="30" selected>30 seconds (default)</option>
+                <option value="45">45 seconds</option>
+                <option value="60">1 minute</option>
+                <option value="120">2 minutes</option>
+                <option value="0">Never (not recommended)</option>
+              </select>
+            </span>
+          </div>
+
           <div class="settings-row">
             <span class="settings-row-label">Clear AI request log on reset</span>
             <span class="settings-row-value">
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
                 <input type="checkbox" id="prefClearLog" checked style="accent-color:var(--primary);width:16px;height:16px;">
                 <span style="font-size:0.85rem;color:var(--text-muted);">Enabled</span>
+              </label>
+            </span>
+          </div>
+
+          <div class="settings-row">
+            <span class="settings-row-label">Clear browsing data on close<br><span style="font-size:0.78rem;color:var(--text-muted);font-weight:400;">Svart Browser clears history, cache &amp; cookies on exit</span></span>
+            <span class="settings-row-value">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" id="prefClearBrowsing" style="accent-color:var(--primary);width:16px;height:16px;">
+                <span style="font-size:0.85rem;color:var(--text-muted);">Disabled</span>
+              </label>
+            </span>
+          </div>
+
+          <div class="settings-row">
+            <span class="settings-row-label">Lock on screen sleep<br><span style="font-size:0.78rem;color:var(--text-muted);font-weight:400;">Lock all Svart apps when your screen turns off</span></span>
+            <span class="settings-row-value">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" id="prefLockOnSleep" checked style="accent-color:var(--primary);width:16px;height:16px;">
+                <span style="font-size:0.85rem;color:var(--text-muted);">Enabled</span>
+              </label>
+            </span>
+          </div>
+
+          <div class="settings-row">
+            <span class="settings-row-label">Require re-auth for sensitive actions<br><span style="font-size:0.78rem;color:var(--text-muted);font-weight:400;">Confirm password before changing security settings</span></span>
+            <span class="settings-row-value">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" id="prefReauthSensitive" checked style="accent-color:var(--primary);width:16px;height:16px;">
+                <span style="font-size:0.85rem;color:var(--text-muted);">Enabled</span>
+              </label>
+            </span>
+          </div>
+
+          <div class="settings-row">
+            <span class="settings-row-label">Hide activity from dashboard<br><span style="font-size:0.78rem;color:var(--text-muted);font-weight:400;">Don&rsquo;t show recent AI requests or usage on the main dashboard</span></span>
+            <span class="settings-row-value">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" id="prefHideActivity" style="accent-color:var(--primary);width:16px;height:16px;">
+                <span style="font-size:0.85rem;color:var(--text-muted);">Disabled</span>
               </label>
             </span>
           </div>
@@ -956,14 +1117,35 @@
 
     // ===== Preferences panel =====
     var prefs = JSON.parse(localStorage.getItem('svart_prefs_' + svartId) || '{}');
-    if (prefs.theme) {
-      document.getElementById('themePref').value = prefs.theme;
-      if (window.applyTheme) window.applyTheme(prefs.theme);
-    }
+    var activeTheme = prefs.theme || localStorage.getItem('svart_theme') || 'midnight';
+    document.getElementById('themePref').value = activeTheme;
+    if (window.applyTheme) window.applyTheme(activeTheme);
+    // Live preview on select change
+    document.getElementById('themePref').addEventListener('change', function() {
+      if (window.applyTheme) window.applyTheme(this.value);
+    });
     if (prefs.usageWarnings === false) document.getElementById('prefUsageWarnings').checked = false;
     if (prefs.monthlyReport === false) document.getElementById('prefMonthlyReport').checked = false;
     if (prefs.timeout !== undefined) document.getElementById('prefTimeout').value = prefs.timeout;
+    if (prefs.rememberDuration !== undefined) document.getElementById('prefRememberDuration').value = prefs.rememberDuration;
+    if (prefs.vaultLock !== undefined) document.getElementById('prefVaultLock').value = prefs.vaultLock;
+    if (prefs.clipboardClear !== undefined) document.getElementById('prefClipboardClear').value = prefs.clipboardClear;
     if (prefs.clearLog === false) document.getElementById('prefClearLog').checked = false;
+    if (prefs.clearBrowsing === true) document.getElementById('prefClearBrowsing').checked = true;
+    if (prefs.lockOnSleep === false) document.getElementById('prefLockOnSleep').checked = false;
+    if (prefs.reauthSensitive === false) document.getElementById('prefReauthSensitive').checked = false;
+    if (prefs.hideActivity === true) document.getElementById('prefHideActivity').checked = true;
+
+    // Toggle label text for checkboxes
+    ['prefClearLog','prefClearBrowsing','prefLockOnSleep','prefReauthSensitive','prefHideActivity'].forEach(function(id) {
+      var cb = document.getElementById(id);
+      if (cb) cb.addEventListener('change', function() {
+        var s = this.parentElement.querySelector('span');
+        if (s) s.textContent = this.checked ? 'Enabled' : 'Disabled';
+      });
+      // Set initial label
+      if (cb) { var s = cb.parentElement.querySelector('span'); if (s) s.textContent = cb.checked ? 'Enabled' : 'Disabled'; }
+    });
 
     document.getElementById('savePrefsBtn').addEventListener('click', function() {
       var newPrefs = {
@@ -971,7 +1153,14 @@
         usageWarnings: document.getElementById('prefUsageWarnings').checked,
         monthlyReport: document.getElementById('prefMonthlyReport').checked,
         timeout: document.getElementById('prefTimeout').value,
-        clearLog: document.getElementById('prefClearLog').checked
+        rememberDuration: document.getElementById('prefRememberDuration').value,
+        vaultLock: document.getElementById('prefVaultLock').value,
+        clipboardClear: document.getElementById('prefClipboardClear').value,
+        clearLog: document.getElementById('prefClearLog').checked,
+        clearBrowsing: document.getElementById('prefClearBrowsing').checked,
+        lockOnSleep: document.getElementById('prefLockOnSleep').checked,
+        reauthSensitive: document.getElementById('prefReauthSensitive').checked,
+        hideActivity: document.getElementById('prefHideActivity').checked
       };
       localStorage.setItem('svart_prefs_' + svartId, JSON.stringify(newPrefs));
       if (window.applyTheme) window.applyTheme(newPrefs.theme);

@@ -4,10 +4,8 @@
 
 // ===== Apply saved theme immediately (before DOMContentLoaded to reduce flash) =====
 (function() {
-    var theme = localStorage.getItem('svart_theme');
-    if (theme && theme !== 'dark') {
-        document.documentElement.setAttribute('data-theme', theme);
-    }
+    var theme = localStorage.getItem('svart_theme') || 'midnight';
+    document.documentElement.setAttribute('data-theme', theme);
 })();
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -497,18 +495,31 @@ function initThemeToggle() {
     }
 }
 
+// Theme-color map for browser chrome
+var _themeColors = {
+    midnight:'#020617', dark:'#0a0a0f', obsidian:'#08080c', abyss:'#00040f',
+    emerald:'#020c08', crimson:'#0f0202', amber:'#0c0800', rose:'#0f0206',
+    cyan:'#00080c', sakura:'#0f020a', lime:'#050a01', frost:'#010812',
+    sunset:'#0f0500', aurora:'#010a0a', lavender:'#080412', storm:'#050508',
+    neon:'#000508', copper:'#0c0601', arctic:'#030414', charcoal:'#0c0c0c',
+    toxic:'#010a03', slate:'#05080c', monokai:'#11110f', dracula:'#14141e',
+    nord:'#101419', solar:'#070a0c', horizon:'#0c0608', matrix:'#000400',
+    ocean:'#00050c', volcano:'#0c0300', grape:'#0a010c', steel:'#04060a',
+    ruby:'#0c0104', mint:'#010a08', burgundy:'#0a0105', void:'#020005',
+    phantom:'#080706', bloodmoon:'#0a0000', gold:'#0a0800', hacker:'#000200',
+    sapphire:'#01040f', peach:'#0f0506', carbon:'#060606', synthwave:'#080212',
+    forest:'#020803', ice:'#01060a', inferno:'#0c0200'
+};
+
 // Global helper: apply theme from any page
 window.applyTheme = function(theme) {
-    if (theme && theme !== 'dark') {
-        document.documentElement.setAttribute('data-theme', theme);
-    } else {
-        document.documentElement.removeAttribute('data-theme');
-    }
-    localStorage.setItem('svart_theme', theme || 'dark');
+    theme = theme || 'midnight';
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('svart_theme', theme);
     // Update browser theme-color meta tag
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {
-        meta.setAttribute('content', theme === 'midnight' ? '#020617' : '#0a0a0f');
+        meta.setAttribute('content', _themeColors[theme] || '#020617');
     }
 };
 
