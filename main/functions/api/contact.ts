@@ -78,7 +78,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const msgId = `contact:msg:${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     await context.env.USAGE_DATA.put(
       msgId,
-      JSON.stringify({ email, secretKey, message, date, ip: context.request.headers.get("CF-Connecting-IP") || "unknown" }),
+      JSON.stringify({ email, secretKey, message, date }),
       { expirationTtl: 60 * 60 * 24 * 90 } // 90 days
     );
 

@@ -83,8 +83,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       email,
       registered,
       requestedAt: new Date().toISOString(),
-      ip: context.request.headers.get("CF-Connecting-IP") || "unknown",
-      country: context.request.headers.get("CF-IPCountry") || "unknown",
       status: "pending", // pending | resolved
     };
 

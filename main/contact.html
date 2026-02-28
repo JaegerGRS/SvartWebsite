@@ -120,14 +120,11 @@
     <script src="js/script.js"></script>
     <script>
     (function() {
-        // Auto-fill secret key from logged-in user
+        // Auto-fill secret key from logged-in user (email is never auto-filled)
         try {
             var session = JSON.parse(localStorage.getItem('ct_persistent_session') || localStorage.getItem('ct_session') || '{}');
             if (session && session.activationKey) {
                 document.getElementById('contactKey').value = session.activationKey;
-            }
-            if (session && session.email) {
-                document.getElementById('contactEmail').value = session.email;
             }
         } catch(e) {}
 

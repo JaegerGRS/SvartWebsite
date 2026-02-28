@@ -172,8 +172,6 @@ async function verifyKey(
     return jsonResponse({
       ...baseResponse,
       guardian: true,
-      country: account.country || "unknown",
-      ip: account.ip || "unknown",
     });
   }
 
@@ -181,8 +179,6 @@ async function verifyKey(
   if (caller === "admin" || caller === "mod") {
     return jsonResponse({
       ...baseResponse,
-      country: account.country || "unknown",
-      ip: account.ip || "unknown",
     });
   }
 

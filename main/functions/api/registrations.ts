@@ -33,8 +33,6 @@ async function notifyAdmin(record: {
   activationKey: string;
   displayName: string;
   registeredAt: string;
-  ip: string;
-  country: string;
 }): Promise<void> {
   try {
     await fetch("https://api.mailchannels.net/tx/v1/send", {
@@ -62,8 +60,6 @@ async function notifyAdmin(record: {
               `Secret Key: ${record.activationKey}`,
               `Display Name:   ${record.displayName || "Not set"}`,
               `Registered:     ${record.registeredAt}`,
-              `Country:        ${record.country}`,
-              `IP:             ${record.ip}`,
               "",
               "---",
               "Svart Security Admin Notification",
@@ -79,8 +75,6 @@ async function notifyAdmin(record: {
                   <tr><td style="padding:6px 12px;color:#888;">Secret Key</td><td style="padding:6px 12px;color:#7c6aef;font-weight:bold;">${record.activationKey}</td></tr>
                   <tr><td style="padding:6px 12px;color:#888;">Display Name</td><td style="padding:6px 12px;color:#fff;">${record.displayName || "Not set"}</td></tr>
                   <tr><td style="padding:6px 12px;color:#888;">Registered</td><td style="padding:6px 12px;color:#fff;">${record.registeredAt}</td></tr>
-                  <tr><td style="padding:6px 12px;color:#888;">Country</td><td style="padding:6px 12px;color:#fff;">${record.country}</td></tr>
-                  <tr><td style="padding:6px 12px;color:#888;">IP</td><td style="padding:6px 12px;color:#fff;">${record.ip}</td></tr>
                 </table>
                 <hr style="border:none;border-top:1px solid #333;margin:16px 0;">
                 <p style="color:#666;font-size:0.85em;margin:0;">Svart Security Admin Notification</p>
@@ -143,13 +137,33 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       );
     }
 
+    // ── NetworkGuardian: Check if this network is allowed to register ──
+    // The Guardian hashes the IP internally — no human ever sees it
+    const clientIp = context.request.headers.get("CF-Connecting-IP") || "";
+    if (clientIp) {
+      try {
+        const guardianResp = await fetch(new URL("/api/guardian", context.request.url).toString(), {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${ADMIN_SECRET}` },
+          body: JSON.stringify({ action: "check-registration", ip: clientIp }),
+        });
+        const guardianData = await guardianResp.json() as { allowed?: boolean; reason?: string };
+        if (guardianData && guardianData.allowed === false) {
+          return jsonResponse(
+            { success: false, error: guardianData.reason || "Registration blocked by NetworkGuardian." },
+            403
+          );
+        }
+      } catch {
+        // Guardian check failed — allow registration (fail-open for availability)
+      }
+    }
+
     const record = {
       email,
       activationKey,
       displayName,
       registeredAt: new Date().toISOString(),
-      ip: context.request.headers.get("CF-Connecting-IP") || "unknown",
-      country: context.request.headers.get("CF-IPCountry") || "unknown",
     };
 
     // Store by secret key (primary lookup)
@@ -172,8 +186,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       passwordHash,
       role,
       createdAt: record.registeredAt,
-      ip: record.ip,
-      country: record.country,
     };
     await context.env.USAGE_DATA.put(
       `account:${email}`,
@@ -199,6 +211,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     // Notify admin via email (best-effort, don't block)
     context.waitUntil(notifyAdmin(record));
+
+    // ── NetworkGuardian: Record this registration's network fingerprint ──
+    if (clientIp) {
+      context.waitUntil(
+        fetch(new URL("/api/guardian", context.request.url).toString(), {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${ADMIN_SECRET}` },
+          body: JSON.stringify({ action: "record-registration", ip: clientIp, email }),
+        }).catch(() => {})
+      );
+    }
 
     return jsonResponse({ success: true, message: "Registration logged" });
   } catch (err) {
@@ -262,23 +285,20 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
             activationKey: reg.key,
             displayName: "",
             registeredAt: reg.date,
-            ip: "unknown",
-            country: "unknown",
           });
         }
       }
 
-      // Build summary email
       const rows = fullRecords
         .map(
-          (r: { email: string; activationKey: string; displayName: string; registeredAt: string; country: string }) =>
-            `  ${r.email} | ${r.activationKey} | ${r.displayName || "-"} | ${r.registeredAt} | ${r.country}`
+          (r: { email: string; activationKey: string; displayName: string; registeredAt: string }) =>
+            `  ${r.email} | ${r.activationKey} | ${r.displayName || "-"} | ${r.registeredAt}`
         )
         .join("\n");
       const htmlRows = fullRecords
         .map(
-          (r: { email: string; activationKey: string; displayName: string; registeredAt: string; country: string }) =>
-            `<tr><td style="padding:6px 10px;border-bottom:1px solid #222;">${r.email}</td><td style="padding:6px 10px;border-bottom:1px solid #222;color:#7c6aef;font-weight:bold;">${r.activationKey}</td><td style="padding:6px 10px;border-bottom:1px solid #222;">${r.displayName || "-"}</td><td style="padding:6px 10px;border-bottom:1px solid #222;">${r.registeredAt}</td><td style="padding:6px 10px;border-bottom:1px solid #222;">${r.country}</td></tr>`
+          (r: { email: string; activationKey: string; displayName: string; registeredAt: string }) =>
+            `<tr><td style="padding:6px 10px;border-bottom:1px solid #222;">${r.email}</td><td style="padding:6px 10px;border-bottom:1px solid #222;color:#7c6aef;font-weight:bold;">${r.activationKey}</td><td style="padding:6px 10px;border-bottom:1px solid #222;">${r.displayName || "-"}</td><td style="padding:6px 10px;border-bottom:1px solid #222;">${r.registeredAt}</td></tr>`
         )
         .join("");
 
@@ -306,7 +326,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
                   <div style="font-family:monospace;background:#0a0a0f;color:#e0e0e0;padding:24px;border-radius:12px;">
                     <h2 style="color:#7c6aef;margin-top:0;">Today's Registrations (${todayRegs.length})</h2>
                     <table style="width:100%;border-collapse:collapse;">
-                      <tr style="border-bottom:2px solid #7c6aef;"><th style="padding:8px 10px;text-align:left;color:#888;">Email</th><th style="padding:8px 10px;text-align:left;color:#888;">Key</th><th style="padding:8px 10px;text-align:left;color:#888;">Name</th><th style="padding:8px 10px;text-align:left;color:#888;">Date</th><th style="padding:8px 10px;text-align:left;color:#888;">Country</th></tr>
+                      <tr style="border-bottom:2px solid #7c6aef;"><th style="padding:8px 10px;text-align:left;color:#888;">Email</th><th style="padding:8px 10px;text-align:left;color:#888;">Key</th><th style="padding:8px 10px;text-align:left;color:#888;">Name</th><th style="padding:8px 10px;text-align:left;color:#888;">Date</th></tr>
                       ${htmlRows}
                     </table>
                     <hr style="border:none;border-top:1px solid #333;margin:16px 0;">
@@ -350,7 +370,16 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       for (const key of keys) {
         const recRaw = await context.env.USAGE_DATA.get(`reg:key:${key}`);
         if (recRaw) {
-          records.push(JSON.parse(recRaw));
+          const rec = JSON.parse(recRaw);
+          // Enrich with role from account data
+          const acctRaw = await context.env.USAGE_DATA.get(`account:${email}`);
+          if (acctRaw) {
+            try {
+              const acct = JSON.parse(acctRaw);
+              rec.role = acct.role || 'user';
+            } catch {}
+          }
+          records.push(rec);
         }
       }
 

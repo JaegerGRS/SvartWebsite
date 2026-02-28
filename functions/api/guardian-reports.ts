@@ -79,8 +79,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     const reportId = `guardian:${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const ip = context.request.headers.get("CF-Connecting-IP") || "unknown";
-    const country = context.request.headers.get("CF-IPCountry") || "unknown";
 
     const report = {
       id: reportId,
@@ -91,8 +89,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       violationType,
       description,
       details,
-      ip,
-      country,
       date: new Date().toISOString(),
       status: "pending", // pending | reviewed | escalated | dismissed
       reviewedBy: null as string | null,
@@ -142,8 +138,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
                 `Type:           ${violationType}`,
                 `Submitter:      ${submitterEmail || userId || "Anonymous"}`,
                 `Date:           ${report.date}`,
-                `Country:        ${country}`,
-                `IP:             ${ip}`,
                 "",
                 "Description:",
                 "------------",
@@ -297,8 +291,6 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         `Source App:       ${report.app}`,
         `Violation Type:   ${report.violationType}`,
         `Submitter:        ${report.submitterEmail || report.userId || "Anonymous"}`,
-        `Origin Country:   ${report.country || "Unknown"}`,
-        `Origin IP:        ${report.ip || "Unknown"}`,
         "",
         "--- DESCRIPTION ---",
         "",
@@ -350,8 +342,6 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
             <tr><td style="padding:6px 12px;color:#888;">Source App</td><td style="padding:6px 12px;color:#fff;">${report.app}</td></tr>
             <tr><td style="padding:6px 12px;color:#888;">Violation Type</td><td style="padding:6px 12px;color:#ef4444;font-weight:bold;">${report.violationType}</td></tr>
             <tr><td style="padding:6px 12px;color:#888;">Submitter</td><td style="padding:6px 12px;color:#fff;">${report.submitterEmail || report.userId || "Anonymous"}</td></tr>
-            <tr><td style="padding:6px 12px;color:#888;">Origin Country</td><td style="padding:6px 12px;color:#fff;">${report.country || "Unknown"}</td></tr>
-            <tr><td style="padding:6px 12px;color:#888;">Origin IP</td><td style="padding:6px 12px;color:#fff;">${report.ip || "Unknown"}</td></tr>
           </table>
           <h3 style="color:#7c6aef;">Description</h3>
           <div style="background:#111;border:1px solid #333;border-radius:8px;padding:16px;margin:12px 0;white-space:pre-wrap;color:#ddd;">${report.description}</div>

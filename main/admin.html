@@ -116,6 +116,7 @@
         <!-- Tabs -->
         <div class="tab-bar">
             <button class="tab-btn active" data-tab="guardian">&#128737; Guardian Reports <span class="badge" id="guardianBadge" style="display:none;">0</span></button>
+            <button class="tab-btn" data-tab="enforcement">&#128272; Guardian Enforcement</button>
             <button class="tab-btn" data-tab="resets">&#128274; Password Resets <span class="badge" id="resetBadge" style="display:none;">0</span></button>
             <button class="tab-btn" data-tab="reglog">&#128203; Registrations <span class="badge" id="reglogBadge" style="display:none;">0</span></button>
             <button class="tab-btn" data-tab="modreports">&#128172; Mod Reports <span class="badge" id="modreportsBadge" style="display:none;">0</span></button>
@@ -129,6 +130,51 @@
                 <table class="reg-table">
                     <thead><tr><th>#</th><th>Date</th><th>App</th><th>Type</th><th>Description</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody id="guardianTableBody"><tr><td colspan="7" class="no-data">Loading...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab: Guardian Enforcement -->
+        <div class="tab-panel" id="panel-enforcement">
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">NetworkGuardian autonomous enforcement. Blocks duplicate accounts, brute force attacks, and abusive networks. <strong style="color:#f59e0b;">No IP addresses are ever visible — only network hash identifiers.</strong></p>
+            <div id="enforcementMsg" style="display:none;margin-bottom:16px;padding:12px 16px;border-radius:8px;font-size:0.9rem;"></div>
+
+            <!-- Enforcement Stats -->
+            <div class="stats-row" style="margin-bottom:24px;">
+                <div class="stat-card"><div class="stat-num" id="enfActiveBlocks">-</div><div class="stat-label">Active Blocks</div></div>
+                <div class="stat-card"><div class="stat-num" id="enfTotalRegs">-</div><div class="stat-label">Registrations Checked</div></div>
+                <div class="stat-card"><div class="stat-num" id="enfTotalLogins">-</div><div class="stat-label">Logins Checked</div></div>
+                <div class="stat-card"><div class="stat-num" id="enfTotalFlagged">-</div><div class="stat-label">Flagged</div></div>
+            </div>
+
+            <!-- Block Network -->
+            <div style="background:rgba(20,20,30,0.8);border:1px solid var(--border-color);border-radius:12px;padding:20px;margin-bottom:20px;">
+                <h3 style="color:var(--primary);margin-bottom:12px;">&#128274; Block Network</h3>
+                <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">Enter a network hash ID (from Guardian Reports) to block it. The Guardian auto-generates these when it detects abuse.</p>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <input type="text" id="blockNetInput" placeholder="net_xxxxxxxxxxxxxxxxxxxxxxxx" style="flex:1;min-width:250px;padding:10px 14px;background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:8px;color:var(--text-light);font-family:monospace;">
+                    <input type="text" id="blockNetReason" placeholder="Reason (optional)" style="flex:1;min-width:150px;padding:10px 14px;background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:8px;color:var(--text-light);">
+                    <button class="btn btn-primary" id="blockNetBtn" style="background:#ef4444;border-color:#ef4444;padding:10px 20px;">Block Network</button>
+                </div>
+            </div>
+
+            <!-- Block URL -->
+            <div style="background:rgba(20,20,30,0.8);border:1px solid var(--border-color);border-radius:12px;padding:20px;margin-bottom:20px;">
+                <h3 style="color:var(--primary);margin-bottom:12px;">&#128279; Block URL</h3>
+                <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">Block a specific URL from being accessed through Svart Security services.</p>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <input type="url" id="blockUrlInput" placeholder="https://example.com/malicious" style="flex:1;min-width:250px;padding:10px 14px;background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:8px;color:var(--text-light);">
+                    <input type="text" id="blockUrlReason" placeholder="Reason (optional)" style="flex:1;min-width:150px;padding:10px 14px;background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:8px;color:var(--text-light);">
+                    <button class="btn btn-primary" id="blockUrlBtn" style="background:#ef4444;border-color:#ef4444;padding:10px 20px;">Block URL</button>
+                </div>
+            </div>
+
+            <!-- Active Block List -->
+            <h3 style="color:var(--primary);margin-bottom:12px;">Active Block List</h3>
+            <div style="overflow-x:auto;">
+                <table class="reg-table">
+                    <thead><tr><th>Type</th><th>Identifier</th><th>Reason</th><th>Blocked At</th><th></th></tr></thead>
+                    <tbody id="blocklistTableBody"><tr><td colspan="5" class="no-data">Loading...</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -263,7 +309,7 @@
         loginBtn.addEventListener('click', doLogin);
         secretInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
         logoutBtn.addEventListener('click', function() { adminToken = ''; panel.style.display = 'none'; loginScreen.style.display = ''; secretInput.value = ''; });
-        refreshBtn.addEventListener('click', function() { loadResetRequests(); loadGuardianReports(); loadRegistrations(); loadModReports(); loadStats(); });
+        refreshBtn.addEventListener('click', function() { loadResetRequests(); loadGuardianReports(); loadRegistrations(); loadModReports(); loadStats(); loadEnforcement(); });
         document.getElementById('searchBtn').addEventListener('click', doSearch);
         document.getElementById('searchEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
 
@@ -289,6 +335,7 @@
             loadResetRequests();
             loadRegistrations();
             loadModReports();
+            loadEnforcement();
         }
 
         // ===== Tabs =====
@@ -332,11 +379,14 @@
                 var records = data.records || [];
                 var html = '<div class="search-result"><h3>Found ' + records.length + ' key(s) for ' + escHtml(email) + '</h3>';
                 records.forEach(function(rec) {
+                    var roleBadge = rec.role === 'admin' ? '<span style="color:#ef4444;font-weight:600;">admin</span>'
+                        : rec.role === 'mod' ? '<span style="color:#f59e0b;font-weight:600;">mod</span>'
+                        : '<span style="color:var(--text-muted);">user</span>';
                     html += '<div style="padding:8px 0;border-bottom:1px solid rgba(39,39,42,0.3);">';
                     html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;">Key</span> <span class="key-cell" style="font-size:1.1rem;cursor:pointer;" onclick="copyText(\'' + escAttr(rec.activationKey) + '\')" title="Click to copy">' + escHtml(rec.activationKey) + '</span></div>';
                     html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;">Name</span> <span style="color:var(--text-light);">' + escHtml(rec.displayName || '-') + '</span></div>';
+                    html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;">Role</span> ' + roleBadge + '</div>';
                     html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;">Registered</span> <span style="color:var(--text-light);">' + new Date(rec.registeredAt).toLocaleString() + '</span></div>';
-                    if (rec.country && rec.country !== 'unknown') html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;">Country</span> <span style="color:var(--text-light);">' + escHtml(rec.country) + '</span></div>';
                     html += '</div>';
                 });
                 html += '</div>';
@@ -441,8 +491,6 @@
                         '<tr><td style="padding:8px 12px;color:var(--text-muted);">Source App</td><td style="padding:8px 12px;color:var(--text-light);">' + escHtml(report.app) + '</td></tr>' +
                         '<tr><td style="padding:8px 12px;color:var(--text-muted);">Violation Type</td><td style="padding:8px 12px;color:#ef4444;font-weight:600;">' + escHtml(report.violationType) + '</td></tr>' +
                         '<tr><td style="padding:8px 12px;color:var(--text-muted);">Submitter</td><td style="padding:8px 12px;color:var(--text-light);">' + escHtml(report.submitterEmail || report.userId || 'Anonymous') + '</td></tr>' +
-                        '<tr><td style="padding:8px 12px;color:var(--text-muted);">Country</td><td style="padding:8px 12px;color:var(--text-light);">' + escHtml(report.country || 'Unknown') + '</td></tr>' +
-                        '<tr><td style="padding:8px 12px;color:var(--text-muted);">IP Address</td><td style="padding:8px 12px;color:var(--text-light);font-family:monospace;">' + escHtml(report.ip || 'Unknown') + '</td></tr>' +
                         '<tr><td style="padding:8px 12px;color:var(--text-muted);">Status</td><td style="padding:8px 12px;color:var(--text-light);font-weight:600;">' + escHtml(report.status) + '</td></tr>' +
                         (report.reviewedBy ? '<tr><td style="padding:8px 12px;color:var(--text-muted);">Reviewed By</td><td style="padding:8px 12px;color:var(--text-light);">' + escHtml(report.reviewedBy) + ' (' + (report.reviewedAt ? new Date(report.reviewedAt).toLocaleString() : '-') + ')</td></tr>' : '') +
                         (report.escalatedAt ? '<tr><td style="padding:8px 12px;color:var(--text-muted);">Escalated At</td><td style="padding:8px 12px;color:#ef4444;font-weight:600;">' + new Date(report.escalatedAt).toLocaleString() + '</td></tr>' : '') +
@@ -517,8 +565,6 @@
             addLine('Source App: ' + r.app);
             addLine('Violation Type: ' + r.violationType, { bold: true, color: '#cc0000' });
             addLine('Submitter: ' + (r.submitterEmail || r.userId || 'Anonymous'));
-            addLine('Origin Country: ' + (r.country || 'Unknown'));
-            addLine('Origin IP: ' + (r.ip || 'Unknown'));
             y += 6;
             addLine('DESCRIPTION', { size: 13, bold: true }); y += 2;
             addLine(r.description || '(none)', { wrap: true }); y += 6;
@@ -630,6 +676,100 @@
                 document.body.appendChild(overlay);
                 overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
             } catch (e) { alert('Failed to load report.'); }
+        };
+
+        // ===== Guardian Enforcement =====
+        async function loadEnforcement() {
+            // Load stats
+            try {
+                var resp = await fetch('/api/guardian?view=stats', { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                var data = await resp.json();
+                if (data.success && data.stats) {
+                    document.getElementById('enfActiveBlocks').textContent = data.stats.activeBlocks || 0;
+                    document.getElementById('enfTotalRegs').textContent = data.stats.totalRegistrations || 0;
+                    document.getElementById('enfTotalLogins').textContent = data.stats.totalLoginChecks || 0;
+                    document.getElementById('enfTotalFlagged').textContent = data.stats.totalFlagged || 0;
+                }
+            } catch (e) {}
+
+            // Load block list
+            var tbody = document.getElementById('blocklistTableBody');
+            tbody.innerHTML = '<tr><td colspan="5" class="no-data">Loading...</td></tr>';
+            try {
+                var resp2 = await fetch('/api/guardian?view=blocklist', { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                var data2 = await resp2.json();
+                if (!data2.success) { tbody.innerHTML = '<tr><td colspan="5" class="no-data">Error loading block list.</td></tr>'; return; }
+                var list = data2.blocklist || [];
+                if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="no-data">No active blocks. NetworkGuardian is monitoring.</td></tr>'; return; }
+                tbody.innerHTML = list.map(function(item) {
+                    var typeLabel = item.type === 'net'
+                        ? '<span style="color:#f59e0b;font-weight:600;">&#128272; Network</span>'
+                        : '<span style="color:#3b82f6;font-weight:600;">&#128279; URL</span>';
+                    var identifier = item.type === 'url' && item.displayUrl
+                        ? escHtml(item.displayUrl)
+                        : '<span style="font-family:monospace;font-size:0.85rem;">' + escHtml(item.hash) + '</span>';
+                    var dateStr = item.blockedAt ? new Date(item.blockedAt).toLocaleString() : '-';
+                    var unblockBtn = '<button class="resolve-btn" style="color:#ef4444;border-color:#ef4444;font-size:0.8rem;" onclick="unblockItem(\'' + escAttr(item.type) + '\', \'' + escAttr(item.hash) + '\')">Unblock</button>';
+                    return '<tr><td>' + typeLabel + '</td><td>' + identifier + '</td><td style="color:var(--text-muted);">' + escHtml(item.reason || '-') + '</td><td>' + dateStr + '</td><td>' + unblockBtn + '</td></tr>';
+                }).join('');
+            } catch (e) { tbody.innerHTML = '<tr><td colspan="5" class="no-data">Network error.</td></tr>'; }
+        }
+
+        // Block network
+        document.getElementById('blockNetBtn').addEventListener('click', async function() {
+            var netId = document.getElementById('blockNetInput').value.trim();
+            var reason = document.getElementById('blockNetReason').value.trim() || 'Policy violation';
+            var msg = document.getElementById('enforcementMsg');
+            if (!netId) { msg.style.display = ''; msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = 'Enter a network hash ID.'; return; }
+            this.disabled = true; this.textContent = 'Blocking...';
+            try {
+                var resp = await fetch('/api/guardian', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken }, body: JSON.stringify({ action: 'block-network', networkId: netId, reason: reason }) });
+                var data = await resp.json();
+                msg.style.display = '';
+                if (data.success) {
+                    msg.style.background = 'rgba(34,197,94,0.15)'; msg.style.color = '#22c55e'; msg.textContent = '\u2713 ' + (data.message || 'Network blocked.');
+                    document.getElementById('blockNetInput').value = ''; document.getElementById('blockNetReason').value = '';
+                    loadEnforcement();
+                } else {
+                    msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = data.error || 'Failed to block.';
+                }
+            } catch (e) { msg.style.display = ''; msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = 'Network error.'; }
+            this.disabled = false; this.textContent = 'Block Network';
+        });
+
+        // Block URL
+        document.getElementById('blockUrlBtn').addEventListener('click', async function() {
+            var url = document.getElementById('blockUrlInput').value.trim();
+            var reason = document.getElementById('blockUrlReason').value.trim() || 'Policy violation';
+            var msg = document.getElementById('enforcementMsg');
+            if (!url) { msg.style.display = ''; msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = 'Enter a URL to block.'; return; }
+            this.disabled = true; this.textContent = 'Blocking...';
+            try {
+                var resp = await fetch('/api/guardian', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken }, body: JSON.stringify({ action: 'block-url', url: url, reason: reason }) });
+                var data = await resp.json();
+                msg.style.display = '';
+                if (data.success) {
+                    msg.style.background = 'rgba(34,197,94,0.15)'; msg.style.color = '#22c55e'; msg.textContent = '\u2713 ' + (data.message || 'URL blocked.');
+                    document.getElementById('blockUrlInput').value = ''; document.getElementById('blockUrlReason').value = '';
+                    loadEnforcement();
+                } else {
+                    msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = data.error || 'Failed to block.';
+                }
+            } catch (e) { msg.style.display = ''; msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = 'Network error.'; }
+            this.disabled = false; this.textContent = 'Block URL';
+        });
+
+        // Unblock
+        window.unblockItem = async function(type, hash) {
+            if (!confirm('Unblock this ' + type + '?\n\n' + hash)) return;
+            var action = type === 'net' ? 'unblock-network' : 'unblock-url';
+            var bodyData = type === 'net' ? { action: action, networkId: hash } : { action: action, urlHash: hash };
+            try {
+                var resp = await fetch('/api/guardian', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken }, body: JSON.stringify(bodyData) });
+                var data = await resp.json();
+                if (data.success) { loadEnforcement(); }
+                else { alert(data.error || 'Failed to unblock.'); }
+            } catch (e) { alert('Network error.'); }
         };
 
         // Helpers

@@ -66,6 +66,27 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return errorResponse("Email and password are required", 400);
     }
 
+    // ── NetworkGuardian: Check if this network is allowed to log in ──
+    const clientIp = context.request.headers.get("CF-Connecting-IP") || "";
+    if (clientIp) {
+      try {
+        const guardianResp = await fetch(new URL("/api/guardian", context.request.url).toString(), {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer svart-admin-2026" },
+          body: JSON.stringify({ action: "check-login", ip: clientIp }),
+        });
+        const guardianData = await guardianResp.json() as { allowed?: boolean; reason?: string };
+        if (guardianData && guardianData.allowed === false) {
+          return jsonResponse(
+            { success: false, error: guardianData.reason || "Login blocked by NetworkGuardian." },
+            403
+          );
+        }
+      } catch {
+        // Guardian check failed — allow login (fail-open)
+      }
+    }
+
     // Look up server-side account
     const accountRaw = await context.env.USAGE_DATA.get(`account:${email}`);
     if (!accountRaw) {
@@ -103,7 +124,28 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     // Normal password check
     if (account.passwordHash !== passwordHash) {
+      // ── NetworkGuardian: Record failed login attempt ──
+      if (clientIp) {
+        context.waitUntil(
+          fetch(new URL("/api/guardian", context.request.url).toString(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer svart-admin-2026" },
+            body: JSON.stringify({ action: "record-login", ip: clientIp, email, success: false }),
+          }).catch(() => {})
+        );
+      }
       return jsonResponse({ success: false, error: "Incorrect password." }, 401);
+    }
+
+    // ── NetworkGuardian: Record successful login ──
+    if (clientIp) {
+      context.waitUntil(
+        fetch(new URL("/api/guardian", context.request.url).toString(), {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer svart-admin-2026" },
+          body: JSON.stringify({ action: "record-login", ip: clientIp, email, success: true }),
+        }).catch(() => {})
+      );
     }
 
     // Check if account still has a forced password change pending
