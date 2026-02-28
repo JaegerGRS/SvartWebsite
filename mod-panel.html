@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mod Panel - Svart Suite</title>
+    <title>Mod Panel - Svart Security</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>!function(){var t=localStorage.getItem("svart_theme")||"midnight";document.documentElement.setAttribute("data-theme",t)}()</script>
     <style>
         .mod-login { max-width: 400px; margin: 120px auto; padding: 32px; background: rgba(20,20,30,0.9); border: 1px solid var(--border-color); border-radius: 16px; }
@@ -13,14 +14,22 @@
         .mod-login input { width: 100%; padding: 12px 16px; background: rgba(var(--bg-dark-rgb),0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 1rem; margin-bottom: 12px; }
         .mod-login input:focus { border-color: var(--primary); outline: none; }
         .mod-panel { max-width: 1100px; margin: 100px auto 40px; padding: 0 20px; }
-        .mod-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+        .mod-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
         .mod-header h1 { color: var(--primary); font-size: 1.6rem; }
-        .mod-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-        .mod-tab { padding: 10px 20px; background: rgba(20,20,30,0.6); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-muted); cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
-        .mod-tab:hover { border-color: var(--primary); color: var(--text-light); }
-        .mod-tab.active { background: rgba(var(--primary-rgb),0.15); border-color: var(--primary); color: var(--primary); font-weight: 600; }
-        .mod-section { display: none; }
-        .mod-section.active { display: block; }
+        .quick-links { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-bottom: 24px; }
+        .quick-link { display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: rgba(20,20,30,0.7); border: 1px solid var(--border-color); border-radius: 12px; text-decoration: none; color: var(--text-light); transition: all 0.2s; }
+        .quick-link:hover { border-color: var(--primary); background: rgba(var(--primary-rgb),0.08); transform: translateY(-1px); }
+        .quick-link .ql-icon { font-size: 1.5rem; width: 36px; text-align: center; }
+        .quick-link .ql-title { font-weight: 600; font-size: 0.95rem; }
+        .quick-link .ql-desc { color: var(--text-muted); font-size: 0.78rem; margin-top: 2px; }
+        .tab-bar { display: flex; gap: 0; margin-bottom: 0; border-bottom: 2px solid var(--border-color); }
+        .tab-btn { padding: 14px 24px; background: transparent; border: none; border-bottom: 3px solid transparent; color: var(--text-muted); cursor: pointer; font-size: 0.95rem; font-weight: 500; transition: all 0.25s; position: relative; bottom: -2px; }
+        .tab-btn:hover { color: var(--text-light); background: rgba(var(--primary-rgb),0.05); }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+        .tab-btn .badge { display: inline-block; background: #ef4444; color: #fff; font-size: 0.7rem; padding: 2px 7px; border-radius: 99px; margin-left: 8px; vertical-align: middle; min-width: 18px; text-align: center; }
+        .tab-panel { display: none; padding-top: 24px; }
+        .tab-panel.active { display: block; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         .card { background: rgba(20,20,30,0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
         .card h3 { color: var(--primary); margin-bottom: 12px; }
         .card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px; }
@@ -44,21 +53,16 @@
         .search-bar { display: flex; gap: 10px; margin-bottom: 24px; }
         .search-bar input { flex: 1; padding: 12px 16px; background: rgba(var(--bg-dark-rgb),0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 1rem; }
         .search-bar input:focus { border-color: var(--primary); outline: none; }
-        .badge-unread { display: inline-block; background: #ef4444; color: #fff; font-size: 0.7rem; padding: 2px 7px; border-radius: 99px; margin-left: 6px; vertical-align: middle; }
         .mod-logout { background: none; border: 1px solid var(--danger, #ef4444); color: var(--danger, #ef4444); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
         .mod-logout:hover { background: rgba(239,68,68,0.15); }
         .copy-btn { background: none; border: 1px solid var(--border-color); color: var(--text-muted); padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: all 0.2s; }
         .copy-btn:hover { border-color: var(--primary); color: var(--primary); }
-        .key-cell { font-family: monospace; color: var(--accent); letter-spacing: 0.5px; }
         .email-cell { max-width: 250px; overflow: hidden; text-overflow: ellipsis; }
-        .notif-item { padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 12px; background: rgba(20,20,30,0.6); }
-        .notif-item.unread { border-left: 3px solid var(--primary); }
-        .notif-meta { color: var(--text-muted); font-size: 0.8rem; margin-bottom: 8px; }
-        .notif-subject { color: var(--text-light); font-weight: 600; margin-bottom: 6px; }
-        .notif-body { color: var(--text-muted); font-size: 0.9rem; white-space: pre-wrap; }
         @media (max-width: 768px) {
             .reg-table { font-size: 0.8rem; }
             .reg-table th, .reg-table td { padding: 8px 10px; }
+            .quick-links { grid-template-columns: 1fr; }
+            .tab-btn { padding: 10px 14px; font-size: 0.85rem; }
         }
     </style>
 </head>
@@ -77,7 +81,7 @@
     <div id="keyScreen" style="display:none;">
         <div class="mod-login">
             <h2>&#128272; Verification Required</h2>
-            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your activation key (secret key) to access the mod panel. This is required on every visit.</p>
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your activation key to access the mod panel. Required every visit.</p>
             <input type="password" id="keyInput" placeholder="Your activation key (XXXX-XXXX-XXXX-XXXX)" autocomplete="off">
             <button class="btn btn-primary btn-full" id="keyVerifyBtn">Verify &amp; Access</button>
             <p id="keyError" style="color:#ef4444;margin-top:12px;display:none;font-size:0.9rem;"></p>
@@ -96,75 +100,61 @@
             </div>
         </div>
 
-        <div class="mod-tabs">
-            <button class="mod-tab active" data-tab="resets">&#128274; Password Resets</button>
-            <button class="mod-tab" data-tab="registrations">&#128203; Registration Log</button>
-            <button class="mod-tab" data-tab="notify">&#128172; Send Report to Admin</button>
-            <button class="mod-tab" data-tab="logs">&#128203; My Action Log</button>
+        <!-- Quick Links -->
+        <div class="quick-links">
+            <a href="registration-log.html" class="quick-link">
+                <span class="ql-icon">&#128203;</span>
+                <div>
+                    <div class="ql-title">Registration Log</div>
+                    <div class="ql-desc">Full registration table, search &amp; filter</div>
+                </div>
+            </a>
         </div>
 
-        <!-- ===== Password Resets Section ===== -->
-        <div class="mod-section active" id="section-resets">
+        <!-- Tabs -->
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="guardian">&#128737; Guardian Reports <span class="badge" id="guardianBadge" style="display:none;">0</span></button>
+            <button class="tab-btn" data-tab="resets">&#128274; Password Resets <span class="badge" id="resetBadge" style="display:none;">0</span></button>
+            <button class="tab-btn" data-tab="notify">&#128172; Report to Admin</button>
+            <button class="tab-btn" data-tab="logs">&#128203; Action Log</button>
+        </div>
+
+        <!-- Tab: Guardian Reports -->
+        <div class="tab-panel active" id="panel-guardian">
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">NetworkGuardian violation reports from Svart Security apps. Review, add notes, and generate PDFs for record-keeping.</p>
+            <div id="guardianMsg" style="display:none;margin-bottom:16px;padding:12px 16px;border-radius:8px;font-size:0.9rem;"></div>
+            <div style="overflow-x:auto;">
+                <table class="reg-table">
+                    <thead><tr><th>#</th><th>Date</th><th>App</th><th>Type</th><th>Description</th><th>Status</th><th></th></tr></thead>
+                    <tbody id="guardianTableBody"><tr><td colspan="7" class="no-data">Loading...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab: Password Resets -->
+        <div class="tab-panel" id="panel-resets">
             <div class="card">
                 <h3>&#128274; Password Reset Requests</h3>
-                <p>Review pending password reset requests. After helping a user, mark the request as resolved. All actions are logged and sent to the admin.</p>
+                <p>Review pending resets. Search a user's email to find their key, then resolve to generate a temporary password.</p>
             </div>
-
             <div class="search-bar">
                 <input type="email" id="searchEmail" placeholder="Search by email to find their activation key...">
                 <button class="btn btn-primary" id="searchBtn">Search</button>
             </div>
             <div id="searchResult" style="display:none;"></div>
-
             <div style="overflow-x:auto;">
                 <table class="reg-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Email</th>
-                            <th>Registered?</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="resetTableBody">
-                        <tr><td colspan="6" class="no-data">Loading...</td></tr>
-                    </tbody>
+                    <thead><tr><th>#</th><th>Email</th><th>Registered?</th><th>Date</th><th>Status</th><th></th></tr></thead>
+                    <tbody id="resetTableBody"><tr><td colspan="6" class="no-data">Loading...</td></tr></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- ===== Registration Log Section ===== -->
-        <div class="mod-section" id="section-registrations">
-            <div class="card">
-                <h3>&#128203; Registration Log</h3>
-                <p>View all registered users to help verify password reset requests. Use the email search on the Password Resets tab to look up a specific user's activation key.</p>
-            </div>
-            <div style="overflow-x:auto;">
-                <table class="reg-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Email</th>
-                            <th>Display Name</th>
-                            <th>Activation Key</th>
-                            <th>Date</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="regTableBody">
-                        <tr><td colspan="6" class="no-data">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- ===== Send Report/Notification Section ===== -->
-        <div class="mod-section" id="section-notify">
+        <!-- Tab: Send Report -->
+        <div class="tab-panel" id="panel-notify">
             <div class="card">
                 <h3>&#128172; Send Report to Admin</h3>
-                <p>Push a notification directly to the admin. This will be emailed and stored for review. Use this for security reports, user issues, or anything requiring admin attention.</p>
+                <p>Push a notification directly to the admin. This will be emailed and stored for review.</p>
                 <div id="notifyMsg" class="msg-box"></div>
                 <div class="form-group">
                     <label>Subject</label>
@@ -189,26 +179,36 @@
             </div>
         </div>
 
-        <!-- ===== Action Log Section ===== -->
-        <div class="mod-section" id="section-logs">
+        <!-- Tab: Action Log -->
+        <div class="tab-panel" id="panel-logs">
             <div class="card">
                 <h3>&#128203; My Action Log</h3>
-                <p>All your mod actions are recorded here and sent to the admin for audit. This includes password resets resolved, searches performed, and reports sent.</p>
+                <p>All your mod actions are recorded here and sent to the admin for audit.</p>
             </div>
             <div style="overflow-x:auto;">
                 <table class="reg-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Action</th>
-                            <th>Target</th>
-                            <th>Details</th>
-                        </tr>
-                    </thead>
-                    <tbody id="logTableBody">
-                        <tr><td colspan="4" class="no-data">Loading...</td></tr>
-                    </tbody>
+                    <thead><tr><th>Date</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
+                    <tbody id="logTableBody"><tr><td colspan="4" class="no-data">Loading...</td></tr></tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- Guardian Detail Modal -->
+        <div id="guardianDetailModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;overflow-y:auto;">
+            <div style="max-width:700px;margin:60px auto;padding:32px;background:rgba(20,20,30,0.98);border:1px solid var(--border-color);border-radius:16px;">
+                <h2 style="color:var(--primary);margin-bottom:16px;">&#128737; Report Details</h2>
+                <div id="guardianDetailContent"></div>
+                <div style="margin-top:20px;">
+                    <label style="color:var(--text-muted);font-size:0.85rem;display:block;margin-bottom:6px;font-weight:600;">Review Notes</label>
+                    <textarea id="guardianNotes" rows="4" style="width:100%;padding:12px;background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:8px;color:var(--text-light);font-size:0.9rem;font-family:inherit;resize:vertical;"></textarea>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+                    <button class="btn btn-primary" id="guardianSaveNotes" style="padding:10px 20px;">Save Notes</button>
+                    <button class="btn btn-primary" id="guardianMarkReviewed" style="padding:10px 20px;background:#22c55e;border-color:#22c55e;">&#10003; Mark Reviewed</button>
+                    <button class="btn btn-primary" id="guardianGenPdf" style="padding:10px 20px;background:#3b82f6;border-color:#3b82f6;">&#128196; Generate PDF</button>
+                    <button class="btn btn-secondary" id="guardianDismiss" style="padding:10px 20px;">Dismiss</button>
+                    <button class="btn btn-secondary" id="guardianCloseModal" style="padding:10px 20px;margin-left:auto;">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -220,18 +220,21 @@
         const ADMIN_EMAIL = 'admin@svartsecurity.org';
         let apiToken = '';
         let currentUser = null;
+        var currentGuardianReport = null;
 
-        // Elements
         const accessDenied = document.getElementById('accessDenied');
         const keyScreen = document.getElementById('keyScreen');
         const modPanel = document.getElementById('modPanel');
         const keyInput = document.getElementById('keyInput');
         const keyVerifyBtn = document.getElementById('keyVerifyBtn');
         const keyError = document.getElementById('keyError');
-        const modLogoutBtn = document.getElementById('modLogoutBtn');
-        const refreshAllBtn = document.getElementById('refreshAllBtn');
+        const guardianTableBody = document.getElementById('guardianTableBody');
+        const guardianMsg = document.getElementById('guardianMsg');
+        const guardianDetailModal = document.getElementById('guardianDetailModal');
+        const guardianDetailContent = document.getElementById('guardianDetailContent');
+        const guardianNotesEl = document.getElementById('guardianNotes');
 
-        // ===== Auth: Get current user =====
+        // ===== Auth =====
         function getCurrentUser() {
             try {
                 var session = JSON.parse(localStorage.getItem('ct_session') || '{}');
@@ -239,53 +242,30 @@
                 var users = JSON.parse(localStorage.getItem('ct_users') || '{}');
                 var user = users[session.svartId];
                 if (!user) return null;
-                return {
-                    svartId: session.svartId,
-                    email: session.email,
-                    role: user.role || 'user',
-                    activationKey: user.activationKey,
-                    displayName: user.displayName || user.username || 'Unknown'
-                };
+                return { svartId: session.svartId, email: session.email, role: user.role || 'user', activationKey: user.activationKey, displayName: user.displayName || user.username || 'Unknown' };
             } catch (e) { return null; }
         }
 
         currentUser = getCurrentUser();
 
-        // Server-side validation: confirm account exists on server with mod/admin role
         if (currentUser) {
             try {
                 var checkResp = await fetch('/api/auth?email=' + encodeURIComponent(currentUser.email) + '&key=' + encodeURIComponent(currentUser.activationKey));
                 var checkData = await checkResp.json();
                 if (!checkData.exists) {
-                    // Account doesn't exist on server — purge local data
-                    localStorage.removeItem('ct_users');
-                    localStorage.removeItem('ct_session');
-                    localStorage.removeItem('ct_persistent_session');
+                    localStorage.removeItem('ct_users'); localStorage.removeItem('ct_session'); localStorage.removeItem('ct_persistent_session');
                     currentUser = null;
                 } else if (checkData.account) {
-                    // Sync role from server
                     currentUser.role = checkData.account.role || 'user';
-                    if (currentUser.role !== 'mod' && currentUser.role !== 'admin' && currentUser.email.toLowerCase() !== ADMIN_EMAIL) {
-                        // Not a mod or admin on server
-                        currentUser = null;
-                    }
+                    if (currentUser.role !== 'mod' && currentUser.role !== 'admin' && currentUser.email.toLowerCase() !== ADMIN_EMAIL) currentUser = null;
                 }
-            } catch (e) {
-                // Server unreachable — block access
-                currentUser = null;
-            }
+            } catch (e) { currentUser = null; }
         }
 
-        // Gate: must be logged in as mod or admin (server-side role verified above)
         if (!currentUser || (currentUser.role !== 'mod' && currentUser.role !== 'admin' && currentUser.email.toLowerCase() !== ADMIN_EMAIL)) {
-            accessDenied.style.display = '';
-            keyScreen.style.display = 'none';
-            modPanel.style.display = 'none';
+            accessDenied.style.display = ''; keyScreen.style.display = 'none'; modPanel.style.display = 'none';
         } else {
-            // Require activation key on every visit for security
-            accessDenied.style.display = 'none';
-            keyScreen.style.display = '';
-            modPanel.style.display = 'none';
+            accessDenied.style.display = 'none'; keyScreen.style.display = ''; modPanel.style.display = 'none';
         }
 
         // ===== Key Verification =====
@@ -294,170 +274,239 @@
 
         function doVerify() {
             var enteredKey = keyInput.value.trim();
-            if (!enteredKey) return;
-            if (!currentUser) {
-                keyError.textContent = 'Not logged in.';
-                keyError.style.display = '';
-                return;
-            }
-            // Verify activation key matches the user's stored key
+            if (!enteredKey || !currentUser) return;
             if (enteredKey !== currentUser.activationKey) {
-                keyError.textContent = 'Invalid activation key. This must match your account\'s secret key.';
-                keyError.style.display = '';
-                keyInput.value = '';
-                return;
+                keyError.textContent = 'Invalid activation key.'; keyError.style.display = ''; keyInput.value = ''; return;
             }
             keyError.style.display = 'none';
-            // Admin gets admin token, mods get mod token
-            apiToken = (currentUser.role === 'admin' || currentUser.email.toLowerCase() === ADMIN_EMAIL)
-                ? ADMIN_API_SECRET
-                : MOD_API_SECRET;
+            apiToken = (currentUser.role === 'admin' || currentUser.email.toLowerCase() === ADMIN_EMAIL) ? ADMIN_API_SECRET : MOD_API_SECRET;
             showPanel();
         }
 
         function showPanel() {
-            keyScreen.style.display = 'none';
-            modPanel.style.display = '';
+            keyScreen.style.display = 'none'; modPanel.style.display = '';
+            loadGuardianReports();
             loadResetRequests();
-            loadRegistrations();
             loadActionLog();
         }
 
-        // ===== Logout =====
-        modLogoutBtn.addEventListener('click', function() {
-            apiToken = '';
-            modPanel.style.display = 'none';
-            keyScreen.style.display = '';
-            keyInput.value = '';
+        // Logout
+        document.getElementById('modLogoutBtn').addEventListener('click', function() {
+            apiToken = ''; modPanel.style.display = 'none'; keyScreen.style.display = ''; keyInput.value = '';
         });
 
-        // ===== Refresh =====
-        refreshAllBtn.addEventListener('click', function() {
-            loadResetRequests();
-            loadRegistrations();
-            loadActionLog();
+        // Refresh
+        document.getElementById('refreshAllBtn').addEventListener('click', function() {
+            loadGuardianReports(); loadResetRequests(); loadActionLog();
         });
 
         // ===== Tab Navigation =====
-        document.querySelectorAll('.mod-tab').forEach(function(btn) {
+        document.querySelectorAll('.tab-btn').forEach(function(btn) {
             btn.addEventListener('click', function() {
-                document.querySelectorAll('.mod-tab').forEach(function(b) { b.classList.remove('active'); });
-                document.querySelectorAll('.mod-section').forEach(function(s) { s.classList.remove('active'); });
+                document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+                document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
                 btn.classList.add('active');
-                document.getElementById('section-' + btn.dataset.tab).classList.add('active');
+                document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
             });
         });
 
-        // ===== Password Reset Requests =====
+        // ===== Guardian Reports =====
+        async function loadGuardianReports() {
+            guardianTableBody.innerHTML = '<tr><td colspan="7" class="no-data">Loading...</td></tr>';
+            try {
+                var resp = await fetch('/api/guardian-reports', { headers: { 'Authorization': 'Bearer ' + apiToken } });
+                var data = await resp.json();
+                if (!data.success) { guardianTableBody.innerHTML = '<tr><td colspan="7" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>'; return; }
+                var reports = data.reports || [];
+                var pending = data.pending || 0;
+                var escalated = data.escalated || 0;
+                if (pending > 0 || escalated > 0) {
+                    document.getElementById('guardianBadge').style.display = '';
+                    document.getElementById('guardianBadge').textContent = pending + escalated;
+                } else { document.getElementById('guardianBadge').style.display = 'none'; }
+                if (reports.length === 0) { guardianTableBody.innerHTML = '<tr><td colspan="7" class="no-data">No guardian reports yet.</td></tr>'; return; }
+                guardianTableBody.innerHTML = reports.map(function(r, i) {
+                    var num = reports.length - i;
+                    var dateStr = r.date ? new Date(r.date).toLocaleString() : '-';
+                    var descShort = (r.description || '').substring(0, 60) + ((r.description || '').length > 60 ? '...' : '');
+                    var statusColors = { pending: '#f59e0b', reviewed: '#22c55e', escalated: '#ef4444', dismissed: '#6b7280' };
+                    var statusBadge = '<span style="color:' + (statusColors[r.status] || '#888') + ';font-weight:600;">' + escHtml(r.status || 'pending') + '</span>';
+                    var typeBadge = r.violationType === 'Security' ? '<span style="color:#ef4444;font-weight:600;">Security</span>'
+                        : r.violationType === 'TOS' ? '<span style="color:#f59e0b;font-weight:600;">TOS</span>'
+                        : r.violationType === 'Privacy' ? '<span style="color:#3b82f6;font-weight:600;">Privacy</span>'
+                        : '<span style="color:var(--text-muted);">' + escHtml(r.violationType) + '</span>';
+                    return '<tr style="cursor:pointer;" onclick="viewGuardianReport(\'' + escAttr(r.id) + '\')">' +
+                        '<td>' + num + '</td><td>' + dateStr + '</td><td>' + escHtml(r.app) + '</td><td>' + typeBadge + '</td>' +
+                        '<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;">' + escHtml(descShort) + '</td>' +
+                        '<td>' + statusBadge + '</td><td><button class="resolve-btn" style="font-size:0.8rem;">View</button></td></tr>';
+                }).join('');
+            } catch (e) { guardianTableBody.innerHTML = '<tr><td colspan="7" class="no-data">Network error.</td></tr>'; }
+        }
+
+        window.viewGuardianReport = function(reportId) {
+            fetch('/api/guardian-reports', { headers: { 'Authorization': 'Bearer ' + apiToken } })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var report = (data.reports || []).find(function(r) { return r.id === reportId; });
+                    if (!report) { alert('Report not found.'); return; }
+                    currentGuardianReport = report;
+                    guardianNotesEl.value = report.notes || '';
+                    guardianDetailContent.innerHTML = '<table style="width:100%;border-collapse:collapse;">' +
+                        '<tr><td style="padding:8px 12px;color:var(--text-muted);width:160px;">Report ID</td><td style="padding:8px 12px;color:var(--text-light);font-family:monospace;font-size:0.85rem;">' + escHtml(report.id) + '</td></tr>' +
+                        '<tr><td style="padding:8px 12px;color:var(--text-muted);">Date Filed</td><td style="padding:8px 12px;color:var(--text-light);">' + new Date(report.date).toLocaleString() + '</td></tr>' +
+                        '<tr><td style="padding:8px 12px;color:var(--text-muted);">Source App</td><td style="padding:8px 12px;color:var(--text-light);">' + escHtml(report.app) + '</td></tr>' +
+                        '<tr><td style="padding:8px 12px;color:var(--text-muted);">Violation Type</td><td style="padding:8px 12px;color:#ef4444;font-weight:600;">' + escHtml(report.violationType) + '</td></tr>' +
+                        '<tr><td style="padding:8px 12px;color:var(--text-muted);">Submitter</td><td style="padding:8px 12px;color:var(--text-light);">' + escHtml(report.submitterEmail || report.userId || 'Anonymous') + '</td></tr>' +
+                        '<tr><td style="padding:8px 12px;color:var(--text-muted);">Country</td><td style="padding:8px 12px;color:var(--text-light);">' + escHtml(report.country || 'Unknown') + '</td></tr>' +
+                        '<tr><td style="padding:8px 12px;color:var(--text-muted);">IP Address</td><td style="padding:8px 12px;color:var(--text-light);font-family:monospace;">' + escHtml(report.ip || 'Unknown') + '</td></tr>' +
+                        '<tr><td style="padding:8px 12px;color:var(--text-muted);">Status</td><td style="padding:8px 12px;color:var(--text-light);font-weight:600;">' + escHtml(report.status) + '</td></tr>' +
+                        (report.reviewedBy ? '<tr><td style="padding:8px 12px;color:var(--text-muted);">Reviewed By</td><td style="padding:8px 12px;color:var(--text-light);">' + escHtml(report.reviewedBy) + '</td></tr>' : '') +
+                        (report.escalatedAt ? '<tr><td style="padding:8px 12px;color:var(--text-muted);">Escalated</td><td style="padding:8px 12px;color:#ef4444;font-weight:600;">' + new Date(report.escalatedAt).toLocaleString() + '</td></tr>' : '') +
+                        '</table>' +
+                        '<h3 style="color:var(--primary);margin:20px 0 8px;">Description</h3>' +
+                        '<div style="background:rgba(var(--bg-dark-rgb),0.5);border:1px solid var(--border-color);border-radius:8px;padding:16px;white-space:pre-wrap;color:var(--text-light);font-size:0.9rem;">' + escHtml(report.description) + '</div>' +
+                        (report.details ? '<h3 style="color:var(--primary);margin:20px 0 8px;">Additional Details</h3><pre style="background:rgba(var(--bg-dark-rgb),0.5);border:1px solid var(--border-color);border-radius:8px;padding:16px;color:var(--text-light);font-size:0.85rem;overflow-x:auto;">' + escHtml(JSON.stringify(report.details, null, 2)) + '</pre>' : '');
+                    guardianDetailModal.style.display = '';
+                });
+        };
+
+        document.getElementById('guardianCloseModal').addEventListener('click', function() { guardianDetailModal.style.display = 'none'; currentGuardianReport = null; });
+
+        document.getElementById('guardianSaveNotes').addEventListener('click', async function() {
+            if (!currentGuardianReport) return;
+            var btn = this; btn.disabled = true; btn.textContent = 'Saving...';
+            try {
+                await fetch('/api/guardian-reports', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiToken }, body: JSON.stringify({ reportId: currentGuardianReport.id, notes: guardianNotesEl.value, reviewerEmail: currentUser.email }) });
+                guardianMsg.style.display = ''; guardianMsg.style.background = 'rgba(34,197,94,0.15)'; guardianMsg.style.color = '#22c55e'; guardianMsg.textContent = '\u2713 Notes saved.';
+                await logModAction('guardian-notes', '', 'Saved notes on report ' + currentGuardianReport.id);
+            } catch (e) { guardianMsg.style.display = ''; guardianMsg.style.background = 'rgba(239,68,68,0.15)'; guardianMsg.style.color = '#ef4444'; guardianMsg.textContent = 'Failed to save notes.'; }
+            btn.disabled = false; btn.textContent = 'Save Notes';
+        });
+
+        document.getElementById('guardianMarkReviewed').addEventListener('click', async function() {
+            if (!currentGuardianReport) return;
+            var btn = this; btn.disabled = true;
+            try {
+                await fetch('/api/guardian-reports', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiToken }, body: JSON.stringify({ reportId: currentGuardianReport.id, status: 'reviewed', notes: guardianNotesEl.value, reviewerEmail: currentUser.email }) });
+                guardianDetailModal.style.display = 'none'; loadGuardianReports();
+                guardianMsg.style.display = ''; guardianMsg.style.background = 'rgba(34,197,94,0.15)'; guardianMsg.style.color = '#22c55e'; guardianMsg.textContent = '\u2713 Report marked as reviewed.';
+                await logModAction('guardian-review', '', 'Marked report ' + currentGuardianReport.id + ' as reviewed');
+            } catch (e) { alert('Failed.'); }
+            btn.disabled = false;
+        });
+
+        document.getElementById('guardianDismiss').addEventListener('click', async function() {
+            if (!currentGuardianReport) return;
+            if (!confirm('Dismiss this report?')) return;
+            try {
+                await fetch('/api/guardian-reports', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiToken }, body: JSON.stringify({ reportId: currentGuardianReport.id, status: 'dismissed', notes: guardianNotesEl.value, reviewerEmail: currentUser.email }) });
+                guardianDetailModal.style.display = 'none'; loadGuardianReports();
+                await logModAction('guardian-dismiss', '', 'Dismissed report ' + currentGuardianReport.id);
+            } catch (e) { alert('Failed.'); }
+        });
+
+        // Generate PDF (mod version — no escalation header)
+        document.getElementById('guardianGenPdf').addEventListener('click', function() {
+            if (!currentGuardianReport) return;
+            var r = currentGuardianReport;
+            var jsPDF = window.jspdf.jsPDF;
+            var doc = new jsPDF();
+            var y = 20, lh = 7, margin = 20, pageW = doc.internal.pageSize.getWidth();
+            function addLine(text, opts) {
+                opts = opts || {};
+                if (y > 270) { doc.addPage(); y = 20; }
+                doc.setFontSize(opts.size || 10);
+                doc.setFont(undefined, opts.bold ? 'bold' : 'normal');
+                doc.setTextColor(opts.color || '#000000');
+                if (opts.wrap) { var lines = doc.splitTextToSize(text, pageW - margin * 2); doc.text(lines, margin, y); y += lines.length * (lh * 0.8); }
+                else { doc.text(text, margin, y); y += lh; }
+            }
+            addLine('NETWORKGUARDIAN REPORT', { size: 16, bold: true });
+            addLine('Generated by Mod: ' + currentUser.email, { size: 10, color: '#666666' });
+            addLine('Date: ' + new Date().toLocaleString()); y += 6;
+            doc.setDrawColor(150); doc.line(margin, y, pageW - margin, y); y += 8;
+            addLine('REPORT DETAILS', { size: 13, bold: true }); y += 2;
+            addLine('Report ID: ' + r.id);
+            addLine('Date Filed: ' + new Date(r.date).toLocaleString());
+            addLine('Source App: ' + r.app);
+            addLine('Violation Type: ' + r.violationType, { bold: true, color: '#cc0000' });
+            addLine('Submitter: ' + (r.submitterEmail || r.userId || 'Anonymous'));
+            addLine('Country: ' + (r.country || 'Unknown'));
+            addLine('IP: ' + (r.ip || 'Unknown'));
+            addLine('Status: ' + r.status); y += 6;
+            addLine('DESCRIPTION', { size: 13, bold: true }); y += 2;
+            addLine(r.description || '(none)', { wrap: true }); y += 6;
+            if (r.details) { addLine('ADDITIONAL DETAILS', { size: 13, bold: true }); y += 2; addLine(JSON.stringify(r.details, null, 2), { wrap: true, size: 8 }); y += 6; }
+            addLine('REVIEW NOTES', { size: 13, bold: true }); y += 2;
+            addLine(guardianNotesEl.value || r.notes || '(No notes)', { wrap: true });
+            doc.save('Guardian-Report-' + r.id.replace(/:/g, '-') + '.pdf');
+            logModAction('guardian-pdf', '', 'Generated PDF for report ' + r.id);
+        });
+
+        // ===== Password Resets =====
         async function loadResetRequests() {
             var tbody = document.getElementById('resetTableBody');
             tbody.innerHTML = '<tr><td colspan="6" class="no-data">Loading...</td></tr>';
             try {
-                var resp = await fetch('/api/password-reset', {
-                    headers: { 'Authorization': 'Bearer ' + apiToken }
-                });
+                var resp = await fetch('/api/password-reset', { headers: { 'Authorization': 'Bearer ' + apiToken } });
                 var data = await resp.json();
-                if (!data.success) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>';
-                    return;
-                }
-
+                if (!data.success) { tbody.innerHTML = '<tr><td colspan="6" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>'; return; }
                 var reqs = data.requests || [];
-                if (reqs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="no-data">No password reset requests yet.</td></tr>';
-                    return;
-                }
-
+                var pending = data.pending || 0;
+                if (pending > 0) {
+                    document.getElementById('resetBadge').style.display = '';
+                    document.getElementById('resetBadge').textContent = pending;
+                } else { document.getElementById('resetBadge').style.display = 'none'; }
+                if (reqs.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="no-data">No password reset requests yet.</td></tr>'; return; }
                 var sorted = reqs.slice().reverse();
                 tbody.innerHTML = sorted.map(function(r, i) {
                     var num = reqs.length - i;
                     var dateStr = r.date ? new Date(r.date).toLocaleString() : '-';
-                    var regBadge = r.registered
-                        ? '<span style="color:#22c55e;">&#10003; Yes</span>'
-                        : '<span style="color:#ef4444;">&#10007; No</span>';
-                    var statusBadge = r.status === 'resolved'
-                        ? '<span class="status-resolved">&#10003; Resolved</span>'
-                        : '<span class="status-pending">&#9679; Pending</span>';
-                    var actionBtn = r.status === 'pending'
-                        ? '<button class="resolve-btn" onclick="resolveReset(\'' + escAttr(r.id) + '\', \'' + escAttr(r.email) + '\')">Resolve</button>'
-                        : '';
-                    return '<tr>' +
-                        '<td>' + num + '</td>' +
-                        '<td>' + escHtml(r.email) + '</td>' +
-                        '<td>' + regBadge + '</td>' +
-                        '<td>' + dateStr + '</td>' +
-                        '<td>' + statusBadge + '</td>' +
-                        '<td>' + actionBtn + '</td>' +
-                        '</tr>';
+                    var regBadge = r.registered ? '<span style="color:#22c55e;">&#10003; Yes</span>' : '<span style="color:#ef4444;">&#10007; No</span>';
+                    var statusBadge = r.status === 'resolved' ? '<span class="status-resolved">&#10003; Resolved</span>' : '<span class="status-pending">&#9679; Pending</span>';
+                    var actionBtn = r.status === 'pending' ? '<button class="resolve-btn" onclick="resolveReset(\'' + escAttr(r.id) + '\', \'' + escAttr(r.email) + '\')">Resolve</button>' : '';
+                    return '<tr><td>' + num + '</td><td>' + escHtml(r.email) + '</td><td>' + regBadge + '</td><td>' + dateStr + '</td><td>' + statusBadge + '</td><td>' + actionBtn + '</td></tr>';
                 }).join('');
-            } catch (e) {
-                tbody.innerHTML = '<tr><td colspan="6" class="no-data">Network error loading reset requests.</td></tr>';
-            }
+            } catch (e) { tbody.innerHTML = '<tr><td colspan="6" class="no-data">Network error.</td></tr>'; }
         }
 
-        // ===== Resolve a reset request (with logging) =====
         window.resolveReset = async function(id, email) {
             try {
-                var resp = await fetch('/api/password-reset?resolve=' + encodeURIComponent(id), {
-                    headers: { 'Authorization': 'Bearer ' + apiToken }
-                });
+                var resp = await fetch('/api/password-reset?resolve=' + encodeURIComponent(id), { headers: { 'Authorization': 'Bearer ' + apiToken } });
                 var data = await resp.json();
-
-                // Log this mod action
                 await logModAction('resolve-password', email, 'Resolved password reset request ' + id);
-
-                // Show the generated temp password to the mod
                 if (data.tempPassword) {
                     var modal = document.createElement('div');
                     modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;';
                     modal.innerHTML = '<div style="background:rgba(20,20,30,0.95);border:1px solid var(--border-color);border-radius:16px;padding:32px;max-width:480px;width:90%;">'
                         + '<h2 style="color:#22c55e;margin-bottom:12px;">&#10003; Password Reset Complete</h2>'
-                        + '<p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">A temporary password has been generated for <strong style="color:var(--text-light);">' + escHtml(data.email || email) + '</strong></p>'
+                        + '<p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Temporary password for <strong style="color:var(--text-light);">' + escHtml(data.email || email) + '</strong></p>'
                         + '<div style="background:rgba(var(--primary-rgb),0.1);border:1px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:16px;text-align:center;">'
                         + '<div style="color:var(--text-muted);font-size:0.8rem;margin-bottom:6px;">TEMPORARY PASSWORD</div>'
-                        + '<div style="color:var(--primary);font-family:monospace;font-size:1.3rem;letter-spacing:1px;cursor:pointer;" onclick="copyText(\'' + escAttr(data.tempPassword) + '\')" title="Click to copy">' + escHtml(data.tempPassword) + '</div>'
-                        + '</div>'
-                        + '<p style="color:#f59e0b;font-size:0.85rem;margin-bottom:16px;">&#9888; Give this password to the user. They will be forced to set a new password on their next login.</p>'
-                        + '<button class="btn btn-primary btn-full" onclick="this.closest(\'div[style]\').remove()">Done</button>'
-                        + '</div>';
+                        + '<div style="color:var(--primary);font-family:monospace;font-size:1.3rem;letter-spacing:1px;cursor:pointer;" onclick="copyText(\'' + escAttr(data.tempPassword) + '\')" title="Click to copy">' + escHtml(data.tempPassword) + '</div></div>'
+                        + '<p style="color:#f59e0b;font-size:0.85rem;margin-bottom:16px;">&#9888; Give this to the user. They must set a new password on next login.</p>'
+                        + '<button class="btn btn-primary btn-full" onclick="this.closest(\'div[style]\').remove()">Done</button></div>';
                     document.body.appendChild(modal);
                 }
-
-                loadResetRequests();
-                loadActionLog();
-            } catch (e) {
-                alert('Failed to resolve request.');
-            }
+                loadResetRequests(); loadActionLog();
+            } catch (e) { alert('Failed to resolve.'); }
         };
 
-        // ===== Email Search (for finding user's activation key) =====
-        var searchBtn = document.getElementById('searchBtn');
-        var searchEmail = document.getElementById('searchEmail');
-        var searchResult = document.getElementById('searchResult');
-
-        searchBtn.addEventListener('click', doSearch);
-        searchEmail.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
+        // ===== Email Search =====
+        document.getElementById('searchBtn').addEventListener('click', doSearch);
+        document.getElementById('searchEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
 
         async function doSearch() {
-            var email = searchEmail.value.trim();
-            if (!email) { searchResult.style.display = 'none'; return; }
-
-            searchResult.style.display = '';
-            searchResult.innerHTML = '<div class="card"><p style="color:var(--text-muted);">Searching...</p></div>';
-
+            var email = document.getElementById('searchEmail').value.trim();
+            var result = document.getElementById('searchResult');
+            if (!email) { result.style.display = 'none'; return; }
+            result.style.display = '';
+            result.innerHTML = '<div class="card"><p style="color:var(--text-muted);">Searching...</p></div>';
             try {
-                var resp = await fetch('/api/registrations?email=' + encodeURIComponent(email), {
-                    headers: { 'Authorization': 'Bearer ' + apiToken }
-                });
+                var resp = await fetch('/api/registrations?email=' + encodeURIComponent(email), { headers: { 'Authorization': 'Bearer ' + apiToken } });
                 var data = await resp.json();
-                if (!data.success || !data.found) {
-                    searchResult.innerHTML = '<div class="card"><h3>No results</h3><p>No registration found for <strong>' + escHtml(email) + '</strong></p></div>';
-                    return;
-                }
-
-                // Log the search action
+                if (!data.success || !data.found) { result.innerHTML = '<div class="card"><h3>No results</h3><p>No registration found for <strong>' + escHtml(email) + '</strong></p></div>'; return; }
                 await logModAction('search-user', email, 'Searched for user activation key');
-
                 var records = data.records || [];
                 var html = '<div class="card"><h3>Found ' + records.length + ' key(s) for ' + escHtml(email) + '</h3>';
                 records.forEach(function(rec) {
@@ -468,188 +517,64 @@
                     html += '</div>';
                 });
                 html += '</div>';
-                searchResult.innerHTML = html;
-                loadActionLog(); // refresh log
-            } catch (e) {
-                searchResult.innerHTML = '<div class="card"><h3 style="color:#ef4444;">Error</h3><p>Network error during search.</p></div>';
-            }
+                result.innerHTML = html;
+                loadActionLog();
+            } catch (e) { result.innerHTML = '<div class="card"><h3 style="color:#ef4444;">Error</h3><p>Network error.</p></div>'; }
         }
 
         // ===== Send Report to Admin =====
-        var sendNotifyBtn = document.getElementById('sendNotifyBtn');
-        var notifyMsg = document.getElementById('notifyMsg');
-
-        sendNotifyBtn.addEventListener('click', async function() {
+        document.getElementById('sendNotifyBtn').addEventListener('click', async function() {
             var subject = document.getElementById('notifySubject').value.trim();
             var category = document.getElementById('notifyCategory').value;
             var message = document.getElementById('notifyMessage').value.trim();
-
-            if (!subject || !message) {
-                notifyMsg.style.display = '';
-                notifyMsg.className = 'msg-box msg-error';
-                notifyMsg.textContent = 'Subject and message are required.';
-                return;
-            }
-
-            sendNotifyBtn.disabled = true;
-            sendNotifyBtn.textContent = 'Sending...';
-            notifyMsg.style.display = 'none';
-
+            var notifyMsg = document.getElementById('notifyMsg');
+            if (!subject || !message) { notifyMsg.style.display = ''; notifyMsg.className = 'msg-box msg-error'; notifyMsg.textContent = 'Subject and message are required.'; return; }
+            this.disabled = true; this.textContent = 'Sending...'; notifyMsg.style.display = 'none';
             try {
-                var resp = await fetch('/api/mod-actions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + apiToken
-                    },
-                    body: JSON.stringify({
-                        action: 'notify',
-                        modEmail: currentUser.email,
-                        subject: '[' + category.toUpperCase() + '] ' + subject,
-                        message: message
-                    })
-                });
+                var resp = await fetch('/api/mod-actions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiToken },
+                    body: JSON.stringify({ action: 'notify', modEmail: currentUser.email, subject: '[' + category.toUpperCase() + '] ' + subject, message: message }) });
                 var data = await resp.json();
                 if (data.success) {
-                    notifyMsg.style.display = '';
-                    notifyMsg.className = 'msg-box msg-success';
-                    notifyMsg.textContent = 'Report sent to admin successfully. They will be emailed.';
-                    document.getElementById('notifySubject').value = '';
-                    document.getElementById('notifyMessage').value = '';
-                    // Log the action too
-                    await logModAction('send-report', ADMIN_EMAIL, subject);
-                    loadActionLog();
-                } else {
-                    notifyMsg.style.display = '';
-                    notifyMsg.className = 'msg-box msg-error';
-                    notifyMsg.textContent = data.error || 'Failed to send report.';
-                }
-            } catch (e) {
-                notifyMsg.style.display = '';
-                notifyMsg.className = 'msg-box msg-error';
-                notifyMsg.textContent = 'Network error sending report.';
-            }
-            sendNotifyBtn.disabled = false;
-            sendNotifyBtn.innerHTML = '&#128232; Send Report to Admin';
+                    notifyMsg.style.display = ''; notifyMsg.className = 'msg-box msg-success'; notifyMsg.textContent = 'Report sent to admin successfully.';
+                    document.getElementById('notifySubject').value = ''; document.getElementById('notifyMessage').value = '';
+                    await logModAction('send-report', ADMIN_EMAIL, subject); loadActionLog();
+                } else { notifyMsg.style.display = ''; notifyMsg.className = 'msg-box msg-error'; notifyMsg.textContent = data.error || 'Failed.'; }
+            } catch (e) { notifyMsg.style.display = ''; notifyMsg.className = 'msg-box msg-error'; notifyMsg.textContent = 'Network error.'; }
+            this.disabled = false; this.innerHTML = '&#128232; Send Report to Admin';
         });
 
-        // ===== Load Action Log =====
+        // ===== Action Log =====
         async function loadActionLog() {
             var tbody = document.getElementById('logTableBody');
             tbody.innerHTML = '<tr><td colspan="4" class="no-data">Loading...</td></tr>';
             try {
-                var resp = await fetch('/api/mod-actions?type=modlogs&mod=' + encodeURIComponent(currentUser.email), {
-                    headers: { 'Authorization': 'Bearer ' + apiToken }
-                });
+                var resp = await fetch('/api/mod-actions?type=modlogs&mod=' + encodeURIComponent(currentUser.email), { headers: { 'Authorization': 'Bearer ' + apiToken } });
                 var data = await resp.json();
-                if (!data.success) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>';
-                    return;
-                }
-
+                if (!data.success) { tbody.innerHTML = '<tr><td colspan="4" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>'; return; }
                 var logs = data.logs || [];
-                if (logs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="no-data">No actions logged yet.</td></tr>';
-                    return;
-                }
-
+                if (logs.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="no-data">No actions logged yet.</td></tr>'; return; }
                 tbody.innerHTML = logs.map(function(l) {
                     var dateStr = l.date ? new Date(l.date).toLocaleString() : '-';
-                    var actionLabel = {
-                        'resolve-password': '&#128274; Resolved Password',
-                        'search-user': '&#128269; Searched User',
-                        'send-report': '&#128232; Sent Report',
+                    var actionLabel = { 'resolve-password': '&#128274; Resolved Password', 'search-user': '&#128269; Searched User', 'send-report': '&#128232; Sent Report',
+                        'guardian-notes': '&#128737; Guardian Notes', 'guardian-review': '&#128737; Guardian Reviewed', 'guardian-dismiss': '&#128737; Guardian Dismissed', 'guardian-pdf': '&#128196; Guardian PDF'
                     }[l.actionType] || escHtml(l.actionType);
-                    return '<tr>' +
-                        '<td>' + dateStr + '</td>' +
-                        '<td>' + actionLabel + '</td>' +
-                        '<td>' + escHtml(l.targetEmail || '-') + '</td>' +
-                        '<td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;">' + escHtml(l.details || '-') + '</td>' +
-                        '</tr>';
+                    return '<tr><td>' + dateStr + '</td><td>' + actionLabel + '</td><td>' + escHtml(l.targetEmail || '-') + '</td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;">' + escHtml(l.details || '-') + '</td></tr>';
                 }).join('');
-            } catch (e) {
-                tbody.innerHTML = '<tr><td colspan="4" class="no-data">Network error loading logs.</td></tr>';
-            }
+            } catch (e) { tbody.innerHTML = '<tr><td colspan="4" class="no-data">Network error.</td></tr>'; }
         }
 
-        // ===== Helper: Log a mod action =====
+        // ===== Log mod action helper =====
         async function logModAction(actionType, targetEmail, details) {
-            try {
-                await fetch('/api/mod-actions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + apiToken
-                    },
-                    body: JSON.stringify({
-                        action: 'log',
-                        modEmail: currentUser.email,
-                        actionType: actionType,
-                        targetEmail: targetEmail || '',
-                        details: details || ''
-                    })
-                });
-            } catch (e) {
-                console.warn('Failed to log mod action:', e);
-            }
-        }
-
-        // ===== Registration Log =====
-        async function loadRegistrations() {
-            var tbody = document.getElementById('regTableBody');
-            tbody.innerHTML = '<tr><td colspan="6" class="no-data">Loading...</td></tr>';
-            try {
-                var resp = await fetch('/api/registrations', {
-                    headers: { 'Authorization': 'Bearer ' + apiToken }
-                });
-                var data = await resp.json();
-                if (!data.success) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>';
-                    return;
-                }
-
-                var regs = data.registrations || [];
-                if (regs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="no-data">No registrations yet.</td></tr>';
-                    return;
-                }
-
-                var sorted = regs.slice().reverse();
-                tbody.innerHTML = sorted.map(function(r, i) {
-                    var num = regs.length - i;
-                    var dateStr = r.date ? new Date(r.date).toLocaleString() : '-';
-                    return '<tr>' +
-                        '<td>' + num + '</td>' +
-                        '<td class="email-cell">' + escHtml(r.email) + '</td>' +
-                        '<td>' + escHtml(r.displayName || '-') + '</td>' +
-                        '<td class="key-cell">' + escHtml(r.key) + '</td>' +
-                        '<td>' + dateStr + '</td>' +
-                        '<td><button class="copy-btn" onclick="copyText(\'' + escAttr(r.key) + '\')">Copy Key</button></td>' +
-                        '</tr>';
-                }).join('');
-            } catch (e) {
-                tbody.innerHTML = '<tr><td colspan="6" class="no-data">Network error loading registrations.</td></tr>';
-            }
+            try { await fetch('/api/mod-actions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiToken },
+                body: JSON.stringify({ action: 'log', modEmail: currentUser.email, actionType: actionType, targetEmail: targetEmail || '', details: details || '' }) });
+            } catch (e) { console.warn('Failed to log mod action:', e); }
         }
 
         // ===== Utilities =====
-        function escHtml(str) {
-            var d = document.createElement('div');
-            d.textContent = str || '';
-            return d.innerHTML;
-        }
-
-        function escAttr(str) {
-            return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        }
-
+        function escHtml(str) { var d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+        function escAttr(str) { return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
         window.copyText = function(text) {
-            navigator.clipboard.writeText(text).then(function() {
-                var el = event.target;
-                var orig = el.textContent;
-                el.textContent = 'Copied!';
-                setTimeout(function() { el.textContent = orig; }, 1500);
-            });
+            navigator.clipboard.writeText(text).then(function() { var el = event.target; var orig = el.textContent; el.textContent = 'Copied!'; setTimeout(function() { el.textContent = orig; }, 1500); });
         };
     })();
     </script>

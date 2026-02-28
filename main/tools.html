@@ -3,28 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tools - Svart Suite</title>
-    <meta name="description" content="Explore the full Svart Suite security and privacy suite. Browser, password manager, secure email, and more.">
+    <title>Tools - Svart Security</title>
+    <meta name="description" content="Explore the full Svart Security security and privacy suite. Browser, password manager, secure email, and more.">
     <meta name="theme-color" content="#0a0a0f">
     <link rel="stylesheet" href="css/style.css">
     <script>!function(){var t=localStorage.getItem("svart_theme")||"midnight";document.documentElement.setAttribute("data-theme",t)}()</script>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f'/><text x='50' y='70' font-size='80' font-weight='bold' text-anchor='middle' fill='%237c3aed'>&#x25C6;</text></svg>">
+    <style>
+        .tools-hero{padding:100px 0 48px;text-align:center}
+        .tools-hero h1{font-size:2.4rem;margin-bottom:10px}
+        .tools-hero .sub{color:var(--text-muted);font-size:1.05rem;max-width:600px;margin:0 auto 6px}
+        .tools-hero .dev-note{color:var(--primary);font-size:.82rem;letter-spacing:.5px}
+
+        /* Filter bar */
+        .tool-filters{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:36px}
+        .tool-filters button{background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:7px 18px;border-radius:20px;font-size:.85rem;cursor:pointer;transition:all .2s}
+        .tool-filters button:hover,.tool-filters button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+        /* Grid */
+        .tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px;margin-bottom:48px}
+
+        /* Card */
+        .tc{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .15s;position:relative}
+        .tc:hover{border-color:var(--primary);box-shadow:0 0 28px rgba(124,58,237,.12);transform:translateY(-2px)}
+        .tc .badge{position:absolute;top:16px;right:16px;font-size:.7rem;padding:3px 10px;border-radius:10px;font-weight:600;letter-spacing:.3px}
+        .tc .badge.dev{background:rgba(124,58,237,.15);color:var(--primary)}
+        .tc .badge.planned{background:rgba(250,204,21,.12);color:#facc15}
+        .tc .badge.core{background:rgba(34,197,94,.12);color:#22c55e}
+        .tc .icon-wrap{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin-bottom:14px;background:rgba(124,58,237,.1)}
+        .tc h3{font-size:1.1rem;margin-bottom:4px}
+        .tc .cat{font-size:.78rem;color:var(--primary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px}
+        .tc .desc{color:var(--text-muted);font-size:.9rem;line-height:1.55;margin-bottom:12px}
+        .tc .specs{display:flex;flex-wrap:wrap;gap:6px}
+        .tc .specs span{font-size:.75rem;background:rgba(124,58,237,.08);color:var(--primary);padding:3px 9px;border-radius:8px}
+        .tc .arrow{position:absolute;bottom:16px;right:18px;font-size:1.1rem;color:var(--text-muted);transition:color .2s}
+        .tc:hover .arrow{color:var(--primary)}
+
+        /* Detail modal */
+        .tool-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;align-items:center;justify-content:center;padding:20px}
+        .tool-modal-bg.open{display:flex}
+        .tool-modal{background:var(--bg);border:1px solid var(--border);border-radius:20px;max-width:680px;width:100%;max-height:85vh;overflow-y:auto;padding:0;position:relative;animation:modalIn .25s ease}
+        @keyframes modalIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        .tm-header{padding:32px 32px 0;display:flex;align-items:flex-start;gap:18px}
+        .tm-header .icon-wrap{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;background:rgba(124,58,237,.1);flex-shrink:0}
+        .tm-header .info h2{font-size:1.35rem;margin:0 0 2px}
+        .tm-header .info .cat{font-size:.8rem;color:var(--primary);text-transform:uppercase;letter-spacing:.4px}
+        .tm-header .info .status{font-size:.75rem;margin-top:4px;padding:2px 10px;border-radius:8px;display:inline-block}
+        .tm-close{position:absolute;top:16px;right:16px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;transition:all .15s}
+        .tm-close:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+        .tm-body{padding:24px 32px 32px}
+        .tm-body h3{font-size:1rem;margin:18px 0 8px;color:var(--text)}
+        .tm-body h3:first-child{margin-top:0}
+        .tm-body p{color:var(--text-muted);font-size:.9rem;line-height:1.65;margin-bottom:10px}
+        .tm-body ul{list-style:none;padding:0;margin:0 0 14px}
+        .tm-body ul li{color:var(--text-muted);font-size:.88rem;padding:4px 0 4px 18px;position:relative}
+        .tm-body ul li::before{content:'&#10003;';position:absolute;left:0;color:var(--primary);font-weight:700}
+        .tm-specs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 20px}
+        .tm-specs .sp{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px}
+        .tm-specs .sp .label{font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+        .tm-specs .sp .val{font-size:.88rem;color:var(--text);font-weight:600}
+        .tm-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
+        .tm-actions .btn{font-size:.88rem;padding:10px 22px}
+        .login-gate{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;margin-top:20px}
+        .login-gate p{margin:0 0 10px;font-size:.88rem;color:var(--text-muted)}
+        @media(max-width:600px){
+            .tg{grid-template-columns:1fr}
+            .tm-header{padding:24px 20px 0;flex-direction:column;gap:10px}
+            .tm-body{padding:18px 20px 24px}
+            .tm-specs{grid-template-columns:1fr}
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
             <div class="nav-brand">
                 <a href="index.html" style="display:flex;align-items:center;gap:10px;color:var(--primary);text-decoration:none;">
-                    <span class="SVART-text">Svart Suite</span>
+                    <span class="SVART-text">Svart Security</span>
                 </a>
             </div>
             <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navMenu">
                 <span></span><span></span><span></span>
             </button>
             <ul class="nav-menu" id="navMenu">
-                <li><a href="tools.html">Tools</a></li>
+                <li><a href="tools.html" class="active">Tools</a></li>
                 <li><a href="pricing.html">Pricing</a></li>
                 <li><a href="comparison.html">Compare</a></li>
+                <li><a href="how-it-works.html">How It Works</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="contact.html">Contact</a></li>
                 <li id="navAuthItem" class="nav-auth"><a href="login.html" class="nav-auth-btn">Login / Sign Up</a></li>
@@ -33,175 +98,183 @@
     </nav>
     <div class="nav-overlay" id="navOverlay"></div>
 
-    <section id="tools" class="tools-catalog">
+    <!-- Hero -->
+    <section class="tools-hero">
         <div class="container">
-            <h2 class="section-title">Available Tools</h2>
-            <p class="section-subtitle">Explore tools for privacy, security, and peace of mind. Simple, clear, and made for everyone.</p>
-            <p style="text-align:center;color:var(--primary);font-size:0.85rem;margin-top:-10px;letter-spacing:1px;">Note: All tools are in development. Features may change before launch.</p>
-
-            <div class="tools-grid">
-                <!-- Featured / Core -->
-                <div class="tool-card tool-featured">
-                    <div class="tool-badge">Featured • In Development</div>
-                    <div class="tool-icon">🔒</div>
-                    <h3>Svart Browser</h3>
-                    <p class="tool-category">Web Browsing</p>
-                    <p class="tool-description">A secure browser with ad blocking and privacy features. No extensions, no tracking. Simple setup for everyone.</p>
-                    <div class="tool-specs">
-                        <span class="spec-item">&#10003; AES-256 Encryption</span>
-                        <span class="spec-item">&#10003; 300+ Ad Filters</span>
-                        <span class="spec-item">&#10003; DNS Privacy Splash</span>
-                        <span class="spec-item">&#10003; Alias/Forwarding Email Guidance</span>
-                        <span class="spec-item">&#10003; NextDNS Affiliate (Privacy)</span>
-                        <span class="spec-item">&#10003; 30-Minute Session Timeout (Customizable)</span>
-                    </div>
-                    <a href="SVART.html" class="btn btn-primary">Learn More</a>
-                </div>
-
-                <div class="tool-card tool-featured">
-                    <div class="tool-badge">Core • In Development</div>
-                    <div class="tool-icon">🤖</div>
-                    <h3>Svart AI</h3>
-                    <p class="tool-category">Local AI Assistant</p>
-                    <p class="tool-description">A local LLM that runs on your device. AI chat, internet scraping, knowledge training, and document analysis — all AES-256-GCM encrypted. 750 free AI requests/month, no credit card required.</p>
-                    <div class="tool-specs">
-                        <span class="spec-item">&#10003; Local LLM — runs on your device</span>
-                        <span class="spec-item">&#10003; AES-256-GCM Encrypted</span>
-                        <span class="spec-item">&#10003; 750 Free Requests/Month</span>
-                        <span class="spec-item">&#10003; Internet Scraping &amp; Training</span>
-                        <span class="spec-item">&#10003; Cross-Platform</span>
-                    </div>
-                    <a href="pricing.html" class="btn btn-primary">View Pricing</a>
-                </div>
-
-                <!-- Available apps -->
-                <div class="tool-card tool-available">
-                    <div class="tool-badge badge-coming">Planned</div>
-                    <div class="tool-icon">🔑</div>
-                    <h3>SVART Passwords</h3>
-                    <p class="tool-category">Password Security</p>
-                    <p class="tool-description">AES-256-GCM encrypted password vault with built-in generator, master password protection, and duress wipe.</p>
-                    <div class="tool-specs">
-                        <span class="spec-item">&#10003; AES-256-GCM Vault</span>
-                        <span class="spec-item">&#10003; Password Generator</span>
-                        <span class="spec-item">&#10003; Duress Wipe</span>
-                    </div>
-                    <button class="btn btn-secondary" disabled>Planned</button>
-                </div>
-
-                <div class="tool-card tool-available">
-                    <div class="tool-badge badge-coming">Planned</div>
-                    <div class="tool-icon">📝</div>
-                    <h3>SVART Notes</h3>
-                    <p class="tool-category">Encrypted Notes</p>
-                    <p class="tool-description">Secure note-taking app with AES-256-GCM encryption at rest. Your notes never leave your device unencrypted.</p>
-                    <div class="tool-specs">
-                        <span class="spec-item">&#10003; AES-256-GCM Encryption</span>
-                        <span class="spec-item">&#10003; Local Vault Storage</span>
-                        <span class="spec-item">&#10003; Activation Key Protected</span>
-                    </div>
-                    <button class="btn btn-secondary" disabled>Planned</button>
-                </div>
-
-                <div class="tool-card tool-available">
-                    <div class="tool-badge badge-coming">Planned</div>
-                    <div class="tool-icon">📄</div>
-                    <h3>SVART Docs</h3>
-                    <p class="tool-category">Encrypted Documents</p>
-                    <p class="tool-description">Rich-text document editor with AES-256-GCM encrypted storage. Format, search, and organise documents securely.</p>
-                    <div class="tool-specs">
-                        <span class="spec-item">&#10003; Rich Text Editing</span>
-                        <span class="spec-item">&#10003; AES-256-GCM Vault</span>
-                        <span class="spec-item">&#10003; Full-Text Search</span>
-                    </div>
-                    <button class="btn btn-secondary" disabled>Planned</button>
-                </div>
-
-                <div class="tool-card tool-available">
-                    <div class="tool-badge badge-coming">Planned</div>
-                    <div class="tool-icon">💬</div>
-                    <h3>SVART Chat</h3>
-                    <p class="tool-category">Encrypted Messaging</p>
-                    <p class="tool-description">Self-hosted encrypted chat with X25519 key exchange and AES-256-GCM message encryption. Host your own server — your data, your rules.</p>
-                    <div class="tool-specs">
-                        <span class="spec-item">&#10003; X25519 + AES-256-GCM</span>
-                        <span class="spec-item">&#10003; Self-Hosted Servers</span>
-                        <span class="spec-item">&#10003; Zero-Knowledge</span>
-                    </div>
-                    <button class="btn btn-secondary" disabled>Planned</button>
-                </div>
-
-                <!-- Coming Soon / Planned -->
-                <div class="tool-card tool-coming">
-                    <div class="tool-badge badge-coming">Planned</div>
-                    <div class="tool-icon">✉️</div>
-                    <h3>Secure Email</h3>
-                    <p class="tool-category">Email Privacy</p>
-                    <p class="tool-description">End-to-end encrypted email with temporary addresses and forwarding.</p>
-                    <div class="tool-specs">
-                        <span class="spec-item">&#10003; E2E Encryption</span>
-                        <span class="spec-item">&#10003; Temp Addresses</span>
-                        <span class="spec-item">&#10003; Anonymous</span>
-                    </div>
-                    <button class="btn btn-secondary" disabled>Planned</button>
-                </div>
-
-                <div class="tool-card tool-coming">
-                    <div class="tool-badge badge-coming">Planned</div>
-                    <div class="tool-icon">🗂️</div>
-                    <h3>File Encryption</h3>
-                    <p class="tool-category">Data Protection</p>
-                    <p class="tool-description">Encrypt, decrypt, and securely manage your files with ease.</p>
-                    <div class="tool-specs">
-                        <span class="spec-item">&#10003; AES-256 Encryption</span>
-                        <span class="spec-item">&#10003; Batch Operations</span>
-                        <span class="spec-item">&#10003; Cross-Platform</span>
-                    </div>
-                    <button class="btn btn-secondary" disabled>Planned</button>
-                </div>
-
-                <div class="tool-card tool-coming">
-                    <div class="tool-badge badge-coming">Planned</div>
-                    <div class="tool-icon">🔍</div>
-                    <h3>Privacy Checker</h3>
-                    <p class="tool-category">Privacy Audit</p>
-                    <p class="tool-description">Scan and optimize your digital privacy settings across platforms.</p>
-                    <div class="tool-specs">
-                        <span class="spec-item">&#10003; Multi-Platform Scan</span>
-                        <span class="spec-item">&#10003; Auto-Fix Tips</span>
-                        <span class="spec-item">&#10003; Monitoring</span>
-                    </div>
-                    <button class="btn btn-secondary" disabled>Planned</button>
-                </div>
-
-                <div class="tool-card tool-coming">
-                    <div class="tool-badge badge-coming">Planned</div>
-                    <div class="tool-icon">🛡️</div>
-                    <h3>VPN Service</h3>
-                    <p class="tool-category">Network Privacy</p>
-                    <p class="tool-description">Ultra-fast VPN with no logs and servers in privacy-friendly jurisdictions.</p>
-                    <div class="tool-specs">
-                        <span class="spec-item">&#10003; No-Log Policy</span>
-                        <span class="spec-item">&#10003; Kill Switch</span>
-                        <span class="spec-item">&#10003; Multi-Device</span>
-                    </div>
-                    <button class="btn btn-secondary" disabled>Planned</button>
-                </div>
-            </div>
-
-            <div class="tools-cta">
-                <h3>Want to Suggest a Tool?</h3>
-                <p>Help us build the ultimate privacy toolkit. Share your ideas and feature requests.</p>
-                <a href="contact.html" class="btn btn-primary">Share Feedback</a>
-            </div>
+            <h1><span class="SVART-logo-large">&#9670;</span><br>Tools</h1>
+            <p class="sub">Privacy &amp; security tools that put you in control. Click any tool for details.</p>
+            <p class="dev-note">All tools are in active development. Features may change before launch.</p>
         </div>
     </section>
 
+    <!-- Filter bar -->
+    <section class="container">
+        <div class="tool-filters">
+            <button class="active" data-filter="all">All Tools</button>
+            <button data-filter="core">Core</button>
+            <button data-filter="security">Security</button>
+            <button data-filter="privacy">Privacy</button>
+            <button data-filter="communication">Communication</button>
+        </div>
+    </section>
+
+    <!-- Tools grid -->
+    <section class="container">
+        <div class="tg" id="toolsGrid">
+            <!-- Svart Browser -->
+            <div class="tc" data-tool="browser" data-tags="core,security,privacy" onclick="openTool('browser')">
+                <span class="badge dev">In Development</span>
+                <div class="icon-wrap">&#128274;</div>
+                <h3>Svart Browser</h3>
+                <div class="cat">Web Browsing</div>
+                <p class="desc">Secure browser with built-in ad blocking, DNS privacy, and AES-256 encryption. No extensions, no tracking.</p>
+                <div class="specs">
+                    <span>AES-256</span><span>Ad Blocker</span><span>DNS Privacy</span><span>Cross-Platform</span>
+                </div>
+                <span class="arrow">&#8594;</span>
+            </div>
+
+            <!-- Svart AI -->
+            <div class="tc" data-tool="ai" data-tags="core" onclick="openTool('ai')">
+                <span class="badge core">Core</span>
+                <div class="icon-wrap">&#129302;</div>
+                <h3>Svart AI</h3>
+                <div class="cat">AI Assistant</div>
+                <p class="desc">AI chat, internet scraping, knowledge training, and document analysis &mdash; AES-256-GCM encrypted. 750 free requests/month.</p>
+                <div class="specs">
+                    <span>AES-256-GCM</span><span>750 Free/mo</span><span>Online Required</span>
+                </div>
+                <span class="arrow">&#8594;</span>
+            </div>
+
+            <!-- SVART Passwords -->
+            <div class="tc" data-tool="passwords" data-tags="security" onclick="openTool('passwords')">
+                <span class="badge planned">Planned</span>
+                <div class="icon-wrap">&#128273;</div>
+                <h3>SVART Passwords</h3>
+                <div class="cat">Password Security</div>
+                <p class="desc">AES-256-GCM encrypted password vault with built-in generator, master password, and duress wipe.</p>
+                <div class="specs">
+                    <span>AES-256-GCM</span><span>Generator</span><span>Duress Wipe</span>
+                </div>
+                <span class="arrow">&#8594;</span>
+            </div>
+
+            <!-- SVART Notes -->
+            <div class="tc" data-tool="notes" data-tags="security,privacy" onclick="openTool('notes')">
+                <span class="badge planned">Planned</span>
+                <div class="icon-wrap">&#128221;</div>
+                <h3>SVART Notes</h3>
+                <div class="cat">Encrypted Notes</div>
+                <p class="desc">Secure note-taking with AES-256-GCM encryption at rest. Your notes never leave your device unencrypted.</p>
+                <div class="specs">
+                    <span>AES-256-GCM</span><span>Local Storage</span><span>Key Protected</span>
+                </div>
+                <span class="arrow">&#8594;</span>
+            </div>
+
+            <!-- SVART Docs -->
+            <div class="tc" data-tool="docs" data-tags="security,privacy" onclick="openTool('docs')">
+                <span class="badge planned">Planned</span>
+                <div class="icon-wrap">&#128196;</div>
+                <h3>SVART Docs</h3>
+                <div class="cat">Encrypted Documents</div>
+                <p class="desc">Rich-text document editor with AES-256-GCM encrypted storage. Format, search, and organise documents securely.</p>
+                <div class="specs">
+                    <span>Rich Text</span><span>AES-256-GCM</span><span>Full-Text Search</span>
+                </div>
+                <span class="arrow">&#8594;</span>
+            </div>
+
+            <!-- SVART Chat -->
+            <div class="tc" data-tool="chat" data-tags="communication,security,privacy" onclick="openTool('chat')">
+                <span class="badge planned">Planned</span>
+                <div class="icon-wrap">&#128172;</div>
+                <h3>SVART Chat</h3>
+                <div class="cat">Encrypted Messaging</div>
+                <p class="desc">Self-hosted encrypted chat with X25519 key exchange and AES-256-GCM. Host your own server &mdash; your data, your rules.</p>
+                <div class="specs">
+                    <span>X25519 + AES-256</span><span>Self-Hosted</span><span>Zero-Knowledge</span>
+                </div>
+                <span class="arrow">&#8594;</span>
+            </div>
+
+            <!-- Secure Email -->
+            <div class="tc" data-tool="email" data-tags="communication,privacy" onclick="openTool('email')">
+                <span class="badge planned">Planned</span>
+                <div class="icon-wrap">&#9993;</div>
+                <h3>Secure Email</h3>
+                <div class="cat">Email Privacy</div>
+                <p class="desc">End-to-end encrypted email with temporary addresses and anonymous forwarding.</p>
+                <div class="specs">
+                    <span>E2E Encryption</span><span>Temp Addresses</span><span>Anonymous</span>
+                </div>
+                <span class="arrow">&#8594;</span>
+            </div>
+
+            <!-- File Encryption -->
+            <div class="tc" data-tool="files" data-tags="security" onclick="openTool('files')">
+                <span class="badge planned">Planned</span>
+                <div class="icon-wrap">&#128450;</div>
+                <h3>File Encryption</h3>
+                <div class="cat">Data Protection</div>
+                <p class="desc">Encrypt, decrypt, and securely manage your files with batch operations across all platforms.</p>
+                <div class="specs">
+                    <span>AES-256</span><span>Batch Ops</span><span>Cross-Platform</span>
+                </div>
+                <span class="arrow">&#8594;</span>
+            </div>
+
+            <!-- Privacy Checker -->
+            <div class="tc" data-tool="checker" data-tags="privacy" onclick="openTool('checker')">
+                <span class="badge planned">Planned</span>
+                <div class="icon-wrap">&#128269;</div>
+                <h3>Privacy Checker</h3>
+                <div class="cat">Privacy Audit</div>
+                <p class="desc">Scan and optimise your digital privacy settings across platforms with guided auto-fix tips.</p>
+                <div class="specs">
+                    <span>Multi-Platform</span><span>Auto-Fix</span><span>Monitoring</span>
+                </div>
+                <span class="arrow">&#8594;</span>
+            </div>
+
+            <!-- VPN Service -->
+            <div class="tc" data-tool="vpn" data-tags="privacy,security" onclick="openTool('vpn')">
+                <span class="badge planned">Planned</span>
+                <div class="icon-wrap">&#128737;</div>
+                <h3>VPN Service</h3>
+                <div class="cat">Network Privacy</div>
+                <p class="desc">Ultra-fast VPN with no logs and servers in privacy-friendly jurisdictions. Kill switch included.</p>
+                <div class="specs">
+                    <span>No-Log</span><span>Kill Switch</span><span>Multi-Device</span>
+                </div>
+                <span class="arrow">&#8594;</span>
+            </div>
+        </div>
+
+        <!-- Suggest a tool -->
+        <div style="text-align:center;margin-bottom:48px">
+            <h3 style="margin-bottom:8px">Want to Suggest a Tool?</h3>
+            <p style="color:var(--text-muted);margin-bottom:14px">Help us build the ultimate privacy toolkit.</p>
+            <a href="contact.html" class="btn btn-secondary">Share Feedback &rarr;</a>
+        </div>
+    </section>
+
+    <!-- Detail modal (single, content swapped by JS) -->
+    <div class="tool-modal-bg" id="toolModalBg" onclick="if(event.target===this)closeTool()">
+        <div class="tool-modal" id="toolModal">
+            <button class="tm-close" onclick="closeTool()">&times;</button>
+            <div class="tm-header" id="tmHeader"></div>
+            <div class="tm-body" id="tmBody"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h4><span class="SVART-logo">&#9670;</span> Svart Suite</h4>
+                    <h4><span class="SVART-logo">&#9670;</span> Svart Security</h4>
                     <p>Security &amp; Privacy Tools Suite. Built for freedom.</p>
                 </div>
                 <div class="footer-section">
@@ -212,6 +285,7 @@
                         <li><a href="pricing.html">Pricing</a></li>
                         <li><a href="topup.html">Top-Ups</a></li>
                         <li><a href="comparison.html">Compare</a></li>
+                        <li><a href="how-it-works.html">How It Works</a></li>
                         <li><a href="about.html">About</a></li>
                     </ul>
                 </div>
@@ -235,10 +309,297 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 Svart Suite. Your privacy, your tools, your control &mdash; we protect people, we do not protect crimes.</p>
+                <p>&copy; 2026 Svart Security. Your privacy, your tools, your control &mdash; we protect people, we do not protect crimes.</p>
             </div>
         </div>
     </footer>
+
     <script src="js/script.js"></script>
+    <script>
+    /* ── Tool data ── */
+    const TOOLS = {
+        browser: {
+            icon: '&#128274;', name: 'Svart Browser', cat: 'Web Browsing',
+            status: 'In Development', statusClass: 'dev',
+            desc: 'A secure browser with built-in ad blocking and DNS privacy, designed for people who want real protection without the complexity. No extensions needed, no tracking, just privacy that works out of the box.',
+            features: [
+                'AES-256 encryption for all stored data',
+                '300+ built-in ad filter lists (powered by uBlock Origin lists)',
+                'DNS privacy splash &mdash; prompted to set up NextDNS on first launch',
+                'Alias &amp; forwarding email guidance for anonymous accounts',
+                'Chromium-based for full site compatibility',
+                '30-minute session timeout (customizable)',
+                'Dev mode for advanced users &mdash; install extensions'
+            ],
+            specs: [
+                { label: 'Encryption', val: 'AES-256-GCM' },
+                { label: 'Engine', val: 'Chromium' },
+                { label: 'Platforms', val: 'Windows, macOS, Linux' },
+                { label: 'Data Storage', val: 'Local only' }
+            ],
+            learnMore: 'SVART.html',
+            downloadable: true
+        },
+        ai: {
+            icon: '&#129302;', name: 'Svart AI', cat: 'AI Assistant',
+            status: 'In Development', statusClass: 'core',
+            desc: 'AI chat, internet scraping, knowledge training, and document analysis &mdash; all AES-256-GCM encrypted. 750 free AI requests per month, no credit card required. Svart AI requires an internet connection to work &mdash; it talks to cloud models behind the scenes and cannot run offline.',
+            features: [
+                'AI chat with multiple model support',
+                'Internet scraping &amp; knowledge training',
+                'Document analysis &amp; summarisation',
+                'AES-256-GCM encrypted conversations',
+                '750 free requests/month, unlimited for &euro;/$/&pound;9.99/mo',
+                'Cross-platform desktop app',
+                'Requires internet connection (cloud AI models)'
+            ],
+            specs: [
+                { label: 'Encryption', val: 'AES-256-GCM' },
+                { label: 'Free Tier', val: '750 requests/mo' },
+                { label: 'Platforms', val: 'Windows, macOS, Linux' },
+                { label: 'Connectivity', val: 'Online required' }
+            ],
+            learnMore: 'pricing.html',
+            downloadable: true
+        },
+        passwords: {
+            icon: '&#128273;', name: 'SVART Passwords', cat: 'Password Security',
+            status: 'Planned', statusClass: 'planned',
+            desc: 'A fully local password vault encrypted with AES-256-GCM. Built-in password generator, master password protection, and a duress wipe feature that destroys everything if you ever need it to.',
+            features: [
+                'AES-256-GCM encrypted vault',
+                'Built-in strong password generator',
+                'Master password + activation key protection',
+                'Duress wipe &mdash; enter a panic code to destroy all data',
+                'Auto-fill support for browser integration',
+                'Completely local &mdash; nothing leaves your device'
+            ],
+            specs: [
+                { label: 'Encryption', val: 'AES-256-GCM' },
+                { label: 'Key Derivation', val: 'Argon2' },
+                { label: 'Platforms', val: 'Windows, macOS, Linux' },
+                { label: 'Data Storage', val: 'Local only' }
+            ],
+            downloadable: false
+        },
+        notes: {
+            icon: '&#128221;', name: 'SVART Notes', cat: 'Encrypted Notes',
+            status: 'Planned', statusClass: 'planned',
+            desc: 'Secure note-taking with AES-256-GCM encryption at rest. Your notes are encrypted the moment you save them and never leave your device unencrypted.',
+            features: [
+                'AES-256-GCM encryption at rest',
+                'Local vault storage',
+                'Activation key protected',
+                'Markdown support',
+                'Quick search across all notes',
+                'Completely offline &mdash; no cloud sync'
+            ],
+            specs: [
+                { label: 'Encryption', val: 'AES-256-GCM' },
+                { label: 'Storage', val: 'Local vault' },
+                { label: 'Platforms', val: 'Windows, macOS, Linux' },
+                { label: 'Sync', val: 'None (local only)' }
+            ],
+            downloadable: false
+        },
+        docs: {
+            icon: '&#128196;', name: 'SVART Docs', cat: 'Encrypted Documents',
+            status: 'Planned', statusClass: 'planned',
+            desc: 'A rich-text document editor with AES-256-GCM encrypted storage. Format, search, and organise documents securely &mdash; everything stays on your machine.',
+            features: [
+                'Rich text editing (bold, lists, headings, etc.)',
+                'AES-256-GCM encrypted vault storage',
+                'Full-text search across documents',
+                'Export to encrypted or plain formats',
+                'Activation key protected',
+                'No cloud, no sync, no risk'
+            ],
+            specs: [
+                { label: 'Encryption', val: 'AES-256-GCM' },
+                { label: 'Editor', val: 'Rich text' },
+                { label: 'Platforms', val: 'Windows, macOS, Linux' },
+                { label: 'Data Storage', val: 'Local only' }
+            ],
+            downloadable: false
+        },
+        chat: {
+            icon: '&#128172;', name: 'SVART Chat', cat: 'Encrypted Messaging',
+            status: 'Planned', statusClass: 'planned',
+            desc: 'Self-hosted encrypted chat with X25519 key exchange and AES-256-GCM message encryption. You host the server wherever you want &mdash; your basement, a friend\'s place, anywhere. Your messages, your hardware.',
+            features: [
+                'X25519 key exchange + AES-256-GCM message encryption',
+                'Self-hosted servers &mdash; you choose where your data lives',
+                'Zero-knowledge architecture &mdash; we can\'t read your messages',
+                'Build packager gives your server an ID to connect',
+                'Group chats with per-group encryption',
+                'Completely decentralised'
+            ],
+            specs: [
+                { label: 'Key Exchange', val: 'X25519' },
+                { label: 'Encryption', val: 'AES-256-GCM' },
+                { label: 'Architecture', val: 'Self-hosted' },
+                { label: 'Platforms', val: 'Windows, macOS, Linux' }
+            ],
+            downloadable: false
+        },
+        email: {
+            icon: '&#9993;', name: 'Secure Email', cat: 'Email Privacy',
+            status: 'Planned', statusClass: 'planned',
+            desc: 'End-to-end encrypted email with temporary addresses and anonymous forwarding. Create throwaway emails for sign-ups or use persistent encrypted inboxes for real communication.',
+            features: [
+                'End-to-end encryption for all messages',
+                'Temporary email addresses for one-time use',
+                'Anonymous forwarding to your real inbox',
+                'No identity required to create an account',
+                'PGP-compatible encryption',
+                'Self-destructing messages'
+            ],
+            specs: [
+                { label: 'Encryption', val: 'E2E (PGP)' },
+                { label: 'Temp Addresses', val: 'Yes' },
+                { label: 'Platforms', val: 'Web + Desktop' },
+                { label: 'Identity', val: 'Anonymous' }
+            ],
+            downloadable: false
+        },
+        files: {
+            icon: '&#128450;', name: 'File Encryption', cat: 'Data Protection',
+            status: 'Planned', statusClass: 'planned',
+            desc: 'Encrypt, decrypt, and securely manage your files with ease. Batch operations, drag-and-drop, and cross-platform support make protecting your files simple.',
+            features: [
+                'AES-256 file encryption',
+                'Batch encrypt/decrypt operations',
+                'Drag-and-drop file handling',
+                'Secure file shredding (overwrite + delete)',
+                'Cross-platform support',
+                'Portable &mdash; no installation required'
+            ],
+            specs: [
+                { label: 'Encryption', val: 'AES-256' },
+                { label: 'Batch', val: 'Yes' },
+                { label: 'Platforms', val: 'Windows, macOS, Linux' },
+                { label: 'Portable', val: 'Yes' }
+            ],
+            downloadable: false
+        },
+        checker: {
+            icon: '&#128269;', name: 'Privacy Checker', cat: 'Privacy Audit',
+            status: 'Planned', statusClass: 'planned',
+            desc: 'Scan and optimise your digital privacy settings across platforms. Get guided auto-fix tips and continuous monitoring to stay private.',
+            features: [
+                'Multi-platform privacy scan',
+                'Guided auto-fix tips for each issue',
+                'Browser privacy audit',
+                'Social media exposure check',
+                'Continuous monitoring mode',
+                'Privacy score with improvement tracking'
+            ],
+            specs: [
+                { label: 'Scan', val: 'Multi-platform' },
+                { label: 'Auto-Fix', val: 'Guided tips' },
+                { label: 'Platforms', val: 'Windows, macOS, Linux' },
+                { label: 'Monitoring', val: 'Continuous' }
+            ],
+            downloadable: false
+        },
+        vpn: {
+            icon: '&#128737;', name: 'VPN Service', cat: 'Network Privacy',
+            status: 'Planned', statusClass: 'planned',
+            desc: 'Ultra-fast VPN with a strict no-log policy and servers in privacy-friendly jurisdictions. Built-in kill switch ensures your real IP is never exposed.',
+            features: [
+                'Strict no-log policy',
+                'Kill switch &mdash; blocks traffic if VPN drops',
+                'Servers in privacy-friendly jurisdictions',
+                'Multi-device support (up to 5 devices)',
+                'Split tunnelling for selective routing',
+                'DNS leak protection'
+            ],
+            specs: [
+                { label: 'Logs', val: 'Zero logs' },
+                { label: 'Kill Switch', val: 'Yes' },
+                { label: 'Devices', val: 'Up to 5' },
+                { label: 'Platforms', val: 'Windows, macOS, Linux, Mobile' }
+            ],
+            downloadable: false
+        }
+    };
+
+    /* ── Auth check ── */
+    function isLoggedIn() {
+        let s = JSON.parse(localStorage.getItem('ct_session') || 'null');
+        if (!s || !s.loggedIn) s = JSON.parse(localStorage.getItem('ct_persistent_session') || 'null');
+        return !!(s && s.loggedIn);
+    }
+
+    /* ── Open detail modal ── */
+    function openTool(id) {
+        const t = TOOLS[id];
+        if (!t) return;
+        const hdr = document.getElementById('tmHeader');
+        const body = document.getElementById('tmBody');
+
+        hdr.innerHTML =
+            '<div class="icon-wrap">' + t.icon + '</div>' +
+            '<div class="info">' +
+                '<h2>' + t.name + '</h2>' +
+                '<div class="cat">' + t.cat + '</div>' +
+                '<span class="status" style="background:' + (t.statusClass === 'dev' ? 'rgba(124,58,237,.15);color:var(--primary)' : t.statusClass === 'core' ? 'rgba(34,197,94,.12);color:#22c55e' : 'rgba(250,204,21,.12);color:#facc15') + '">' + t.status + '</span>' +
+            '</div>';
+
+        let html = '<p>' + t.desc + '</p>';
+        html += '<h3>Features</h3><ul>' + t.features.map(f => '<li>' + f + '</li>').join('') + '</ul>';
+
+        if (t.specs && t.specs.length) {
+            html += '<div class="tm-specs">' + t.specs.map(s =>
+                '<div class="sp"><div class="label">' + s.label + '</div><div class="val">' + s.val + '</div></div>'
+            ).join('') + '</div>';
+        }
+
+        /* Download / login gate */
+        if (t.downloadable) {
+            if (isLoggedIn()) {
+                html += '<div class="tm-actions">';
+                html += '<a href="account.html" class="btn btn-primary">Download from Dashboard</a>';
+                if (t.learnMore) html += '<a href="' + t.learnMore + '" class="btn btn-secondary">Learn More</a>';
+                html += '</div>';
+            } else {
+                html += '<div class="login-gate">';
+                html += '<p>&#128274; You need to be logged in to download this tool.</p>';
+                html += '<a href="login.html" class="btn btn-primary">Login to Download</a>';
+                if (t.learnMore) html += ' <a href="' + t.learnMore + '" class="btn btn-secondary" style="margin-left:8px">Learn More</a>';
+                html += '</div>';
+            }
+        } else {
+            html += '<div class="tm-actions">';
+            html += '<button class="btn btn-secondary" disabled>Coming Soon</button>';
+            if (t.learnMore) html += '<a href="' + t.learnMore + '" class="btn btn-secondary">Learn More</a>';
+            html += '</div>';
+        }
+
+        body.innerHTML = html;
+        document.getElementById('toolModalBg').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeTool() {
+        document.getElementById('toolModalBg').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeTool(); });
+
+    /* ── Filter ── */
+    document.querySelectorAll('.tool-filters button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tool-filters button').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const f = this.dataset.filter;
+            document.querySelectorAll('.tc').forEach(card => {
+                if (f === 'all') { card.style.display = ''; return; }
+                const tags = card.dataset.tags || '';
+                card.style.display = tags.includes(f) ? '' : 'none';
+            });
+        });
+    });
+    </script>
 </body>
 </html>

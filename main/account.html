@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Svart Suite</title>
-  <meta name="description" content="Your Svart Suite dashboard — manage your profile, security, plan, tools, downloads, and preferences all in one place.">
+  <title>Dashboard - Svart Security</title>
+  <meta name="description" content="Your Svart Security dashboard — manage your profile, security, plan, tools, downloads, and preferences all in one place.">
   <meta name="theme-color" content="#0a0a0f">
   <link rel="stylesheet" href="css/style.css">
   <script>!function(){var t=localStorage.getItem("svart_theme")||"midnight";document.documentElement.setAttribute("data-theme",t)}()</script>
@@ -15,7 +15,7 @@
     <div class="container">
       <div class="nav-brand">
         <a href="index.html" style="display:flex;align-items:center;gap:10px;color:var(--primary);text-decoration:none;">
-          <span class="SVART-text">Svart Suite</span>
+          <span class="SVART-text">Svart Security</span>
         </a>
       </div>
       <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navMenu">
@@ -25,7 +25,8 @@
         <li><a href="tools.html">Tools</a></li>
         <li><a href="pricing.html">Pricing</a></li>
         <li><a href="comparison.html">Compare</a></li>
-        <li><a href="about.html">About</a></li>
+        <li><a href="how-it-works.html">How It Works</a></li>
+                <li><a href="about.html">About</a></li>
         <li><a href="contact.html">Contact</a></li>
         <li id="navAuthItem" class="nav-auth"><a href="login.html" class="nav-auth-btn">Login / Sign Up</a></li>
       </ul>
@@ -74,14 +75,14 @@
               <span>&#128273;</span>
               <h3>Your Activation Key</h3>
             </div>
-            <p>Use this key in all Svart Suite desktop apps when prompted for activation. This is your <strong>secret key</strong> &mdash; keep it safe, you need it to reset your password.</p>
+            <p>Use this key in all Svart Security desktop apps when prompted for activation. This is your <strong>secret key</strong> &mdash; keep it safe, you need it to reset your password.</p>
             <div class="activation-key-display" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
               <code id="userKey" style="letter-spacing:2px;">&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;</code>
               <button id="showKey" class="btn btn-secondary btn-sm" type="button">Show</button>
               <button id="copyKey" class="btn btn-primary btn-sm" type="button">Copy</button>
             </div>
             <div class="key-info">
-              <span>&#128274; Your secret key &mdash; works with all 6 Svart Suite apps and is needed to reset your password &mdash; <a href="#tools" style="color:var(--primary);" class="dash-tab-link" data-target="tools">view your tools</a></span>
+              <span>&#128274; Your secret key &mdash; works with all 6 Svart Security apps and is needed to reset your password &mdash; <a href="#tools" style="color:var(--primary);" class="dash-tab-link" data-target="tools">view your tools</a></span>
             </div>
           </div>
 
@@ -112,7 +113,7 @@
 
         <!-- Downloads -->
         <h3 class="account-section-title">Your Downloads</h3>
-        <p class="section-subtitle" style="margin-bottom:30px;">Download any Svart Suite app. Use your activation key above to unlock each one.</p>
+        <p class="section-subtitle" style="margin-bottom:30px;">Download any Svart Security app. Use your activation key above to unlock each one.</p>
 
         <div class="download-grid">
           <div class="download-tile">
@@ -279,13 +280,13 @@
 
         <div class="settings-card">
           <h3><span class="card-icon">&#128273;</span> Activation Key (Your Secret Key)</h3>
-          <p>Your activation key is your <strong>secret key</strong> for all Svart Suite apps and password recovery. Keep it private and safe &mdash; treat it like a master password. If you lose access, this key is the only way to reset your password instantly.</p>
+          <p>Your activation key is your <strong>secret key</strong> for all Svart Security apps and password recovery. Keep it private and safe &mdash; treat it like a master password. If you lose access, this key is the only way to reset your password instantly.</p>
           <div class="activation-key-display" style="max-width:480px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <code id="settingsKey" style="letter-spacing:2px;">&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;</code>
             <button id="showKeyBtn" class="btn btn-secondary btn-sm" type="button">Show</button>
             <button id="copyKeyBtn" class="btn btn-primary btn-sm" type="button">Copy</button>
           </div>
-          <p style="color:var(--text-muted);font-size:0.8rem;margin-top:12px;">&#128274; This is your <strong>secret key</strong> &mdash; it unlocks all 6 Svart Suite apps and is required to reset your password. Never share it. The server only stores your email and this key.</p>
+          <p style="color:var(--text-muted);font-size:0.8rem;margin-top:12px;">&#128274; This is your <strong>secret key</strong> &mdash; it unlocks all 6 Svart Security apps and is required to reset your password. Never share it. The server only stores your email and this key.</p>
         </div>
 
         <div class="settings-card">
@@ -338,12 +339,12 @@
           <div class="settings-card">
             <h3><span class="card-icon">&#128274;</span> Privacy</h3>
             <p>Svart does not log or track your usage. Only your email address and activation key are stored.</p>
-            <p style="color:var(--text-muted);font-size:0.8rem;margin-top:14px;">All Svart Suite tools are free and unlimited. We recommend using a forwarding or alias email for maximum privacy.</p>
+            <p style="color:var(--text-muted);font-size:0.8rem;margin-top:14px;">All Svart Security tools are free and unlimited. We recommend using a forwarding or alias email for maximum privacy.</p>
           </div>
 
           <div class="settings-card">
             <h3><span class="card-icon">&#128176;</span> Billing</h3>
-            <p>Plans are managed through your Svart Suite account. No credit card is required for Free Premium.</p>
+            <p>Plans are managed through your Svart Security account. No credit card is required for Free Premium.</p>
             <div class="settings-row">
               <span class="settings-row-label">Payment method</span>
               <span class="settings-row-value" id="billingMethod">None (Free plan)</span>
@@ -419,7 +420,7 @@
       <!-- ===== Tools Panel ===== -->
       <div class="settings-panel" id="panel-tools">
         <div class="settings-card">
-          <h3><span class="card-icon">&#128736;</span> Your Svart Suite Tools</h3>
+          <h3><span class="card-icon">&#128736;</span> Your Svart Security Tools</h3>
           <p>All tools use your activation key. Everything is free and unlimited. Svart does not log or track any usage.</p>
 
           <div class="settings-tool-grid">
@@ -522,7 +523,7 @@
       <div class="settings-panel" id="panel-preferences">
         <div class="settings-card">
           <h3><span class="card-icon">&#127912;</span> Appearance</h3>
-          <p>Customise how the Svart Suite dashboard and website look.</p>
+          <p>Customise how the Svart Security dashboard and website look.</p>
           <div class="settings-row">
             <span class="settings-row-label">Theme</span>
             <span class="settings-row-value">
@@ -626,7 +627,7 @@
 
         <div class="settings-card">
           <h3><span class="card-icon">&#128338;</span> Session &amp; Privacy</h3>
-          <p>Control session behaviour, auto-lock timers, and data retention across Svart Suite.</p>
+          <p>Control session behaviour, auto-lock timers, and data retention across Svart Security.</p>
 
           <div class="settings-row">
             <span class="settings-row-label">Session timeout<br><span style="font-size:0.78rem;color:var(--text-muted);font-weight:400;">Auto sign-out after inactivity</span></span>
@@ -753,7 +754,7 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-section">
-          <h4><span class="SVART-logo">&#9670;</span> Svart Suite</h4>
+          <h4><span class="SVART-logo">&#9670;</span> Svart Security</h4>
           <p>Security &amp; Privacy Tools Suite. Built for freedom.</p>
         </div>
         <div class="footer-section">
@@ -764,8 +765,9 @@
             <li><a href="pricing.html">Pricing</a></li>
             <li><a href="topup.html">Top-Ups</a></li>
             <li><a href="comparison.html">Compare</a></li>
-            <li><a href="about.html">About</a></li>
-          </ul>
+            <li><a href="how-it-works.html">How It Works</a></li>
+                        <li><a href="about.html">About</a></li>
+                                        </ul>
         </div>
         <div class="footer-section">
           <h4>Community</h4>
@@ -787,7 +789,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2026 Svart Suite. Your privacy, your tools, your control &mdash; we protect people, we do not protect crimes.</p>
+        <p>&copy; 2026 Svart Security. Your privacy, your tools, your control &mdash; we protect people, we do not protect crimes.</p>
       </div>
     </div>
   </footer>

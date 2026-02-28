@@ -1,5 +1,5 @@
 // ============================================
-// Svart Suite - Website Interactivity
+// Svart Security - Website Interactivity
 // ============================================
 
 // ===== Apply saved theme immediately (before DOMContentLoaded to reduce flash) =====
@@ -594,7 +594,7 @@ function initEncryptionDemo() {
     if (!demoBtn) return;
     
     demoBtn.addEventListener('click', () => {
-        const text = 'Svart Suite for Everyone';
+        const text = 'Svart Security for Everyone';
         demoBtn.textContent = 'Encrypting...';
         demoBtn.disabled = true;
         

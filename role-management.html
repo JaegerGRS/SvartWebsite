@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role Management - Svart Security Admin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="css/style.css">
+    <script>!function(){var t=localStorage.getItem("svart_theme")||"midnight";document.documentElement.setAttribute("data-theme",t)}()</script>
+    <style>
+        .page-login { max-width: 400px; margin: 120px auto; padding: 32px; background: rgba(20,20,30,0.9); border: 1px solid var(--border-color); border-radius: 16px; }
+        .page-login h2 { color: var(--primary); margin-bottom: 16px; }
+        .page-login input { width: 100%; padding: 12px 16px; background: rgba(var(--bg-dark-rgb),0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 1rem; margin-bottom: 12px; }
+        .page-login input:focus { border-color: var(--primary); outline: none; }
+        .page-container { max-width: 1100px; margin: 100px auto 40px; padding: 0 20px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+        .page-header h1 { color: var(--primary); font-size: 1.6rem; }
+        .nav-links { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .nav-links a, .nav-links button { padding: 8px 16px; font-size: 0.85rem; text-decoration: none; border-radius: 8px; }
+        .page-logout { background: none; border: 1px solid var(--danger, #ef4444); color: var(--danger, #ef4444); cursor: pointer; }
+        .page-logout:hover { background: rgba(239,68,68,0.15); }
+        .reg-table { width: 100%; border-collapse: collapse; background: rgba(20,20,30,0.6); border-radius: 12px; overflow: hidden; }
+        .reg-table th { background: rgba(var(--primary-rgb),0.15); color: var(--primary); padding: 12px 16px; text-align: left; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .reg-table td { padding: 12px 16px; border-bottom: 1px solid rgba(39,39,42,0.3); color: var(--text-light); font-size: 0.9rem; }
+        .reg-table tr:hover td { background: rgba(var(--primary-rgb),0.05); }
+        .no-data { text-align: center; padding: 40px; color: var(--text-muted); }
+        .email-cell { max-width: 250px; overflow: hidden; text-overflow: ellipsis; }
+        .role-select:focus { border-color: var(--primary); outline: none; }
+        .resolve-btn { background: none; border: 1px solid #22c55e; color: #22c55e; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: all 0.2s; }
+        .resolve-btn:hover { background: rgba(34,197,94,0.15); }
+        .info-card { background: rgba(20,20,30,0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+        .info-card h3 { color: var(--primary); margin-bottom: 8px; }
+        .info-card p { color: var(--text-muted); font-size: 0.9rem; margin: 0; }
+        .filter-bar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+        .filter-bar input { padding: 10px 14px; background: rgba(var(--bg-dark-rgb),0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 0.9rem; flex: 1; min-width: 200px; }
+        .filter-bar input:focus { border-color: var(--primary); outline: none; }
+        .filter-count { color: var(--text-muted); font-size: 0.85rem; }
+        .danger-zone { margin-top: 48px; border: 1px solid #ef4444; border-radius: 12px; padding: 24px; background: rgba(239,68,68,0.05); }
+        .danger-zone h3 { color: #ef4444; margin-bottom: 8px; }
+        .danger-zone p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px; }
+        .danger-btn { background: none; border: 1px solid #ef4444; color: #ef4444; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .danger-btn:hover { background: rgba(239,68,68,0.15); }
+        @media (max-width: 768px) {
+            .reg-table { font-size: 0.8rem; }
+            .reg-table th, .reg-table td { padding: 8px 10px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Access Denied -->
+    <div id="accessDenied" style="display:none;">
+        <div class="page-login">
+            <h2 style="color:#ef4444;">&#128683; Admin Only</h2>
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Only the admin account can manage user roles.</p>
+            <a href="account.html" class="btn btn-primary btn-full" style="text-align:center;text-decoration:none;display:block;">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Key Verification -->
+    <div id="keyScreen" style="display:none;">
+        <div class="page-login">
+            <h2>&#128272; Admin Verification</h2>
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your activation key to access role management.</p>
+            <input type="password" id="keyInput" placeholder="Your activation key (XXXX-XXXX-XXXX-XXXX)" autocomplete="off">
+            <button class="btn btn-primary btn-full" id="keyVerifyBtn">Verify &amp; Access</button>
+            <p id="keyError" style="color:#ef4444;margin-top:12px;display:none;font-size:0.9rem;"></p>
+            <a href="admin.html" style="display:block;text-align:center;margin-top:16px;color:var(--text-muted);font-size:0.85rem;text-decoration:none;">&#8592; Back to Admin Panel</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="page-container" style="display:none;">
+        <div class="page-header">
+            <h1>&#128101; Role Management</h1>
+            <div class="nav-links">
+                <a href="admin.html" class="btn btn-secondary">&#128736; Admin Panel</a>
+                <a href="registration-log.html" class="btn btn-secondary">&#128203; Registration Log</a>
+                <a href="account.html" class="btn btn-secondary">&#8592; Dashboard</a>
+                <button class="btn btn-primary" id="refreshBtn">Refresh</button>
+                <button class="page-logout" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <div id="roleMsg" style="display:none;margin-bottom:16px;padding:12px 16px;border-radius:8px;font-size:0.9rem;"></div>
+
+        <div class="info-card">
+            <h3>&#128101; Manage User Roles</h3>
+            <p>Assign roles to registered users. <strong style="color:#f59e0b;">Mods</strong> get mod panel access for password resets, reporting, and viewing registration logs. <strong style="color:#ef4444;">Admins</strong> get full access including role management and account wipes. Changes take effect on the user's next login.</p>
+        </div>
+
+        <div class="filter-bar">
+            <input type="text" id="filterInput" placeholder="Filter by email or display name...">
+            <span class="filter-count" id="filterCount"></span>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table class="reg-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Email</th>
+                        <th>Display Name</th>
+                        <th>Current Role</th>
+                        <th>Change To</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="roleTableBody">
+                    <tr><td colspan="6" class="no-data">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="danger-zone">
+            <h3>&#9888; Danger Zone</h3>
+            <p>Permanently delete ALL registered accounts, password resets, and sessions. All users will need to re-register. This cannot be undone.</p>
+            <button class="danger-btn" id="wipeAllBtn">&#9888; Wipe All Accounts</button>
+        </div>
+    </div>
+
+    <script>
+    (async function() {
+        const ADMIN_API_SECRET = 'svart-admin-2026';
+        const ADMIN_EMAIL = 'admin@svartsecurity.org';
+        const API_BASE = '/api/registrations';
+        let adminToken = '';
+        let adminUser = null;
+
+        const accessDenied = document.getElementById('accessDenied');
+        const keyScreen = document.getElementById('keyScreen');
+        const mainContent = document.getElementById('mainContent');
+        const keyInput = document.getElementById('keyInput');
+        const keyVerifyBtn = document.getElementById('keyVerifyBtn');
+        const keyError = document.getElementById('keyError');
+        const roleMsg = document.getElementById('roleMsg');
+
+        function getAdminUser() {
+            try {
+                var session = JSON.parse(localStorage.getItem('ct_session') || '{}');
+                if (!session.loggedIn || !session.email) return null;
+                if (session.email.toLowerCase() !== ADMIN_EMAIL) return null;
+                var users = JSON.parse(localStorage.getItem('ct_users') || '{}');
+                var user = users[session.svartId];
+                if (!user) return null;
+                return { svartId: session.svartId, email: session.email, activationKey: user.activationKey };
+            } catch (e) { return null; }
+        }
+
+        adminUser = getAdminUser();
+
+        // Server validation
+        if (adminUser) {
+            try {
+                var checkResp = await fetch('/api/auth?email=' + encodeURIComponent(adminUser.email) + '&key=' + encodeURIComponent(adminUser.activationKey));
+                var checkData = await checkResp.json();
+                if (!checkData.exists) {
+                    localStorage.removeItem('ct_users');
+                    localStorage.removeItem('ct_session');
+                    adminUser = null;
+                } else if (checkData.account && checkData.account.role !== 'admin') {
+                    adminUser = null;
+                }
+            } catch (e) {
+                adminUser = null;
+            }
+        }
+
+        if (!adminUser) {
+            accessDenied.style.display = '';
+        } else {
+            keyScreen.style.display = '';
+        }
+
+        keyVerifyBtn.addEventListener('click', doVerify);
+        keyInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doVerify(); });
+
+        function doVerify() {
+            var entered = keyInput.value.trim();
+            if (!entered || !adminUser) return;
+            if (entered !== adminUser.activationKey) {
+                keyError.textContent = 'Invalid activation key.';
+                keyError.style.display = '';
+                keyInput.value = '';
+                return;
+            }
+            keyError.style.display = 'none';
+            adminToken = ADMIN_API_SECRET;
+            showPage();
+        }
+
+        function showPage() {
+            keyScreen.style.display = 'none';
+            mainContent.style.display = '';
+            loadRoles();
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            adminToken = '';
+            mainContent.style.display = 'none';
+            keyScreen.style.display = '';
+            keyInput.value = '';
+        });
+
+        document.getElementById('refreshBtn').addEventListener('click', loadRoles);
+
+        // Filter
+        var filterInput = document.getElementById('filterInput');
+        var filterCount = document.getElementById('filterCount');
+        var allRows = [];
+        filterInput.addEventListener('input', function() {
+            var q = filterInput.value.toLowerCase();
+            var visible = 0;
+            allRows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                var show = !q || text.indexOf(q) !== -1;
+                row.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            filterCount.textContent = q ? visible + ' of ' + allRows.length + ' shown' : '';
+        });
+
+        async function loadRoles() {
+            var tbody = document.getElementById('roleTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="no-data">Loading...</td></tr>';
+            try {
+                var resp = await fetch(API_BASE, { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                var data = await resp.json();
+                if (!data.success) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>';
+                    return;
+                }
+
+                var regs = data.registrations || [];
+                if (regs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="no-data">No users registered yet.</td></tr>';
+                    allRows = [];
+                    return;
+                }
+
+                var sorted = regs.slice().reverse();
+                tbody.innerHTML = sorted.map(function(r, i) {
+                    var num = regs.length - i;
+                    var currentRole = r.role || 'user';
+                    var roleBadge = currentRole === 'admin' ? '<span style="color:#ef4444;font-weight:600;">admin</span>'
+                        : currentRole === 'mod' ? '<span style="color:#f59e0b;font-weight:600;">mod</span>'
+                        : '<span style="color:var(--text-muted);">user</span>';
+                    var isProtected = r.email.toLowerCase() === ADMIN_EMAIL;
+                    var selectHtml = isProtected
+                        ? '<span style="color:var(--text-muted);font-size:0.8rem;">Protected</span>'
+                        : '<select data-email="' + escAttr(r.email) + '" class="role-select" style="background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:6px;color:var(--text-light);padding:6px 10px;font-size:0.85rem;">' +
+                            '<option value="user"' + (currentRole === 'user' ? ' selected' : '') + '>User</option>' +
+                            '<option value="mod"' + (currentRole === 'mod' ? ' selected' : '') + '>Mod</option>' +
+                            '<option value="admin"' + (currentRole === 'admin' ? ' selected' : '') + '>Admin</option>' +
+                            '</select>';
+                    var actionHtml = isProtected ? '' : '<button class="resolve-btn role-save-btn" data-email="' + escAttr(r.email) + '" style="font-size:0.8rem;">Save</button>';
+                    return '<tr>' +
+                        '<td>' + num + '</td>' +
+                        '<td class="email-cell">' + escHtml(r.email) + '</td>' +
+                        '<td>' + escHtml(r.displayName || '-') + '</td>' +
+                        '<td>' + roleBadge + '</td>' +
+                        '<td>' + selectHtml + '</td>' +
+                        '<td>' + actionHtml + '</td>' +
+                        '</tr>';
+                }).join('');
+
+                allRows = Array.from(tbody.querySelectorAll('tr'));
+                filterInput.dispatchEvent(new Event('input'));
+
+                // Bind save buttons
+                tbody.querySelectorAll('.role-save-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        var email = btn.dataset.email;
+                        var select = tbody.querySelector('select[data-email="' + email + '"]');
+                        if (select) changeRole(email, select.value, btn);
+                    });
+                });
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="6" class="no-data">Network error.</td></tr>';
+            }
+        }
+
+        async function changeRole(email, newRole, btn) {
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+            roleMsg.style.display = 'none';
+            try {
+                var resp = await fetch('/api/auth', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, adminSecret: ADMIN_API_SECRET, updates: { role: newRole } })
+                });
+                var data = await resp.json();
+                if (data.success) {
+                    roleMsg.style.display = '';
+                    roleMsg.style.background = 'rgba(34,197,94,0.15)';
+                    roleMsg.style.color = '#22c55e';
+                    roleMsg.textContent = '\u2713 Role for ' + email + ' changed to ' + newRole;
+                    loadRoles();
+                } else {
+                    roleMsg.style.display = '';
+                    roleMsg.style.background = 'rgba(239,68,68,0.15)';
+                    roleMsg.style.color = '#ef4444';
+                    roleMsg.textContent = 'Error: ' + (data.error || 'Failed.');
+                }
+            } catch (e) {
+                roleMsg.style.display = '';
+                roleMsg.style.background = 'rgba(239,68,68,0.15)';
+                roleMsg.style.color = '#ef4444';
+                roleMsg.textContent = 'Network error.';
+            }
+            btn.disabled = false;
+            btn.textContent = 'Save';
+        }
+
+        // Wipe All
+        document.getElementById('wipeAllBtn').addEventListener('click', async function() {
+            if (!confirm('\u26a0\ufe0f DANGER: This will permanently delete ALL registered accounts and password reset requests.\n\nAll users will need to re-register.\n\nAre you absolutely sure?')) return;
+            var typed = prompt('Type DELETE to confirm wiping all accounts:');
+            if (typed !== 'DELETE') { alert('Wipe cancelled.'); return; }
+            var btn = this;
+            btn.disabled = true;
+            btn.textContent = 'Wiping...';
+            try {
+                var resp = await fetch(API_BASE, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + adminToken } });
+                var data = await resp.json();
+                if (data.success) {
+                    localStorage.removeItem('ct_users');
+                    localStorage.removeItem('ct_session');
+                    Object.keys(localStorage).forEach(function(k) {
+                        if (k.startsWith('ai_plan_') || k.startsWith('ai_requests_')) localStorage.removeItem(k);
+                    });
+                    roleMsg.style.display = '';
+                    roleMsg.style.background = 'rgba(239,68,68,0.15)';
+                    roleMsg.style.color = '#ef4444';
+                    roleMsg.textContent = '\u2713 ' + (data.message || 'All accounts wiped.');
+                    loadRoles();
+                } else {
+                    roleMsg.style.display = '';
+                    roleMsg.style.background = 'rgba(239,68,68,0.15)';
+                    roleMsg.style.color = '#ef4444';
+                    roleMsg.textContent = 'Error: ' + (data.error || 'Failed.');
+                }
+            } catch (e) {
+                roleMsg.style.display = '';
+                roleMsg.style.background = 'rgba(239,68,68,0.15)';
+                roleMsg.style.color = '#ef4444';
+                roleMsg.textContent = 'Network error.';
+            }
+            btn.disabled = false;
+            btn.innerHTML = '&#9888; Wipe All Accounts';
+        });
+
+        function escHtml(str) { var d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+        function escAttr(str) { return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+    })();
+    </script>
+    <script src="js/script.js"></script>
+</body>
+</html>
