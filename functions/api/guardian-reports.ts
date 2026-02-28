@@ -41,6 +41,55 @@ function isAuthorized(request: Request): { authorized: boolean; role: string } {
   return { authorized: false, role: "" };
 }
 
+// ============================
+// LAW VIOLATION CATEGORIES
+// Mirror of guardian.ts — used to resolve law references in reports and escalation emails.
+// NOTE: General piracy (media, music, film) is NOT included —
+//       only commercial software distribution/sharing is covered.
+// ============================
+const LAW_CATEGORIES: Record<string, {
+  id: string; name: string; jurisdiction: string; statute: string;
+  description: string; evidenceNote: string;
+}> = {
+  "CMA_1990":          { id: "CMA_1990",          name: "Unauthorized Access to Computer Material",  jurisdiction: "UK",  statute: "Computer Misuse Act 1990, Section 1",                    description: "Unauthorized access to computer material.",                                                                                                  evidenceNote: "Registration network hash, account creation timestamp." },
+  "CMA_1990_S2":       { id: "CMA_1990_S2",       name: "Unauthorized Access with Intent",            jurisdiction: "UK",  statute: "Computer Misuse Act 1990, Section 2",                    description: "Unauthorized access with intent to commit further offences.",                                                                                evidenceNote: "Registration network hash, account creation timestamp." },
+  "CMA_1990_S3":       { id: "CMA_1990_S3",       name: "Unauthorized Modification",                  jurisdiction: "UK",  statute: "Computer Misuse Act 1990, Section 3",                    description: "Unauthorized acts impairing computer operation.",                                                                                            evidenceNote: "Registration network hash, account creation timestamp." },
+  "CMA_1990_S3A":      { id: "CMA_1990_S3A",      name: "Making/Supplying Articles for Misuse",       jurisdiction: "UK",  statute: "Computer Misuse Act 1990, Section 3A",                   description: "Making or supplying articles for computer misuse.",                                                                                          evidenceNote: "Registration network hash, account creation timestamp." },
+  "CFAA":              { id: "CFAA",              name: "Computer Fraud and Abuse",                   jurisdiction: "US",  statute: "18 U.S.C. § 1030",                                      description: "Unauthorized access to protected computers.",                                                                                                evidenceNote: "Registration network hash, account creation timestamp." },
+  "FRAUD_ACT_2006":    { id: "FRAUD_ACT_2006",    name: "Fraud (False Representation)",               jurisdiction: "UK",  statute: "Fraud Act 2006, Section 2",                              description: "Fraud by false representation.",                                                                                                            evidenceNote: "Registration network hash, account creation timestamp." },
+  "FRAUD_ACT_2006_S6": { id: "FRAUD_ACT_2006_S6", name: "Possession of Articles for Fraud",           jurisdiction: "UK",  statute: "Fraud Act 2006, Section 6",                              description: "Possession of articles for use in fraud.",                                                                                                  evidenceNote: "Registration network hash, account creation timestamp." },
+  "WIRE_FRAUD":        { id: "WIRE_FRAUD",        name: "Wire Fraud",                                 jurisdiction: "US",  statute: "18 U.S.C. § 1343",                                      description: "Using wire communications to execute a scheme to defraud.",                                                                                 evidenceNote: "Registration network hash, account creation timestamp." },
+  "IDENTITY_THEFT_UK": { id: "IDENTITY_THEFT_UK", name: "Identity Fraud / Impersonation",             jurisdiction: "UK",  statute: "Fraud Act 2006, Section 2; Identity Documents Act 2010", description: "Using another person's identity for fraudulent purposes.",                                                                                   evidenceNote: "Registration network hash, account creation timestamp." },
+  "IDENTITY_THEFT_US": { id: "IDENTITY_THEFT_US", name: "Identity Theft",                              jurisdiction: "US",  statute: "18 U.S.C. § 1028",                                      description: "Using another person's identification for unlawful activity.",                                                                              evidenceNote: "Registration network hash, account creation timestamp." },
+  "GDPR":              { id: "GDPR",              name: "GDPR Violation",                             jurisdiction: "EU/UK", statute: "GDPR (EU) 2016/679",                                   description: "Violations of data protection principles.",                                                                                                 evidenceNote: "Registration network hash, account creation timestamp." },
+  "DPA_2018":          { id: "DPA_2018",          name: "Data Protection Violation",                  jurisdiction: "UK",  statute: "Data Protection Act 2018",                               description: "Offences relating to personal data.",                                                                                                       evidenceNote: "Registration network hash, account creation timestamp." },
+  "CSAM_UK":           { id: "CSAM_UK",           name: "Indecent Images of Children",                jurisdiction: "UK",  statute: "Protection of Children Act 1978; CJA 1988 s.160",        description: "Distribution or possession of indecent images of children.",                                                                                evidenceNote: "Registration network hash, account creation timestamp. Immediate referral required." },
+  "CSAM_US":           { id: "CSAM_US",           name: "Child Sexual Abuse Material",                jurisdiction: "US",  statute: "18 U.S.C. §§ 2251–2260A",                               description: "Production, distribution, or possession of CSAM.",                                                                                         evidenceNote: "Registration network hash, account creation timestamp. NCMEC reporting required." },
+  "HARASSMENT_UK":     { id: "HARASSMENT_UK",     name: "Harassment / Cyberstalking",                 jurisdiction: "UK",  statute: "Protection from Harassment Act 1997; Malicious Communications Act 1988", description: "Online harassment or stalking.",                                                                              evidenceNote: "Registration network hash, account creation timestamp." },
+  "CYBERSTALKING_US":  { id: "CYBERSTALKING_US",  name: "Cyberstalking",                              jurisdiction: "US",  statute: "18 U.S.C. § 2261A",                                     description: "Electronic stalking or harassment.",                                                                                                        evidenceNote: "Registration network hash, account creation timestamp." },
+  "TERRORISM_UK":      { id: "TERRORISM_UK",      name: "Terrorism-Related Offences",                 jurisdiction: "UK",  statute: "Terrorism Act 2000; Terrorism Act 2006",                 description: "Encouragement, preparation, or support of terrorism.",                                                                                      evidenceNote: "Registration network hash, account creation timestamp. Immediate referral required." },
+  "TERRORISM_US":      { id: "TERRORISM_US",      name: "Material Support for Terrorism",             jurisdiction: "US",  statute: "18 U.S.C. § 2339A/B",                                   description: "Providing material support to terrorist organisations.",                                                                                    evidenceNote: "Registration network hash, account creation timestamp. Immediate referral required." },
+  "MONEY_LAUNDERING_UK": { id: "MONEY_LAUNDERING_UK", name: "Money Laundering",                       jurisdiction: "UK",  statute: "Proceeds of Crime Act 2002, ss.327–329",                 description: "Concealing, converting, or transferring criminal property.",                                                                                evidenceNote: "Registration network hash, account creation timestamp." },
+  "MONEY_LAUNDERING_US": { id: "MONEY_LAUNDERING_US", name: "Money Laundering",                       jurisdiction: "US",  statute: "18 U.S.C. §§ 1956–1957",                                description: "Financial transactions involving proceeds of unlawful activity.",                                                                           evidenceNote: "Registration network hash, account creation timestamp." },
+  "SOFTWARE_PIRACY_UK": { id: "SOFTWARE_PIRACY_UK", name: "Commercial Software Piracy (Distribution)", jurisdiction: "UK",  statute: "Copyright, Designs and Patents Act 1988, ss.107–110",    description: "Distributing or sharing commercial software without authorization. Software distribution ONLY — not media/music/film.",                      evidenceNote: "Registration network hash, account creation timestamp." },
+  "SOFTWARE_PIRACY_US": { id: "SOFTWARE_PIRACY_US", name: "Commercial Software Piracy (Distribution)", jurisdiction: "US",  statute: "NET Act 17 U.S.C. § 506; 18 U.S.C. § 2319",             description: "Willful distribution of copyrighted commercial software. Software distribution ONLY — not media/music/film.",                                evidenceNote: "Registration network hash, account creation timestamp." },
+  "MALWARE_UK":        { id: "MALWARE_UK",        name: "Malware Distribution",                       jurisdiction: "UK",  statute: "Computer Misuse Act 1990, Section 3/3A",                 description: "Creating or distributing malware, ransomware, or spyware.",                                                                                 evidenceNote: "Registration network hash, account creation timestamp." },
+  "MALWARE_US":        { id: "MALWARE_US",        name: "Malware Distribution",                       jurisdiction: "US",  statute: "18 U.S.C. § 1030(a)(5)",                                description: "Transmitting malicious code to damage protected computers.",                                                                                evidenceNote: "Registration network hash, account creation timestamp." },
+  "DDOS_UK":           { id: "DDOS_UK",           name: "DDoS Attack",                                jurisdiction: "UK",  statute: "Computer Misuse Act 1990, Section 3",                    description: "Denial-of-service attacks impairing computer operation.",                                                                                    evidenceNote: "Registration network hash, account creation timestamp." },
+  "DDOS_US":           { id: "DDOS_US",           name: "DDoS Attack",                                jurisdiction: "US",  statute: "18 U.S.C. § 1030(a)(5)",                                description: "DDoS attacks against protected computers.",                                                                                                 evidenceNote: "Registration network hash, account creation timestamp." },
+  "PHISHING_UK":       { id: "PHISHING_UK",       name: "Phishing",                                   jurisdiction: "UK",  statute: "Fraud Act 2006, Section 2; CMA 1990",                    description: "Phishing to obtain personal information or credentials.",                                                                                   evidenceNote: "Registration network hash, account creation timestamp." },
+  "PHISHING_US":       { id: "PHISHING_US",       name: "Phishing",                                   jurisdiction: "US",  statute: "CAN-SPAM Act; 18 U.S.C. § 1030; 18 U.S.C. § 1343",      description: "Deceptive communications to obtain personal/financial data.",                                                                               evidenceNote: "Registration network hash, account creation timestamp." },
+  "THREATS_UK":        { id: "THREATS_UK",        name: "Threats to Kill / Criminal Threats",          jurisdiction: "UK",  statute: "OAPA 1861 s.16; Communications Act 2003 s.127",          description: "Threats of violence or grossly offensive communications.",                                                                                  evidenceNote: "Registration network hash, account creation timestamp." },
+  "EXTORTION_UK":      { id: "EXTORTION_UK",      name: "Blackmail / Extortion",                      jurisdiction: "UK",  statute: "Theft Act 1968, Section 21",                             description: "Unwarranted demands with menaces including ransomware/sextortion.",                                                                         evidenceNote: "Registration network hash, account creation timestamp." },
+  "EXTORTION_US":      { id: "EXTORTION_US",      name: "Extortion / Cyber Extortion",                jurisdiction: "US",  statute: "18 U.S.C. § 873; 18 U.S.C. § 1030",                     description: "Threats or unauthorized access to extort money, data, or services.",                                                                        evidenceNote: "Registration network hash, account creation timestamp." },
+  "HATE_CRIME_UK":     { id: "HATE_CRIME_UK",     name: "Online Hate Crime / Incitement",             jurisdiction: "UK",  statute: "Public Order Act 1986; Racial and Religious Hatred Act 2006", description: "Stirring up racial, religious, or sexual orientation hatred.",                                                                          evidenceNote: "Registration network hash, account creation timestamp." },
+  "OBSCENE_PUB_UK":    { id: "OBSCENE_PUB_UK",    name: "Obscene Publications",                       jurisdiction: "UK",  statute: "Obscene Publications Act 1959/1964",                     description: "Distributing or transmitting obscene material.",                                                                                            evidenceNote: "Registration network hash, account creation timestamp." },
+  "TRADE_SECRETS_UK":  { id: "TRADE_SECRETS_UK",  name: "Trade Secret Theft",                         jurisdiction: "UK",  statute: "Trade Secrets Regulations 2018; Fraud Act 2006",          description: "Unlawful acquisition or disclosure of trade secrets.",                                                                                      evidenceNote: "Registration network hash, account creation timestamp." },
+  "TRADE_SECRETS_US":  { id: "TRADE_SECRETS_US",  name: "Economic Espionage / Trade Secret Theft",    jurisdiction: "US",  statute: "18 U.S.C. §§ 1831–1839; DTSA 2016",                     description: "Theft or misappropriation of trade secrets.",                                                                                               evidenceNote: "Registration network hash, account creation timestamp." },
+  "TOS_VIOLATION":     { id: "TOS_VIOLATION",     name: "Terms of Service Violation",                 jurisdiction: "Internal", statute: "Svart Security Terms of Service",                    description: "Violation of Svart Security ToS or EULA.",                                                                                                  evidenceNote: "Registration network hash, account creation timestamp." },
+  "OTHER":             { id: "OTHER",             name: "Other Violation",                            jurisdiction: "Various",  statute: "To be determined upon review",                        description: "A violation not covered by other categories.",                                                                                              evidenceNote: "Registration network hash, account creation timestamp." }
+};
+
 export const onRequestOptions: PagesFunction<Env> = async () => {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 };
@@ -73,6 +122,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const description = (body.description || "").trim();
     const details = body.details || null;
     const submitterEmail = (body.submitterEmail || "").trim().toLowerCase();
+    const lawCategoryIds: string[] = Array.isArray(body.lawCategoryIds) ? body.lawCategoryIds.filter((id: string) => typeof id === "string" && LAW_CATEGORIES[id]) : [];
+
+    // Resolve law references from category IDs
+    const lawReferences = lawCategoryIds.map((id: string) => {
+      const cat = LAW_CATEGORIES[id];
+      return { id: cat.id, name: cat.name, jurisdiction: cat.jurisdiction, statute: cat.statute, evidenceNote: cat.evidenceNote };
+    });
 
     if (!description) {
       return errorResponse("Description is required", 400);
@@ -87,6 +143,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       submitterEmail,
       submitterRole: role, // app | guardian | admin | mod — identifies who submitted
       violationType,
+      lawCategoryIds,
+      lawReferences,
       description,
       details,
       date: new Date().toISOString(),
@@ -95,6 +153,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       reviewedAt: null as string | null,
       notes: "" as string,
       escalatedAt: null as string | null,
+      availableEvidence: "Registration network hash (SHA-256, irreversible) and account creation date/time only. No IP addresses, browsing history, or other tracking data is available.",
     };
 
     // Store the report
@@ -139,15 +198,18 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
                 `Submitter:      ${submitterEmail || userId || "Anonymous"}`,
                 `Date:           ${report.date}`,
                 "",
+                lawReferences.length > 0 ? "Law Categories:\n" + lawReferences.map((l: any) => `  - ${l.name} (${l.jurisdiction}) — ${l.statute}`).join("\n") + "\n" : "",
                 "Description:",
                 "------------",
                 description,
                 "",
                 details ? `Additional Details: ${JSON.stringify(details)}` : "",
                 "",
+                "Available Evidence: Registration network hash + account creation date/time only.",
+                "",
                 "---",
-                "Review this report in the Admin or Mod Panel → Guardian Reports tab.",
-                "NetworkGuardian — Svart Suite",
+                "Review this report in the Admin Panel → Guardian Reports tab.",
+                "NetworkGuardian — Svart Security",
               ].join("\n"),
             },
           ],
@@ -274,6 +336,16 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       });
 
       const escalationDate = new Date().toISOString();
+
+      // Resolve law references from the report
+      const reportLawRefs = (report.lawReferences || []) as Array<{id: string; name: string; jurisdiction: string; statute: string; evidenceNote: string}>;
+      const lawSection = reportLawRefs.length > 0
+        ? ["--- APPLICABLE LAWS ---", "", ...reportLawRefs.map((l: any, i: number) => `  ${i + 1}. ${l.name} (${l.jurisdiction})\n     Statute: ${l.statute}\n     Evidence: ${l.evidenceNote}`), ""].join("\n")
+        : "";
+      const lawHtmlSection = reportLawRefs.length > 0
+        ? `<h3 style="color:#ef4444;">Applicable Laws</h3><table style="width:100%;border-collapse:collapse;margin:16px 0;">${reportLawRefs.map((l: any) => `<tr><td style="padding:8px 12px;color:#f59e0b;font-weight:600;border-bottom:1px solid #222;">${l.name}</td><td style="padding:8px 12px;color:#ddd;border-bottom:1px solid #222;">${l.jurisdiction}</td></tr><tr><td colspan="2" style="padding:4px 12px 12px;color:#aaa;font-size:0.85em;"><strong>Statute:</strong> ${l.statute}<br><strong>Evidence:</strong> ${l.evidenceNote}</td></tr>`).join("")}</table>`
+        : "";
+
       const emailBody = [
         "FORMAL INCIDENT REPORT — FOR LAW ENFORCEMENT FORWARDING",
         "=========================================================",
@@ -291,6 +363,11 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         `Source App:       ${report.app}`,
         `Violation Type:   ${report.violationType}`,
         `Submitter:        ${report.submitterEmail || report.userId || "Anonymous"}`,
+        "",
+        lawSection,
+        "--- AVAILABLE EVIDENCE ---",
+        "",
+        report.availableEvidence || "Registration network hash (SHA-256, irreversible) and account creation date/time only.",
         "",
         "--- DESCRIPTION ---",
         "",
@@ -343,6 +420,9 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
             <tr><td style="padding:6px 12px;color:#888;">Violation Type</td><td style="padding:6px 12px;color:#ef4444;font-weight:bold;">${report.violationType}</td></tr>
             <tr><td style="padding:6px 12px;color:#888;">Submitter</td><td style="padding:6px 12px;color:#fff;">${report.submitterEmail || report.userId || "Anonymous"}</td></tr>
           </table>
+          ${lawHtmlSection}
+          <h3 style="color:#7c6aef;">Available Evidence</h3>
+          <div style="background:#111;border:1px solid #333;border-radius:8px;padding:16px;margin:12px 0;color:#f59e0b;font-size:0.9em;">${report.availableEvidence || "Registration network hash (SHA-256, irreversible) and account creation date/time only. No IP addresses, browsing history, or other tracking data is available."}</div>
           <h3 style="color:#7c6aef;">Description</h3>
           <div style="background:#111;border:1px solid #333;border-radius:8px;padding:16px;margin:12px 0;white-space:pre-wrap;color:#ddd;">${report.description}</div>
           ${report.details ? `<h3 style="color:#7c6aef;">Additional Details</h3><pre style="background:#111;border:1px solid #333;border-radius:8px;padding:16px;margin:12px 0;color:#ddd;overflow-x:auto;">${JSON.stringify(report.details, null, 2)}</pre>` : ""}

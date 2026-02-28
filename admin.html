@@ -484,6 +484,33 @@
                     if (!report) { alert('Report not found.'); return; }
                     currentGuardianReport = report;
                     guardianNotesEl.value = report.notes || '';
+                    // Build law references section
+                    var lawHtml = '';
+                    if (report.lawReferences && report.lawReferences.length > 0) {
+                        lawHtml = '<h3 style="color:#ef4444;margin:20px 0 8px;">Applicable Laws</h3><div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:16px;">';
+                        report.lawReferences.forEach(function(l) {
+                            lawHtml += '<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(239,68,68,0.15);">';
+                            lawHtml += '<div style="color:#ef4444;font-weight:600;">' + escHtml(l.name) + ' <span style="color:#f59e0b;font-size:0.85rem;">(' + escHtml(l.jurisdiction) + ')</span></div>';
+                            lawHtml += '<div style="color:var(--text-muted);font-size:0.85rem;margin-top:4px;">Statute: ' + escHtml(l.statute) + '</div>';
+                            lawHtml += '<div style="color:var(--text-muted);font-size:0.8rem;margin-top:2px;">Evidence: ' + escHtml(l.evidenceNote) + '</div>';
+                            lawHtml += '</div>';
+                        });
+                        lawHtml += '</div>';
+                    }
+                    // Build law category IDs section
+                    var lawCatsHtml = '';
+                    if (report.lawCategoryIds && report.lawCategoryIds.length > 0) {
+                        lawCatsHtml = '<div style="margin-top:8px;"><span style="color:var(--text-muted);font-size:0.8rem;">Categories: </span>';
+                        report.lawCategoryIds.forEach(function(id) {
+                            lawCatsHtml += '<span style="display:inline-block;background:rgba(239,68,68,0.15);color:#ef4444;font-size:0.75rem;padding:2px 8px;border-radius:4px;margin:2px 4px;">' + escHtml(id) + '</span>';
+                        });
+                        lawCatsHtml += '</div>';
+                    }
+                    // Available evidence section
+                    var evidenceHtml = '<h3 style="color:#f59e0b;margin:20px 0 8px;">Available Evidence</h3>' +
+                        '<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:16px;color:#f59e0b;font-size:0.9rem;">' +
+                        escHtml(report.availableEvidence || 'Registration network hash (SHA-256, irreversible) and account creation date/time only. No IP addresses, browsing history, or other tracking data is available.') +
+                        '</div>';
                     guardianDetailContent.innerHTML = '<table style="width:100%;border-collapse:collapse;">' +
                         '<tr><td style="padding:8px 12px;color:var(--text-muted);width:160px;">Report ID</td><td style="padding:8px 12px;color:var(--text-light);font-family:monospace;font-size:0.85rem;">' + escHtml(report.id) + '</td></tr>' +
                         '<tr><td style="padding:8px 12px;color:var(--text-muted);">Date Filed</td><td style="padding:8px 12px;color:var(--text-light);">' + new Date(report.date).toLocaleString() + '</td></tr>' +
@@ -494,6 +521,9 @@
                         (report.reviewedBy ? '<tr><td style="padding:8px 12px;color:var(--text-muted);">Reviewed By</td><td style="padding:8px 12px;color:var(--text-light);">' + escHtml(report.reviewedBy) + ' (' + (report.reviewedAt ? new Date(report.reviewedAt).toLocaleString() : '-') + ')</td></tr>' : '') +
                         (report.escalatedAt ? '<tr><td style="padding:8px 12px;color:var(--text-muted);">Escalated At</td><td style="padding:8px 12px;color:#ef4444;font-weight:600;">' + new Date(report.escalatedAt).toLocaleString() + '</td></tr>' : '') +
                         '</table>' +
+                        lawCatsHtml +
+                        lawHtml +
+                        evidenceHtml +
                         '<h3 style="color:var(--primary);margin:20px 0 8px;">Description</h3>' +
                         '<div style="background:rgba(var(--bg-dark-rgb),0.5);border:1px solid var(--border-color);border-radius:8px;padding:16px;white-space:pre-wrap;color:var(--text-light);font-size:0.9rem;">' + escHtml(report.description) + '</div>' +
                         (report.details ? '<h3 style="color:var(--primary);margin:20px 0 8px;">Additional Details</h3><pre style="background:rgba(var(--bg-dark-rgb),0.5);border:1px solid var(--border-color);border-radius:8px;padding:16px;color:var(--text-light);font-size:0.85rem;overflow-x:auto;">' + escHtml(JSON.stringify(report.details, null, 2)) + '</pre>' : '');
@@ -565,6 +595,19 @@
             addLine('Violation Type: ' + r.violationType, { bold: true, color: '#cc0000' });
             addLine('Submitter: ' + (r.submitterEmail || r.userId || 'Anonymous'));
             y += 6;
+            // Law references
+            if (r.lawReferences && r.lawReferences.length > 0) {
+                addLine('APPLICABLE LAWS', { size: 13, bold: true }); y += 2;
+                r.lawReferences.forEach(function(l, idx) {
+                    addLine((idx + 1) + '. ' + l.name + ' (' + l.jurisdiction + ')', { bold: true, size: 10 });
+                    addLine('   Statute: ' + l.statute, { size: 9 });
+                    addLine('   Evidence: ' + l.evidenceNote, { size: 9, color: '#666666' });
+                    y += 2;
+                });
+                y += 4;
+            }
+            addLine('AVAILABLE EVIDENCE', { size: 13, bold: true }); y += 2;
+            addLine(r.availableEvidence || 'Registration network hash (SHA-256, irreversible) and account creation date/time only.', { wrap: true, size: 9, color: '#666666' }); y += 6;
             addLine('DESCRIPTION', { size: 13, bold: true }); y += 2;
             addLine(r.description || '(none)', { wrap: true }); y += 6;
             if (r.details) { addLine('ADDITIONAL DETAILS', { size: 13, bold: true }); y += 2; addLine(JSON.stringify(r.details, null, 2), { wrap: true, size: 8 }); y += 6; }

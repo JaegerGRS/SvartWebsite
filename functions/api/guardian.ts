@@ -64,6 +64,353 @@ function isAuthorized(request: Request): { authorized: boolean; role: string } {
   return { authorized: false, role: "" };
 }
 
+// ============================
+// LAW VIOLATION CATEGORIES
+// Comprehensive list of laws that can be violated and reported through the Guardian.
+// Each category includes the statute, jurisdiction, and what evidence is available.
+// NOTE: Only data available is registration network hash + account creation date/time.
+// NOTE: General piracy (media, music, film) is NOT included — only commercial software
+//       distribution/sharing is covered under software piracy laws.
+// ============================
+const LAW_CATEGORIES: Record<string, {
+  id: string;
+  name: string;
+  jurisdiction: string;
+  statute: string;
+  description: string;
+  evidenceNote: string;
+}> = {
+  // === COMPUTER MISUSE / UNAUTHORIZED ACCESS ===
+  "CMA_1990": {
+    id: "CMA_1990",
+    name: "Unauthorized Access to Computer Material",
+    jurisdiction: "UK",
+    statute: "Computer Misuse Act 1990, Section 1",
+    description: "Unauthorized access to computer material, including accounts, systems, or data belonging to others.",
+    evidenceNote: "Registration network hash, account creation timestamp. May indicate account used as staging for unauthorized access."
+  },
+  "CMA_1990_S2": {
+    id: "CMA_1990_S2",
+    name: "Unauthorized Access with Intent to Commit Offences",
+    jurisdiction: "UK",
+    statute: "Computer Misuse Act 1990, Section 2",
+    description: "Unauthorized access to a computer with intent to commit or facilitate further offences (e.g., fraud, theft).",
+    evidenceNote: "Registration network hash, account creation timestamp, linked account activity patterns."
+  },
+  "CMA_1990_S3": {
+    id: "CMA_1990_S3",
+    name: "Unauthorized Modification of Computer Material",
+    jurisdiction: "UK",
+    statute: "Computer Misuse Act 1990, Section 3",
+    description: "Unauthorized acts with intent to impair the operation of a computer, prevent access to programs/data, or impair reliability.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+  "CMA_1990_S3A": {
+    id: "CMA_1990_S3A",
+    name: "Making/Supplying Articles for Computer Misuse",
+    jurisdiction: "UK",
+    statute: "Computer Misuse Act 1990, Section 3A",
+    description: "Making, adapting, supplying or offering to supply any article for use in computer misuse offences.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+  "CFAA": {
+    id: "CFAA",
+    name: "Computer Fraud and Abuse",
+    jurisdiction: "US",
+    statute: "Computer Fraud and Abuse Act (18 U.S.C. § 1030)",
+    description: "Unauthorized access to protected computers, exceeding authorized access, or causing damage to computer systems.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+
+  // === FRAUD ===
+  "FRAUD_ACT_2006": {
+    id: "FRAUD_ACT_2006",
+    name: "Fraud (False Representation)",
+    jurisdiction: "UK",
+    statute: "Fraud Act 2006, Section 2",
+    description: "Fraud by false representation — dishonestly making a false representation to make a gain or cause loss.",
+    evidenceNote: "Registration network hash, account creation timestamp. False details used during registration."
+  },
+  "FRAUD_ACT_2006_S6": {
+    id: "FRAUD_ACT_2006_S6",
+    name: "Possession of Articles for Fraud",
+    jurisdiction: "UK",
+    statute: "Fraud Act 2006, Section 6",
+    description: "Possession of any article for use in the course of or in connection with any fraud.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+  "WIRE_FRAUD": {
+    id: "WIRE_FRAUD",
+    name: "Wire Fraud",
+    jurisdiction: "US",
+    statute: "18 U.S.C. § 1343",
+    description: "Using wire communications (internet) to execute a scheme to defraud or obtain money/property by false pretences.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+
+  // === IDENTITY THEFT ===
+  "IDENTITY_THEFT_UK": {
+    id: "IDENTITY_THEFT_UK",
+    name: "Identity Fraud / Impersonation",
+    jurisdiction: "UK",
+    statute: "Fraud Act 2006, Section 2 (identity context); Identity Documents Act 2010",
+    description: "Using another person's identity or creating false identity documents for fraudulent purposes.",
+    evidenceNote: "Registration network hash, account creation timestamp. Account registered using stolen/false identity details."
+  },
+  "IDENTITY_THEFT_US": {
+    id: "IDENTITY_THEFT_US",
+    name: "Identity Theft",
+    jurisdiction: "US",
+    statute: "Identity Theft and Assumption Deterrence Act (18 U.S.C. § 1028)",
+    description: "Knowingly transferring, possessing, or using another person's identification with intent to commit unlawful activity.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+
+  // === DATA PROTECTION / PRIVACY ===
+  "GDPR": {
+    id: "GDPR",
+    name: "GDPR Violation",
+    jurisdiction: "EU/UK",
+    statute: "General Data Protection Regulation (EU) 2016/679",
+    description: "Violations of data protection principles including unlawful processing, data breaches, or failure to protect personal data.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+  "DPA_2018": {
+    id: "DPA_2018",
+    name: "Data Protection Violation",
+    jurisdiction: "UK",
+    statute: "Data Protection Act 2018",
+    description: "Offences relating to personal data including unlawful obtaining, selling, or re-identification of de-identified data.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+
+  // === CHILD EXPLOITATION / CSAM ===
+  "CSAM_UK": {
+    id: "CSAM_UK",
+    name: "Indecent Images of Children",
+    jurisdiction: "UK",
+    statute: "Protection of Children Act 1978; Criminal Justice Act 1988, Section 160",
+    description: "Taking, distributing, showing, possessing, or publishing indecent images/pseudo-images of children.",
+    evidenceNote: "Registration network hash, account creation timestamp. Immediate law enforcement referral required."
+  },
+  "CSAM_US": {
+    id: "CSAM_US",
+    name: "Child Sexual Abuse Material",
+    jurisdiction: "US",
+    statute: "18 U.S.C. §§ 2251–2260A (PROTECT Act)",
+    description: "Production, distribution, reception, or possession of child sexual abuse material.",
+    evidenceNote: "Registration network hash, account creation timestamp. Mandatory NCMEC reporting required."
+  },
+
+  // === HARASSMENT / STALKING ===
+  "HARASSMENT_UK": {
+    id: "HARASSMENT_UK",
+    name: "Harassment / Cyberstalking",
+    jurisdiction: "UK",
+    statute: "Protection from Harassment Act 1997; Malicious Communications Act 1988",
+    description: "Course of conduct amounting to harassment, stalking, or sending malicious/threatening communications online.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+  "CYBERSTALKING_US": {
+    id: "CYBERSTALKING_US",
+    name: "Cyberstalking",
+    jurisdiction: "US",
+    statute: "18 U.S.C. § 2261A (Violence Against Women Act)",
+    description: "Using electronic communications to stalk, harass, or cause substantial emotional distress.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+
+  // === TERRORISM ===
+  "TERRORISM_UK": {
+    id: "TERRORISM_UK",
+    name: "Terrorism-Related Offences",
+    jurisdiction: "UK",
+    statute: "Terrorism Act 2000; Terrorism Act 2006",
+    description: "Encouragement of terrorism, dissemination of terrorist publications, preparation of terrorist acts, or support of proscribed organisations.",
+    evidenceNote: "Registration network hash, account creation timestamp. Immediate law enforcement referral required."
+  },
+  "TERRORISM_US": {
+    id: "TERRORISM_US",
+    name: "Material Support for Terrorism",
+    jurisdiction: "US",
+    statute: "18 U.S.C. § 2339A/B",
+    description: "Providing material support or resources to foreign terrorist organisations or for terrorist acts.",
+    evidenceNote: "Registration network hash, account creation timestamp. Immediate law enforcement referral required."
+  },
+
+  // === MONEY LAUNDERING ===
+  "MONEY_LAUNDERING_UK": {
+    id: "MONEY_LAUNDERING_UK",
+    name: "Money Laundering",
+    jurisdiction: "UK",
+    statute: "Proceeds of Crime Act 2002, Sections 327–329",
+    description: "Concealing, disguising, converting, transferring, or acquiring criminal property.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+  "MONEY_LAUNDERING_US": {
+    id: "MONEY_LAUNDERING_US",
+    name: "Money Laundering",
+    jurisdiction: "US",
+    statute: "18 U.S.C. §§ 1956–1957",
+    description: "Conducting financial transactions involving proceeds of unlawful activity or structuring transactions to evade reporting.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+
+  // === SOFTWARE PIRACY (Distribution only — NOT general media piracy) ===
+  "SOFTWARE_PIRACY_UK": {
+    id: "SOFTWARE_PIRACY_UK",
+    name: "Commercial Software Piracy (Distribution)",
+    jurisdiction: "UK",
+    statute: "Copyright, Designs and Patents Act 1988, Sections 107–110",
+    description: "Distributing, sharing, or making available for download commercial/proprietary software without authorization. This applies ONLY to software distribution — not media, music, or film.",
+    evidenceNote: "Registration network hash, account creation timestamp. Account used to distribute pirated software."
+  },
+  "SOFTWARE_PIRACY_US": {
+    id: "SOFTWARE_PIRACY_US",
+    name: "Commercial Software Piracy (Distribution)",
+    jurisdiction: "US",
+    statute: "No Electronic Theft Act (NET Act) 17 U.S.C. § 506; 18 U.S.C. § 2319",
+    description: "Willful distribution or sharing of copyrighted commercial software for personal or commercial advantage. This applies ONLY to software distribution — not media, music, or film.",
+    evidenceNote: "Registration network hash, account creation timestamp. Account used to distribute pirated software."
+  },
+
+  // === MALWARE / DDOS ===
+  "MALWARE_UK": {
+    id: "MALWARE_UK",
+    name: "Malware Distribution",
+    jurisdiction: "UK",
+    statute: "Computer Misuse Act 1990, Section 3/3A",
+    description: "Creating, distributing, or supplying malware, ransomware, spyware, or other malicious software.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+  "MALWARE_US": {
+    id: "MALWARE_US",
+    name: "Malware Distribution",
+    jurisdiction: "US",
+    statute: "Computer Fraud and Abuse Act (18 U.S.C. § 1030(a)(5))",
+    description: "Knowingly causing the transmission of a program, code, or command that intentionally causes damage to a protected computer.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+  "DDOS_UK": {
+    id: "DDOS_UK",
+    name: "DDoS Attack",
+    jurisdiction: "UK",
+    statute: "Computer Misuse Act 1990, Section 3",
+    description: "Deliberately impairing the operation of a computer or access to data/programs through distributed denial-of-service attacks.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+  "DDOS_US": {
+    id: "DDOS_US",
+    name: "DDoS Attack",
+    jurisdiction: "US",
+    statute: "Computer Fraud and Abuse Act (18 U.S.C. § 1030(a)(5))",
+    description: "Intentionally causing damage to a protected computer by means of transmission of code or commands (DDoS).",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+
+  // === PHISHING ===
+  "PHISHING_UK": {
+    id: "PHISHING_UK",
+    name: "Phishing",
+    jurisdiction: "UK",
+    statute: "Fraud Act 2006, Section 2; Computer Misuse Act 1990",
+    description: "Creating fake websites, emails, or communications to trick people into revealing personal information, credentials, or financial data.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+  "PHISHING_US": {
+    id: "PHISHING_US",
+    name: "Phishing",
+    jurisdiction: "US",
+    statute: "CAN-SPAM Act; 18 U.S.C. § 1030; 18 U.S.C. § 1343 (Wire Fraud)",
+    description: "Using deceptive electronic communications to obtain personal information, credentials, or financial data from victims.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+
+  // === THREATS / EXTORTION ===
+  "THREATS_UK": {
+    id: "THREATS_UK",
+    name: "Threats to Kill / Criminal Threats",
+    jurisdiction: "UK",
+    statute: "Offences Against the Person Act 1861, Section 16; Communications Act 2003, Section 127",
+    description: "Making threats to kill, threats of violence, or sending grossly offensive/threatening communications.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+  "EXTORTION_UK": {
+    id: "EXTORTION_UK",
+    name: "Blackmail / Extortion",
+    jurisdiction: "UK",
+    statute: "Theft Act 1968, Section 21",
+    description: "Making unwarranted demands with menaces for personal gain, including ransomware extortion and sextortion.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+  "EXTORTION_US": {
+    id: "EXTORTION_US",
+    name: "Extortion / Cyber Extortion",
+    jurisdiction: "US",
+    statute: "18 U.S.C. § 873 (Extortion); 18 U.S.C. § 1030 (CFAA)",
+    description: "Using threats, intimidation, or unauthorized computer access to extort money, data, or services.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+
+  // === HATE CRIMES (ONLINE) ===
+  "HATE_CRIME_UK": {
+    id: "HATE_CRIME_UK",
+    name: "Online Hate Crime / Incitement",
+    jurisdiction: "UK",
+    statute: "Public Order Act 1986, Part 3/3A; Racial and Religious Hatred Act 2006",
+    description: "Stirring up racial, religious, or sexual orientation hatred through online communications or publications.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+
+  // === OBSCENE PUBLICATIONS ===
+  "OBSCENE_PUB_UK": {
+    id: "OBSCENE_PUB_UK",
+    name: "Obscene Publications",
+    jurisdiction: "UK",
+    statute: "Obscene Publications Act 1959/1964",
+    description: "Publishing, distributing, or transmitting obscene material electronically.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+
+  // === TRADE SECRETS / ESPIONAGE ===
+  "TRADE_SECRETS_UK": {
+    id: "TRADE_SECRETS_UK",
+    name: "Trade Secret Theft",
+    jurisdiction: "UK",
+    statute: "Trade Secrets (Enforcement, etc.) Regulations 2018; Fraud Act 2006",
+    description: "Unlawful acquisition, use, or disclosure of trade secrets.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+  "TRADE_SECRETS_US": {
+    id: "TRADE_SECRETS_US",
+    name: "Economic Espionage / Trade Secret Theft",
+    jurisdiction: "US",
+    statute: "Economic Espionage Act (18 U.S.C. §§ 1831–1839); Defend Trade Secrets Act 2016",
+    description: "Theft, misappropriation, or unauthorized disclosure of trade secrets for economic benefit or to benefit a foreign entity.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  },
+
+  // === TOS VIOLATION (Non-criminal, internal) ===
+  "TOS_VIOLATION": {
+    id: "TOS_VIOLATION",
+    name: "Terms of Service Violation",
+    jurisdiction: "Internal",
+    statute: "Svart Security Terms of Service",
+    description: "Violation of Svart Security's terms of service, acceptable use policy, or end-user license agreement.",
+    evidenceNote: "Registration network hash, account creation timestamp, account activity."
+  },
+
+  // === OTHER ===
+  "OTHER": {
+    id: "OTHER",
+    name: "Other Violation",
+    jurisdiction: "Various",
+    statute: "To be determined upon review",
+    description: "A violation not covered by the above categories. Provide full details in the description field.",
+    evidenceNote: "Registration network hash, account creation timestamp."
+  }
+};
+
 /**
  * SHA-256 hash an IP address into an irreversible network fingerprint.
  * Prefixed with "net_" so it's clearly a Guardian identifier, not a real IP.
@@ -194,13 +541,25 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     // ───────────────────────────────────────────
-    // ADMIN: block-network
-    // Admin/Mod blocks a network hash (they only see the hash, never the IP)
+    // ADMIN ONLY: get-law-categories
+    // Returns all available law violation categories for reports
+    // ───────────────────────────────────────────
+    if (action === "get-law-categories") {
+      const { authorized, role } = isAuthorized(context.request);
+      if (!authorized || role !== "admin") {
+        return errorResponse("Unauthorized. Admin only.", 401);
+      }
+      return jsonResponse({ success: true, categories: LAW_CATEGORIES });
+    }
+
+    // ───────────────────────────────────────────
+    // ADMIN ONLY: block-network
+    // Admin blocks a network hash (they only see the hash, never the IP)
     // ───────────────────────────────────────────
     if (action === "block-network") {
       const { authorized, role } = isAuthorized(context.request);
-      if (!authorized || (role !== "admin" && role !== "mod")) {
-        return errorResponse("Unauthorized", 401);
+      if (!authorized || role !== "admin") {
+        return errorResponse("Unauthorized. Admin only.", 401);
       }
 
       const networkId = (body.networkId || "").trim();
@@ -241,12 +600,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     // ───────────────────────────────────────────
-    // ADMIN: block-url
+    // ADMIN ONLY: block-url
     // ───────────────────────────────────────────
     if (action === "block-url") {
       const { authorized, role } = isAuthorized(context.request);
-      if (!authorized || (role !== "admin" && role !== "mod")) {
-        return errorResponse("Unauthorized", 401);
+      if (!authorized || role !== "admin") {
+        return errorResponse("Unauthorized. Admin only.", 401);
       }
 
       const url = (body.url || "").trim();
@@ -321,8 +680,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }
 
     const { authorized, role } = isAuthorized(context.request);
-    if (!authorized || (role !== "admin" && role !== "mod")) {
-      return errorResponse("Unauthorized. Admin or Mod access only.", 401);
+    if (!authorized || role !== "admin") {
+      return errorResponse("Unauthorized. Admin access only.", 401);
     }
 
     const url = new URL(context.request.url);
