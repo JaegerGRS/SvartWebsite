@@ -61,6 +61,16 @@
         .filter-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .filter-bar input { padding: 10px 14px; background: rgba(var(--bg-dark-rgb),0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 0.9rem; flex: 1; min-width: 200px; }
         .filter-bar input:focus { border-color: var(--primary); outline: none; }
+        .role-select { background: rgba(var(--bg-dark-rgb),0.8); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-light); padding: 6px 10px; font-size: 0.85rem; }
+        .role-select:focus { border-color: var(--primary); outline: none; }
+        .info-card { background: rgba(20,20,30,0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+        .info-card h3 { color: var(--primary); margin-bottom: 8px; }
+        .info-card p { color: var(--text-muted); font-size: 0.9rem; margin: 0; }
+        .danger-zone { margin-top: 48px; border: 1px solid #ef4444; border-radius: 12px; padding: 24px; background: rgba(239,68,68,0.05); }
+        .danger-zone h3 { color: #ef4444; margin-bottom: 8px; }
+        .danger-zone p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px; }
+        .danger-btn { background: none; border: 1px solid #ef4444; color: #ef4444; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .danger-btn:hover { background: rgba(239,68,68,0.15); }
         @media (max-width: 768px) {
             .reg-table { font-size: 0.8rem; }
             .reg-table th, .reg-table td { padding: 8px 10px; }
@@ -140,6 +150,8 @@
             <button class="tab-btn active" data-tab="guardian">&#128737; Guardian Reports <span class="badge" id="guardianBadge" style="display:none;">0</span></button>
             <button class="tab-btn" data-tab="resets">&#128274; Password Resets <span class="badge" id="resetBadge" style="display:none;">0</span></button>
             <button class="tab-btn" data-tab="reglog">&#128203; Registration Log <span class="badge" id="reglogBadge" style="display:none;">0</span></button>
+            <button class="tab-btn" data-tab="modlogs">&#128203; Mod Logs</button>
+            <button class="tab-btn" data-tab="roles">&#128101; Role Management</button>
         </div>
 
         <!-- Tab: Guardian Reports -->
@@ -189,6 +201,45 @@
                     <thead><tr><th>#</th><th>Email</th><th>Activation Key</th><th>Display Name</th><th>Role</th><th>Date</th><th></th></tr></thead>
                     <tbody id="regTableBody"><tr><td colspan="7" class="no-data">Loading...</td></tr></tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- Tab: Mod Logs -->
+        <div class="tab-panel" id="panel-modlogs">
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">All mod actions across the platform. Every search, password reset, report, and guardian action is logged here for audit.</p>
+            <div class="filter-bar" style="margin-bottom:12px;">
+                <input type="text" id="modlogFilterInput" placeholder="Filter by mod email, action, target...">
+                <span style="color:var(--text-muted);font-size:0.85rem;" id="modlogFilterCount"></span>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="reg-table">
+                    <thead><tr><th>Date</th><th>Mod</th><th>Role</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
+                    <tbody id="modlogTableBody"><tr><td colspan="6" class="no-data">Loading...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab: Role Management -->
+        <div class="tab-panel" id="panel-roles">
+            <div id="roleMsg" style="display:none;margin-bottom:16px;padding:12px 16px;border-radius:8px;font-size:0.9rem;"></div>
+            <div class="info-card">
+                <h3>&#128101; Manage User Roles</h3>
+                <p>Assign roles to registered users. <strong style="color:#f59e0b;">Mods</strong> get mod panel access for password resets, reporting, and viewing registration logs. <strong style="color:#ef4444;">Admins</strong> get full access including role management and account wipes. Changes take effect on the user's next login.</p>
+            </div>
+            <div class="filter-bar" style="margin-bottom:12px;">
+                <input type="text" id="roleFilterInput" placeholder="Filter by email or display name...">
+                <span style="color:var(--text-muted);font-size:0.85rem;" id="roleFilterCount"></span>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="reg-table">
+                    <thead><tr><th>#</th><th>Email</th><th>Display Name</th><th>Current Role</th><th>Change To</th><th></th></tr></thead>
+                    <tbody id="roleTableBody"><tr><td colspan="6" class="no-data">Loading...</td></tr></tbody>
+                </table>
+            </div>
+            <div class="danger-zone">
+                <h3>&#9888; Danger Zone</h3>
+                <p>Permanently delete ALL registered accounts, password resets, and sessions. All users will need to re-register. This cannot be undone.</p>
+                <button class="danger-btn" id="wipeAllBtn">&#9888; Wipe All Accounts</button>
             </div>
         </div>
 
@@ -289,7 +340,7 @@
         loginBtn.addEventListener('click', doLogin);
         secretInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
         logoutBtn.addEventListener('click', function() { adminToken = ''; panel.style.display = 'none'; loginScreen.style.display = ''; secretInput.value = ''; });
-        refreshBtn.addEventListener('click', function() { loadResetRequests(); loadGuardianReports(); loadRegistrations(); loadStats(); });
+        refreshBtn.addEventListener('click', function() { loadResetRequests(); loadGuardianReports(); loadRegistrations(); loadModLogs(); loadRoles(); loadStats(); });
         document.getElementById('searchBtn').addEventListener('click', doSearch);
         document.getElementById('searchEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
 
@@ -314,6 +365,8 @@
             loadGuardianReports();
             loadResetRequests();
             loadRegistrations();
+            loadModLogs();
+            loadRoles();
         }
 
         // ===== Tabs =====
@@ -673,6 +726,148 @@
                 result.innerHTML = html;
             } catch (e) { result.innerHTML = '<div class="search-result"><h3 style="color:#ef4444;">Error</h3><p>Network error.</p></div>'; }
         }
+
+        // ===== Mod Logs =====
+        var modlogAllRows = [];
+        var modlogFilterInput = document.getElementById('modlogFilterInput');
+        var modlogFilterCount = document.getElementById('modlogFilterCount');
+
+        modlogFilterInput.addEventListener('input', function() {
+            var q = modlogFilterInput.value.toLowerCase();
+            var visible = 0;
+            modlogAllRows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                var show = !q || text.indexOf(q) !== -1;
+                row.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            modlogFilterCount.textContent = q ? visible + ' of ' + modlogAllRows.length + ' shown' : '';
+        });
+
+        async function loadModLogs() {
+            var tbody = document.getElementById('modlogTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="no-data">Loading...</td></tr>';
+            try {
+                var resp = await fetch('/api/mod-actions?type=modlogs', { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                var data = await resp.json();
+                if (!data.success) { tbody.innerHTML = '<tr><td colspan="6" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>'; return; }
+                var logs = data.logs || [];
+                if (logs.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="no-data">No mod actions logged yet.</td></tr>'; modlogAllRows = []; return; }
+                var actionLabels = { 'resolve-password': '\u{1F512} Resolved Password', 'search-user': '\u{1F50D} Searched User', 'send-report': '\u{1F4E8} Sent Report',
+                    'guardian-notes': '\u{1F6E1} Guardian Notes', 'guardian-review': '\u{1F6E1} Guardian Reviewed', 'guardian-dismiss': '\u{1F6E1} Guardian Dismissed', 'guardian-pdf': '\u{1F4C4} Guardian PDF' };
+                tbody.innerHTML = logs.map(function(l) {
+                    var dateStr = l.date ? new Date(l.date).toLocaleString() : '-';
+                    var actionLabel = actionLabels[l.actionType] || escHtml(l.actionType);
+                    var roleBadge = l.role === 'admin' ? '<span style="color:#ef4444;font-weight:600;">admin</span>' : '<span style="color:#f59e0b;font-weight:600;">mod</span>';
+                    return '<tr><td>' + dateStr + '</td><td class="email-cell">' + escHtml(l.modEmail || '-') + '</td><td>' + roleBadge + '</td><td>' + actionLabel + '</td><td>' + escHtml(l.targetEmail || '-') + '</td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;">' + escHtml(l.details || '-') + '</td></tr>';
+                }).join('');
+                modlogAllRows = Array.from(tbody.querySelectorAll('tr'));
+                modlogFilterInput.dispatchEvent(new Event('input'));
+            } catch (e) { tbody.innerHTML = '<tr><td colspan="6" class="no-data">Network error.</td></tr>'; }
+        }
+
+        // ===== Role Management =====
+        var roleAllRows = [];
+        var roleFilterInput = document.getElementById('roleFilterInput');
+        var roleFilterCount = document.getElementById('roleFilterCount');
+        var roleMsg = document.getElementById('roleMsg');
+
+        roleFilterInput.addEventListener('input', function() {
+            var q = roleFilterInput.value.toLowerCase();
+            var visible = 0;
+            roleAllRows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                var show = !q || text.indexOf(q) !== -1;
+                row.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            roleFilterCount.textContent = q ? visible + ' of ' + roleAllRows.length + ' shown' : '';
+        });
+
+        async function loadRoles() {
+            var tbody = document.getElementById('roleTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="no-data">Loading...</td></tr>';
+            try {
+                var resp = await fetch(API_BASE, { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                var data = await resp.json();
+                if (!data.success) { tbody.innerHTML = '<tr><td colspan="6" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>'; return; }
+                var regs = data.registrations || [];
+                if (regs.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="no-data">No users registered yet.</td></tr>'; roleAllRows = []; return; }
+                var sorted = regs.slice().reverse();
+                tbody.innerHTML = sorted.map(function(r, i) {
+                    var num = regs.length - i;
+                    var currentRole = r.role || 'user';
+                    var roleBadge = currentRole === 'admin' ? '<span style="color:#ef4444;font-weight:600;">admin</span>'
+                        : currentRole === 'mod' ? '<span style="color:#f59e0b;font-weight:600;">mod</span>'
+                        : '<span style="color:var(--text-muted);">user</span>';
+                    var isProtected = r.email.toLowerCase() === ADMIN_EMAIL;
+                    var selectHtml = isProtected
+                        ? '<span style="color:var(--text-muted);font-size:0.8rem;">Protected</span>'
+                        : '<select data-email="' + escAttr(r.email) + '" class="role-select">'
+                            + '<option value="user"' + (currentRole === 'user' ? ' selected' : '') + '>User</option>'
+                            + '<option value="mod"' + (currentRole === 'mod' ? ' selected' : '') + '>Mod</option>'
+                            + '<option value="admin"' + (currentRole === 'admin' ? ' selected' : '') + '>Admin</option>'
+                            + '</select>';
+                    var actionHtml = isProtected ? '' : '<button class="resolve-btn role-save-btn" data-email="' + escAttr(r.email) + '" style="font-size:0.8rem;">Save</button>';
+                    return '<tr><td>' + num + '</td><td class="email-cell">' + escHtml(r.email) + '</td><td>' + escHtml(r.displayName || '-') + '</td><td>' + roleBadge + '</td><td>' + selectHtml + '</td><td>' + actionHtml + '</td></tr>';
+                }).join('');
+                roleAllRows = Array.from(tbody.querySelectorAll('tr'));
+                roleFilterInput.dispatchEvent(new Event('input'));
+                tbody.querySelectorAll('.role-save-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        var email = btn.dataset.email;
+                        var select = tbody.querySelector('select[data-email="' + email + '"]');
+                        if (select) changeRole(email, select.value, btn);
+                    });
+                });
+            } catch (e) { tbody.innerHTML = '<tr><td colspan="6" class="no-data">Network error.</td></tr>'; }
+        }
+
+        async function changeRole(email, newRole, btn) {
+            btn.disabled = true; btn.textContent = 'Saving...'; roleMsg.style.display = 'none';
+            try {
+                var resp = await fetch('/api/auth', { method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, adminSecret: ADMIN_API_SECRET, updates: { role: newRole } }) });
+                var data = await resp.json();
+                if (data.success) {
+                    roleMsg.style.display = ''; roleMsg.style.background = 'rgba(34,197,94,0.15)'; roleMsg.style.color = '#22c55e';
+                    roleMsg.textContent = '\u2713 Role for ' + email + ' changed to ' + newRole;
+                    loadRoles();
+                } else {
+                    roleMsg.style.display = ''; roleMsg.style.background = 'rgba(239,68,68,0.15)'; roleMsg.style.color = '#ef4444';
+                    roleMsg.textContent = 'Error: ' + (data.error || 'Failed.');
+                }
+            } catch (e) {
+                roleMsg.style.display = ''; roleMsg.style.background = 'rgba(239,68,68,0.15)'; roleMsg.style.color = '#ef4444';
+                roleMsg.textContent = 'Network error.';
+            }
+            btn.disabled = false; btn.textContent = 'Save';
+        }
+
+        document.getElementById('wipeAllBtn').addEventListener('click', async function() {
+            if (!confirm('\u26a0\ufe0f DANGER: This will permanently delete ALL registered accounts and password reset requests.\n\nAll users will need to re-register.\n\nAre you absolutely sure?')) return;
+            var typed = prompt('Type DELETE to confirm wiping all accounts:');
+            if (typed !== 'DELETE') { alert('Wipe cancelled.'); return; }
+            var btn = this; btn.disabled = true; btn.textContent = 'Wiping...';
+            try {
+                var resp = await fetch(API_BASE, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + adminToken } });
+                var data = await resp.json();
+                if (data.success) {
+                    localStorage.removeItem('ct_users'); localStorage.removeItem('ct_session');
+                    Object.keys(localStorage).forEach(function(k) { if (k.startsWith('ai_plan_') || k.startsWith('ai_requests_')) localStorage.removeItem(k); });
+                    roleMsg.style.display = ''; roleMsg.style.background = 'rgba(239,68,68,0.15)'; roleMsg.style.color = '#ef4444';
+                    roleMsg.textContent = '\u2713 ' + (data.message || 'All accounts wiped.');
+                    loadRoles(); loadRegistrations(); loadStats();
+                } else {
+                    roleMsg.style.display = ''; roleMsg.style.background = 'rgba(239,68,68,0.15)'; roleMsg.style.color = '#ef4444';
+                    roleMsg.textContent = 'Error: ' + (data.error || 'Failed.');
+                }
+            } catch (e) {
+                roleMsg.style.display = ''; roleMsg.style.background = 'rgba(239,68,68,0.15)'; roleMsg.style.color = '#ef4444';
+                roleMsg.textContent = 'Network error.';
+            }
+            btn.disabled = false; btn.innerHTML = '&#9888; Wipe All Accounts';
+        });
 
         // Helpers
         function escHtml(str) { var d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
