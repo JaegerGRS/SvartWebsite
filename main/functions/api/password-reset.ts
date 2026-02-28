@@ -3,6 +3,7 @@ interface Env {
 }
 
 const ADMIN_SECRET = "svart-admin-2026";
+const MOD_SECRET = "svart-mod-2026";
 
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -23,6 +24,29 @@ function errorResponse(error: string, status = 500): Response {
 
 function checkKV(env: Env): boolean {
   return !!(env && env.USAGE_DATA);
+}
+
+// Generate a random temporary password (12 chars, alphanumeric + special)
+function generateTempPassword(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
+  const bytes = new Uint8Array(12);
+  crypto.getRandomValues(bytes);
+  let pw = '';
+  for (let i = 0; i < 12; i++) {
+    pw += chars[bytes[i] % chars.length];
+  }
+  return pw;
+}
+
+// Same hash function used client-side (must match login.html / signup.html)
+function hashPassword(pw: string): string {
+  let hash = 0;
+  for (let i = 0; i < pw.length; i++) {
+    const c = pw.charCodeAt(i);
+    hash = ((hash << 5) - hash) + c;
+    hash |= 0;
+  }
+  return 'h' + Math.abs(hash).toString(36);
 }
 
 export const onRequestOptions: PagesFunction<Env> = async () => {
@@ -101,19 +125,39 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 };
 
-// GET — Admin: view all password reset requests
+// GET — Admin/Mod: view all password reset requests
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
-    const auth = context.request.headers.get("Authorization");
-    if (!auth || auth !== `Bearer ${ADMIN_SECRET}`) {
-      return errorResponse("Unauthorized", 401);
-    }
-
     if (!checkKV(context.env)) {
-      return errorResponse("Server storage not configured. Add KV namespace binding 'USAGE_DATA' in Cloudflare Pages → Settings → Functions.", 503);
+      return errorResponse("Server storage not configured.", 503);
     }
 
     const url = new URL(context.request.url);
+
+    // Public endpoint: check if temp credentials exist for a user (used by login page)
+    const checkEmail = url.searchParams.get("checkCredentials");
+    if (checkEmail) {
+      const email = checkEmail.trim().toLowerCase();
+      const credRaw = await context.env.USAGE_DATA.get(`reset:credentials:${email}`);
+      if (!credRaw) {
+        return jsonResponse({ success: true, hasCredentials: false });
+      }
+      const cred = JSON.parse(credRaw);
+      return jsonResponse({
+        success: true,
+        hasCredentials: true,
+        hashedPassword: cred.hashedPassword,
+        forcePasswordChange: cred.forcePasswordChange,
+      });
+    }
+
+    // All other GET operations require admin or mod auth
+    const auth = context.request.headers.get("Authorization");
+    const token = auth ? auth.replace("Bearer ", "") : "";
+    if (token !== ADMIN_SECRET && token !== MOD_SECRET) {
+      return errorResponse("Unauthorized", 401);
+    }
+
     const resolveId = url.searchParams.get("resolve");
 
     // Mark a request as resolved
@@ -129,7 +173,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       }
       const entry = log.find((r) => r.id === resolveId);
       if (entry) {
+        // Generate a random temporary password for this user
+        const tempPassword = generateTempPassword();
+        const hashedTempPassword = hashPassword(tempPassword);
+
         entry.status = "resolved";
+        entry.tempPassword = tempPassword; // Store plain text so mod can share it
+        entry.resolvedAt = new Date().toISOString();
         await context.env.USAGE_DATA.put("reset:log", JSON.stringify(log));
 
         // Also update the individual record
@@ -137,11 +187,35 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         if (recRaw) {
           const rec = JSON.parse(recRaw);
           rec.status = "resolved";
+          rec.tempPassword = tempPassword;
+          rec.hashedTempPassword = hashedTempPassword;
+          rec.resolvedAt = entry.resolvedAt;
           await context.env.USAGE_DATA.put(
             `reset:${resolveId}`,
             JSON.stringify(rec)
           );
         }
+
+        // Store the hashed temp password + forceChange flag by email so login can pick it up
+        // Key: reset:credentials:<email>
+        if (entry.email) {
+          await context.env.USAGE_DATA.put(
+            `reset:credentials:${entry.email.toLowerCase()}`,
+            JSON.stringify({
+              hashedPassword: hashedTempPassword,
+              forcePasswordChange: true,
+              generatedAt: entry.resolvedAt,
+            }),
+            { expirationTtl: 60 * 60 * 24 * 7 } // Expires in 7 days
+          );
+        }
+
+        return jsonResponse({
+          success: true,
+          message: "Marked as resolved. Temporary password generated.",
+          tempPassword: tempPassword,
+          email: entry.email,
+        });
       }
 
       return jsonResponse({ success: true, message: "Marked as resolved" });

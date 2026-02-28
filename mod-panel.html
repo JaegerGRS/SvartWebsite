@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mod Panel - Svart Suite</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="css/style.css">
+    <script>!function(){var t=localStorage.getItem("svart_theme")||"midnight";document.documentElement.setAttribute("data-theme",t)}()</script>
+    <style>
+        .mod-login { max-width: 400px; margin: 120px auto; padding: 32px; background: rgba(20,20,30,0.9); border: 1px solid var(--border-color); border-radius: 16px; }
+        .mod-login h2 { color: var(--primary); margin-bottom: 16px; }
+        .mod-login input { width: 100%; padding: 12px 16px; background: rgba(var(--bg-dark-rgb),0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 1rem; margin-bottom: 12px; }
+        .mod-login input:focus { border-color: var(--primary); outline: none; }
+        .mod-panel { max-width: 1100px; margin: 100px auto 40px; padding: 0 20px; }
+        .mod-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+        .mod-header h1 { color: var(--primary); font-size: 1.6rem; }
+        .mod-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+        .mod-tab { padding: 10px 20px; background: rgba(20,20,30,0.6); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-muted); cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .mod-tab:hover { border-color: var(--primary); color: var(--text-light); }
+        .mod-tab.active { background: rgba(var(--primary-rgb),0.15); border-color: var(--primary); color: var(--primary); font-weight: 600; }
+        .mod-section { display: none; }
+        .mod-section.active { display: block; }
+        .card { background: rgba(20,20,30,0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+        .card h3 { color: var(--primary); margin-bottom: 12px; }
+        .card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 6px; font-weight: 600; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 16px; background: rgba(var(--bg-dark-rgb),0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 0.95rem; font-family: inherit; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--primary); outline: none; }
+        .form-group textarea { min-height: 120px; resize: vertical; }
+        .msg-box { padding: 12px 16px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 16px; display: none; }
+        .msg-success { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .msg-error { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .reg-table { width: 100%; border-collapse: collapse; background: rgba(20,20,30,0.6); border-radius: 12px; overflow: hidden; }
+        .reg-table th { background: rgba(var(--primary-rgb),0.15); color: var(--primary); padding: 12px 16px; text-align: left; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .reg-table td { padding: 12px 16px; border-bottom: 1px solid rgba(39,39,42,0.3); color: var(--text-light); font-size: 0.9rem; }
+        .reg-table tr:hover td { background: rgba(var(--primary-rgb),0.05); }
+        .no-data { text-align: center; padding: 40px; color: var(--text-muted); }
+        .status-pending { color: #f59e0b; font-weight: 600; }
+        .status-resolved { color: #22c55e; }
+        .resolve-btn { background: none; border: 1px solid #22c55e; color: #22c55e; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: all 0.2s; }
+        .resolve-btn:hover { background: rgba(34,197,94,0.15); }
+        .search-bar { display: flex; gap: 10px; margin-bottom: 24px; }
+        .search-bar input { flex: 1; padding: 12px 16px; background: rgba(var(--bg-dark-rgb),0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 1rem; }
+        .search-bar input:focus { border-color: var(--primary); outline: none; }
+        .badge-unread { display: inline-block; background: #ef4444; color: #fff; font-size: 0.7rem; padding: 2px 7px; border-radius: 99px; margin-left: 6px; vertical-align: middle; }
+        .mod-logout { background: none; border: 1px solid var(--danger, #ef4444); color: var(--danger, #ef4444); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+        .mod-logout:hover { background: rgba(239,68,68,0.15); }
+        .notif-item { padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 12px; background: rgba(20,20,30,0.6); }
+        .notif-item.unread { border-left: 3px solid var(--primary); }
+        .notif-meta { color: var(--text-muted); font-size: 0.8rem; margin-bottom: 8px; }
+        .notif-subject { color: var(--text-light); font-weight: 600; margin-bottom: 6px; }
+        .notif-body { color: var(--text-muted); font-size: 0.9rem; white-space: pre-wrap; }
+        @media (max-width: 768px) {
+            .reg-table { font-size: 0.8rem; }
+            .reg-table th, .reg-table td { padding: 8px 10px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Access Denied Screen -->
+    <div id="accessDenied" style="display:none;">
+        <div class="mod-login">
+            <h2 style="color:#ef4444;">&#128683; Access Denied</h2>
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">You must be logged in as a moderator or admin to access this panel.</p>
+            <a href="account.html" class="btn btn-primary btn-full" style="text-align:center;text-decoration:none;display:block;">Back to Dashboard</a>
+            <a href="login.html" class="btn btn-secondary btn-full" style="text-align:center;text-decoration:none;display:block;margin-top:8px;">Log In</a>
+        </div>
+    </div>
+
+    <!-- Activation Key Verification Screen -->
+    <div id="keyScreen" style="display:none;">
+        <div class="mod-login">
+            <h2>&#128272; Verification Required</h2>
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your activation key (secret key) to access the mod panel. This is required on every visit.</p>
+            <input type="password" id="keyInput" placeholder="Your activation key (XXXX-XXXX-XXXX-XXXX)" autocomplete="off">
+            <button class="btn btn-primary btn-full" id="keyVerifyBtn">Verify &amp; Access</button>
+            <p id="keyError" style="color:#ef4444;margin-top:12px;display:none;font-size:0.9rem;"></p>
+            <a href="account.html" style="display:block;text-align:center;margin-top:16px;color:var(--text-muted);font-size:0.85rem;text-decoration:none;">&#8592; Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Mod Panel -->
+    <div id="modPanel" class="mod-panel" style="display:none;">
+        <div class="mod-header">
+            <h1>&#128737; Mod Panel</h1>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <a href="account.html" class="btn btn-secondary" style="padding:8px 16px;font-size:0.85rem;text-decoration:none;">&#8592; Dashboard</a>
+                <button class="btn btn-primary" id="refreshAllBtn" style="padding:8px 16px;font-size:0.85rem;">Refresh</button>
+                <button class="mod-logout" id="modLogoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <div class="mod-tabs">
+            <button class="mod-tab active" data-tab="resets">&#128274; Password Resets</button>
+            <button class="mod-tab" data-tab="notify">&#128172; Send Report to Admin</button>
+            <button class="mod-tab" data-tab="logs">&#128203; My Action Log</button>
+        </div>
+
+        <!-- ===== Password Resets Section ===== -->
+        <div class="mod-section active" id="section-resets">
+            <div class="card">
+                <h3>&#128274; Password Reset Requests</h3>
+                <p>Review pending password reset requests. After helping a user, mark the request as resolved. All actions are logged and sent to the admin.</p>
+            </div>
+
+            <div class="search-bar">
+                <input type="email" id="searchEmail" placeholder="Search by email to find their activation key...">
+                <button class="btn btn-primary" id="searchBtn">Search</button>
+            </div>
+            <div id="searchResult" style="display:none;"></div>
+
+            <div style="overflow-x:auto;">
+                <table class="reg-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Email</th>
+                            <th>Registered?</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="resetTableBody">
+                        <tr><td colspan="6" class="no-data">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== Send Report/Notification Section ===== -->
+        <div class="mod-section" id="section-notify">
+            <div class="card">
+                <h3>&#128172; Send Report to Admin</h3>
+                <p>Push a notification directly to the admin. This will be emailed and stored for review. Use this for security reports, user issues, or anything requiring admin attention.</p>
+                <div id="notifyMsg" class="msg-box"></div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" id="notifySubject" placeholder="e.g. Suspicious account activity">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="notifyCategory">
+                        <option value="security">&#128274; Security Issue</option>
+                        <option value="user-report">&#128100; User Report</option>
+                        <option value="password-help">&#128273; Password Help</option>
+                        <option value="bug">&#128027; Bug Report</option>
+                        <option value="suggestion">&#128161; Suggestion</option>
+                        <option value="other">&#128196; Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="notifyMessage" placeholder="Describe the issue in detail..."></textarea>
+                </div>
+                <button class="btn btn-primary" id="sendNotifyBtn" style="width:100%;">&#128232; Send Report to Admin</button>
+            </div>
+        </div>
+
+        <!-- ===== Action Log Section ===== -->
+        <div class="mod-section" id="section-logs">
+            <div class="card">
+                <h3>&#128203; My Action Log</h3>
+                <p>All your mod actions are recorded here and sent to the admin for audit. This includes password resets resolved, searches performed, and reports sent.</p>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="reg-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Action</th>
+                            <th>Target</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logTableBody">
+                        <tr><td colspan="4" class="no-data">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const MOD_API_SECRET = 'svart-mod-2026';
+        const ADMIN_API_SECRET = 'svart-admin-2026';
+        const ADMIN_EMAIL = 'admin@svartsecurity.org';
+        let apiToken = '';
+        let currentUser = null;
+
+        // Elements
+        const accessDenied = document.getElementById('accessDenied');
+        const keyScreen = document.getElementById('keyScreen');
+        const modPanel = document.getElementById('modPanel');
+        const keyInput = document.getElementById('keyInput');
+        const keyVerifyBtn = document.getElementById('keyVerifyBtn');
+        const keyError = document.getElementById('keyError');
+        const modLogoutBtn = document.getElementById('modLogoutBtn');
+        const refreshAllBtn = document.getElementById('refreshAllBtn');
+
+        // ===== Auth: Get current user =====
+        function getCurrentUser() {
+            try {
+                var session = JSON.parse(localStorage.getItem('ct_session') || '{}');
+                if (!session.loggedIn || !session.email) return null;
+                var users = JSON.parse(localStorage.getItem('ct_users') || '{}');
+                var user = users[session.svartId];
+                if (!user) return null;
+                return {
+                    svartId: session.svartId,
+                    email: session.email,
+                    role: user.role || 'user',
+                    activationKey: user.activationKey,
+                    displayName: user.displayName || user.username || 'Unknown'
+                };
+            } catch (e) { return null; }
+        }
+
+        currentUser = getCurrentUser();
+
+        // Gate: must be logged in as mod or admin
+        if (!currentUser || (currentUser.role !== 'mod' && currentUser.role !== 'admin' && currentUser.email.toLowerCase() !== ADMIN_EMAIL)) {
+            accessDenied.style.display = '';
+            keyScreen.style.display = 'none';
+            modPanel.style.display = 'none';
+        } else {
+            // ALWAYS require activation key — no session caching
+            accessDenied.style.display = 'none';
+            keyScreen.style.display = '';
+            modPanel.style.display = 'none';
+        }
+
+        // ===== Key Verification =====
+        keyVerifyBtn.addEventListener('click', doVerify);
+        keyInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doVerify(); });
+
+        function doVerify() {
+            var enteredKey = keyInput.value.trim();
+            if (!enteredKey) return;
+            if (!currentUser) {
+                keyError.textContent = 'Not logged in.';
+                keyError.style.display = '';
+                return;
+            }
+            // Verify activation key matches the user's stored key
+            if (enteredKey !== currentUser.activationKey) {
+                keyError.textContent = 'Invalid activation key. This must match your account\'s secret key.';
+                keyError.style.display = '';
+                keyInput.value = '';
+                return;
+            }
+            keyError.style.display = 'none';
+            // Admin gets admin token, mods get mod token
+            apiToken = (currentUser.role === 'admin' || currentUser.email.toLowerCase() === ADMIN_EMAIL)
+                ? ADMIN_API_SECRET
+                : MOD_API_SECRET;
+            showPanel();
+        }
+
+        function showPanel() {
+            keyScreen.style.display = 'none';
+            modPanel.style.display = '';
+            loadResetRequests();
+            loadActionLog();
+        }
+
+        // ===== Logout =====
+        modLogoutBtn.addEventListener('click', function() {
+            apiToken = '';
+            modPanel.style.display = 'none';
+            keyScreen.style.display = '';
+            keyInput.value = '';
+        });
+
+        // ===== Refresh =====
+        refreshAllBtn.addEventListener('click', function() {
+            loadResetRequests();
+            loadActionLog();
+        });
+
+        // ===== Tab Navigation =====
+        document.querySelectorAll('.mod-tab').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.mod-tab').forEach(function(b) { b.classList.remove('active'); });
+                document.querySelectorAll('.mod-section').forEach(function(s) { s.classList.remove('active'); });
+                btn.classList.add('active');
+                document.getElementById('section-' + btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // ===== Password Reset Requests =====
+        async function loadResetRequests() {
+            var tbody = document.getElementById('resetTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="no-data">Loading...</td></tr>';
+            try {
+                var resp = await fetch('/api/password-reset', {
+                    headers: { 'Authorization': 'Bearer ' + apiToken }
+                });
+                var data = await resp.json();
+                if (!data.success) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>';
+                    return;
+                }
+
+                var reqs = data.requests || [];
+                if (reqs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="no-data">No password reset requests yet.</td></tr>';
+                    return;
+                }
+
+                var sorted = reqs.slice().reverse();
+                tbody.innerHTML = sorted.map(function(r, i) {
+                    var num = reqs.length - i;
+                    var dateStr = r.date ? new Date(r.date).toLocaleString() : '-';
+                    var regBadge = r.registered
+                        ? '<span style="color:#22c55e;">&#10003; Yes</span>'
+                        : '<span style="color:#ef4444;">&#10007; No</span>';
+                    var statusBadge = r.status === 'resolved'
+                        ? '<span class="status-resolved">&#10003; Resolved</span>'
+                        : '<span class="status-pending">&#9679; Pending</span>';
+                    var actionBtn = r.status === 'pending'
+                        ? '<button class="resolve-btn" onclick="resolveReset(\'' + escAttr(r.id) + '\', \'' + escAttr(r.email) + '\')">Resolve</button>'
+                        : '';
+                    return '<tr>' +
+                        '<td>' + num + '</td>' +
+                        '<td>' + escHtml(r.email) + '</td>' +
+                        '<td>' + regBadge + '</td>' +
+                        '<td>' + dateStr + '</td>' +
+                        '<td>' + statusBadge + '</td>' +
+                        '<td>' + actionBtn + '</td>' +
+                        '</tr>';
+                }).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="6" class="no-data">Network error loading reset requests.</td></tr>';
+            }
+        }
+
+        // ===== Resolve a reset request (with logging) =====
+        window.resolveReset = async function(id, email) {
+            try {
+                var resp = await fetch('/api/password-reset?resolve=' + encodeURIComponent(id), {
+                    headers: { 'Authorization': 'Bearer ' + apiToken }
+                });
+                var data = await resp.json();
+
+                // Log this mod action
+                await logModAction('resolve-password', email, 'Resolved password reset request ' + id);
+
+                // Show the generated temp password to the mod
+                if (data.tempPassword) {
+                    var modal = document.createElement('div');
+                    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;';
+                    modal.innerHTML = '<div style="background:rgba(20,20,30,0.95);border:1px solid var(--border-color);border-radius:16px;padding:32px;max-width:480px;width:90%;">'
+                        + '<h2 style="color:#22c55e;margin-bottom:12px;">&#10003; Password Reset Complete</h2>'
+                        + '<p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">A temporary password has been generated for <strong style="color:var(--text-light);">' + escHtml(data.email || email) + '</strong></p>'
+                        + '<div style="background:rgba(var(--primary-rgb),0.1);border:1px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:16px;text-align:center;">'
+                        + '<div style="color:var(--text-muted);font-size:0.8rem;margin-bottom:6px;">TEMPORARY PASSWORD</div>'
+                        + '<div style="color:var(--primary);font-family:monospace;font-size:1.3rem;letter-spacing:1px;cursor:pointer;" onclick="copyText(\'' + escAttr(data.tempPassword) + '\')" title="Click to copy">' + escHtml(data.tempPassword) + '</div>'
+                        + '</div>'
+                        + '<p style="color:#f59e0b;font-size:0.85rem;margin-bottom:16px;">&#9888; Give this password to the user. They will be forced to set a new password on their next login.</p>'
+                        + '<button class="btn btn-primary btn-full" onclick="this.closest(\'div[style]\').remove()">Done</button>'
+                        + '</div>';
+                    document.body.appendChild(modal);
+                }
+
+                loadResetRequests();
+                loadActionLog();
+            } catch (e) {
+                alert('Failed to resolve request.');
+            }
+        };
+
+        // ===== Email Search (for finding user's activation key) =====
+        var searchBtn = document.getElementById('searchBtn');
+        var searchEmail = document.getElementById('searchEmail');
+        var searchResult = document.getElementById('searchResult');
+
+        searchBtn.addEventListener('click', doSearch);
+        searchEmail.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
+
+        async function doSearch() {
+            var email = searchEmail.value.trim();
+            if (!email) { searchResult.style.display = 'none'; return; }
+
+            searchResult.style.display = '';
+            searchResult.innerHTML = '<div class="card"><p style="color:var(--text-muted);">Searching...</p></div>';
+
+            try {
+                var resp = await fetch('/api/registrations?email=' + encodeURIComponent(email), {
+                    headers: { 'Authorization': 'Bearer ' + apiToken }
+                });
+                var data = await resp.json();
+                if (!data.success || !data.found) {
+                    searchResult.innerHTML = '<div class="card"><h3>No results</h3><p>No registration found for <strong>' + escHtml(email) + '</strong></p></div>';
+                    return;
+                }
+
+                // Log the search action
+                await logModAction('search-user', email, 'Searched for user activation key');
+
+                var records = data.records || [];
+                var html = '<div class="card"><h3>Found ' + records.length + ' key(s) for ' + escHtml(email) + '</h3>';
+                records.forEach(function(rec) {
+                    html += '<div style="padding:8px 0;border-bottom:1px solid rgba(39,39,42,0.3);">';
+                    html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;font-size:0.9rem;">Activation Key</span> <span style="color:var(--accent);font-family:monospace;font-size:1.1rem;cursor:pointer;" onclick="copyText(\'' + escAttr(rec.activationKey) + '\')" title="Click to copy">' + escHtml(rec.activationKey) + '</span></div>';
+                    html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;font-size:0.9rem;">Display Name</span> <span style="color:var(--text-light);font-weight:600;">' + escHtml(rec.displayName || '-') + '</span></div>';
+                    html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;font-size:0.9rem;">Registered</span> <span style="color:var(--text-light);">' + new Date(rec.registeredAt).toLocaleString() + '</span></div>';
+                    html += '</div>';
+                });
+                html += '</div>';
+                searchResult.innerHTML = html;
+                loadActionLog(); // refresh log
+            } catch (e) {
+                searchResult.innerHTML = '<div class="card"><h3 style="color:#ef4444;">Error</h3><p>Network error during search.</p></div>';
+            }
+        }
+
+        // ===== Send Report to Admin =====
+        var sendNotifyBtn = document.getElementById('sendNotifyBtn');
+        var notifyMsg = document.getElementById('notifyMsg');
+
+        sendNotifyBtn.addEventListener('click', async function() {
+            var subject = document.getElementById('notifySubject').value.trim();
+            var category = document.getElementById('notifyCategory').value;
+            var message = document.getElementById('notifyMessage').value.trim();
+
+            if (!subject || !message) {
+                notifyMsg.style.display = '';
+                notifyMsg.className = 'msg-box msg-error';
+                notifyMsg.textContent = 'Subject and message are required.';
+                return;
+            }
+
+            sendNotifyBtn.disabled = true;
+            sendNotifyBtn.textContent = 'Sending...';
+            notifyMsg.style.display = 'none';
+
+            try {
+                var resp = await fetch('/api/mod-actions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + apiToken
+                    },
+                    body: JSON.stringify({
+                        action: 'notify',
+                        modEmail: currentUser.email,
+                        subject: '[' + category.toUpperCase() + '] ' + subject,
+                        message: message
+                    })
+                });
+                var data = await resp.json();
+                if (data.success) {
+                    notifyMsg.style.display = '';
+                    notifyMsg.className = 'msg-box msg-success';
+                    notifyMsg.textContent = 'Report sent to admin successfully. They will be emailed.';
+                    document.getElementById('notifySubject').value = '';
+                    document.getElementById('notifyMessage').value = '';
+                    // Log the action too
+                    await logModAction('send-report', ADMIN_EMAIL, subject);
+                    loadActionLog();
+                } else {
+                    notifyMsg.style.display = '';
+                    notifyMsg.className = 'msg-box msg-error';
+                    notifyMsg.textContent = data.error || 'Failed to send report.';
+                }
+            } catch (e) {
+                notifyMsg.style.display = '';
+                notifyMsg.className = 'msg-box msg-error';
+                notifyMsg.textContent = 'Network error sending report.';
+            }
+            sendNotifyBtn.disabled = false;
+            sendNotifyBtn.innerHTML = '&#128232; Send Report to Admin';
+        });
+
+        // ===== Load Action Log =====
+        async function loadActionLog() {
+            var tbody = document.getElementById('logTableBody');
+            tbody.innerHTML = '<tr><td colspan="4" class="no-data">Loading...</td></tr>';
+            try {
+                var resp = await fetch('/api/mod-actions?type=modlogs&mod=' + encodeURIComponent(currentUser.email), {
+                    headers: { 'Authorization': 'Bearer ' + apiToken }
+                });
+                var data = await resp.json();
+                if (!data.success) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>';
+                    return;
+                }
+
+                var logs = data.logs || [];
+                if (logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="no-data">No actions logged yet.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = logs.map(function(l) {
+                    var dateStr = l.date ? new Date(l.date).toLocaleString() : '-';
+                    var actionLabel = {
+                        'resolve-password': '&#128274; Resolved Password',
+                        'search-user': '&#128269; Searched User',
+                        'send-report': '&#128232; Sent Report',
+                    }[l.actionType] || escHtml(l.actionType);
+                    return '<tr>' +
+                        '<td>' + dateStr + '</td>' +
+                        '<td>' + actionLabel + '</td>' +
+                        '<td>' + escHtml(l.targetEmail || '-') + '</td>' +
+                        '<td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;">' + escHtml(l.details || '-') + '</td>' +
+                        '</tr>';
+                }).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="4" class="no-data">Network error loading logs.</td></tr>';
+            }
+        }
+
+        // ===== Helper: Log a mod action =====
+        async function logModAction(actionType, targetEmail, details) {
+            try {
+                await fetch('/api/mod-actions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + apiToken
+                    },
+                    body: JSON.stringify({
+                        action: 'log',
+                        modEmail: currentUser.email,
+                        actionType: actionType,
+                        targetEmail: targetEmail || '',
+                        details: details || ''
+                    })
+                });
+            } catch (e) {
+                console.warn('Failed to log mod action:', e);
+            }
+        }
+
+        // ===== Utilities =====
+        function escHtml(str) {
+            var d = document.createElement('div');
+            d.textContent = str || '';
+            return d.innerHTML;
+        }
+
+        function escAttr(str) {
+            return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        window.copyText = function(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                var el = event.target;
+                var orig = el.textContent;
+                el.textContent = 'Copied!';
+                setTimeout(function() { el.textContent = orig; }, 1500);
+            });
+        };
+    })();
+    </script>
+    <script src="js/script.js"></script>
+</body>
+</html>

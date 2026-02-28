@@ -3,6 +3,7 @@ interface Env {
 }
 
 const ADMIN_SECRET = "svart-admin-2026";
+const MOD_SECRET = "svart-mod-2026";
 const ADMIN_EMAIL = "admin@svartsecurity.org";
 
 const CORS_HEADERS: Record<string, string> = {
@@ -184,12 +185,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 };
 
-// GET - Admin: list all registrations or search by email
-// Requires Authorization: Bearer <ADMIN_SECRET>
+// GET - Admin/Mod: list all registrations or search by email
+// Requires Authorization: Bearer <ADMIN_SECRET> or <MOD_SECRET>
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const auth = context.request.headers.get("Authorization");
-    if (!auth || auth !== `Bearer ${ADMIN_SECRET}`) {
+    const token = auth ? auth.replace("Bearer ", "") : "";
+    const isAdmin = token === ADMIN_SECRET;
+    const isMod = token === MOD_SECRET;
+    if (!isAdmin && !isMod) {
       return errorResponse("Unauthorized", 401);
     }
 

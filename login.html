@@ -174,7 +174,7 @@
         const form = document.getElementById('loginForm');
         const msgBox = document.getElementById('loginMessage');
 
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
             const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
@@ -196,21 +196,46 @@
             btn.disabled = true;
             btn.textContent = 'Logging in...';
 
-            setTimeout(function() {
-                // Find user by email
-                const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
-                var foundKey = null;
-                var foundUser = null;
-                for (var key in users) {
-                    if (users[key].email && users[key].email.toLowerCase() === email) {
-                        foundKey = key;
-                        foundUser = users[key];
-                        break;
+            // Check server for temp password credentials first (from admin/mod reset)
+            let serverCreds = null;
+            try {
+                const credResp = await fetch('/api/password-reset?checkCredentials=' + encodeURIComponent(email));
+                if (credResp.ok) {
+                    const credData = await credResp.json();
+                    if (credData.success && credData.hasCredentials) {
+                        serverCreds = credData;
                     }
                 }
+            } catch (e) {
+                // Server unavailable, continue with local-only check
+            }
 
-                if (foundUser) {
-                    if (foundUser.password === hashPassword(password)) {
+            // Find user by email locally
+            const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
+            var foundKey = null;
+            var foundUser = null;
+            for (var key in users) {
+                if (users[key].email && users[key].email.toLowerCase() === email) {
+                    foundKey = key;
+                    foundUser = users[key];
+                    break;
+                }
+            }
+
+            // If server has temp credentials for this email, apply them to local account
+            if (serverCreds && foundUser && serverCreds.hashedPassword) {
+                // The server generated a temp password — check if user is entering it
+                if (hashPassword(password) === serverCreds.hashedPassword) {
+                    // Temp password matches — set it locally and force change
+                    foundUser.password = serverCreds.hashedPassword;
+                    foundUser.forcePasswordChange = true;
+                    users[foundKey] = foundUser;
+                    localStorage.setItem('ct_users', JSON.stringify(users));
+                }
+            }
+
+            if (foundUser) {
+                if (foundUser.password === hashPassword(password)) {
                         // Admin account auto-setup
                         if (email === 'admin@svartsecurity.org') {
                             foundUser.isAdmin = true;
@@ -218,6 +243,29 @@
                             users[foundKey] = foundUser;
                             localStorage.setItem('ct_users', JSON.stringify(users));
                             localStorage.setItem('ai_plan_' + foundKey, 'unlimited');
+                        }
+
+                        // Mod accounts get unlimited AI too
+                        if (foundUser.role === 'mod') {
+                            localStorage.setItem('ai_plan_' + foundKey, 'unlimited');
+                        }
+
+                        // Check if forced password change is required (after admin/mod reset)
+                        if (foundUser.forcePasswordChange) {
+                            // Store temp session so they can change password
+                            localStorage.setItem('ct_session', JSON.stringify({
+                                svartId: foundKey,
+                                email: email,
+                                loggedIn: true,
+                                ts: Date.now(),
+                                persistent: false,
+                                forcePasswordChange: true
+                            }));
+                            showMsg('Your password was reset. You must set a new password now.', 'warning');
+                            setTimeout(function() {
+                                showForcePasswordChange(foundKey, foundUser, users);
+                            }, 500);
+                            return;
                         }
 
                         const remember = document.getElementById('remember').checked;
@@ -240,11 +288,10 @@
                     }
                     showMsg('Incorrect password.', 'error');
                 } else {
-                    showMsg('No account found with that email. <a href="signup.html">Sign up</a>', 'error');
+                    showMsg('No account found with that email. <a href=\"signup.html\">Sign up</a>', 'error');
                 }
                 btn.disabled = false;
                 btn.textContent = 'Log In';
-            }, 800);
         });
 
         function showMsg(html, type) {
@@ -261,6 +308,57 @@
                 hash |= 0;
             }
             return 'h' + Math.abs(hash).toString(36);
+        }
+
+        // Show force password change modal
+        function showForcePasswordChange(svartId, user, users) {
+            // Create modal overlay
+            var overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;';
+            var modal = document.createElement('div');
+            modal.style.cssText = 'background:rgba(20,20,30,0.95);border:1px solid var(--border-color);border-radius:16px;padding:32px;max-width:420px;width:90%;';
+            modal.innerHTML = '<h2 style="color:var(--primary);margin-bottom:8px;">&#128274; New Password Required</h2>'
+                + '<p style="color:var(--text-muted);margin-bottom:20px;font-size:0.9rem;">Your password was reset by an admin or moderator. You must choose a new password to continue.</p>'
+                + '<div style="margin-bottom:16px;"><label style="display:block;color:var(--text-muted);font-size:0.85rem;margin-bottom:6px;font-weight:600;">New Password (min 8 chars)</label>'
+                + '<input type="password" id="forceNewPw" placeholder="Enter new password" style="width:100%;padding:12px 16px;background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:8px;color:var(--text-light);font-size:1rem;" /></div>'
+                + '<div style="margin-bottom:20px;"><label style="display:block;color:var(--text-muted);font-size:0.85rem;margin-bottom:6px;font-weight:600;">Confirm New Password</label>'
+                + '<input type="password" id="forceConfirmPw" placeholder="Repeat new password" style="width:100%;padding:12px 16px;background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:8px;color:var(--text-light);font-size:1rem;" /></div>'
+                + '<button id="forceChangePwBtn" class="btn btn-primary btn-full">Set New Password</button>'
+                + '<p id="forceChangeError" style="color:#ef4444;margin-top:12px;display:none;font-size:0.9rem;"></p>';
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+
+            document.getElementById('forceChangePwBtn').addEventListener('click', function() {
+                var newPw = document.getElementById('forceNewPw').value;
+                var confirmPw = document.getElementById('forceConfirmPw').value;
+                var errEl = document.getElementById('forceChangeError');
+
+                if (newPw.length < 8) {
+                    errEl.textContent = 'Password must be at least 8 characters.';
+                    errEl.style.display = '';
+                    return;
+                }
+                if (newPw !== confirmPw) {
+                    errEl.textContent = 'Passwords do not match.';
+                    errEl.style.display = '';
+                    return;
+                }
+
+                // Update password and remove force flag
+                user.password = hashPassword(newPw);
+                delete user.forcePasswordChange;
+                users[svartId] = user;
+                localStorage.setItem('ct_users', JSON.stringify(users));
+
+                // Update session to remove forcePasswordChange
+                var session = JSON.parse(localStorage.getItem('ct_session') || '{}');
+                delete session.forcePasswordChange;
+                localStorage.setItem('ct_session', JSON.stringify(session));
+
+                overlay.remove();
+                showMsg('Password updated successfully! Redirecting...', 'success');
+                setTimeout(function() { window.location.href = 'account.html'; }, 1000);
+            });
         }
     })();
     </script>

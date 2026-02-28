@@ -203,22 +203,15 @@
             loginScreen.style.display = 'none';
             panel.style.display = 'none';
         } else {
-            // Check if already verified this session
-            var stored = sessionStorage.getItem('svart_admin_verified');
-            if (stored === 'true') {
-                adminToken = ADMIN_API_SECRET;
-                showPanel();
-            } else {
-                notAdminScreen.style.display = 'none';
-                loginScreen.style.display = '';
-                panel.style.display = 'none';
-            }
+            // ALWAYS require activation key on every visit — no session caching
+            notAdminScreen.style.display = 'none';
+            loginScreen.style.display = '';
+            panel.style.display = 'none';
         }
 
         loginBtn.addEventListener('click', doLogin);
         secretInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
         logoutBtn.addEventListener('click', function() {
-            sessionStorage.removeItem('svart_admin_verified');
             adminToken = '';
             panel.style.display = 'none';
             loginScreen.style.display = '';
@@ -320,7 +313,7 @@
             }
             loginError.style.display = 'none';
             adminToken = ADMIN_API_SECRET;
-            sessionStorage.setItem('svart_admin_verified', 'true');
+            // No sessionStorage caching — require key every visit
             showPanel();
         }
 
@@ -487,9 +480,28 @@
         // Mark a reset request as resolved
         window.resolveReset = async function(id) {
             try {
-                await fetch('/api/password-reset?resolve=' + encodeURIComponent(id), {
+                var resp = await fetch('/api/password-reset?resolve=' + encodeURIComponent(id), {
                     headers: { 'Authorization': 'Bearer ' + adminToken }
                 });
+                var data = await resp.json();
+                if (data.tempPassword) {
+                    // Show modal with generated temp password
+                    var overlay = document.createElement('div');
+                    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:10000;display:flex;align-items:center;justify-content:center;';
+                    overlay.innerHTML = '<div style="background:var(--bg-secondary,#1a1a2e);border:1px solid var(--border-color,#333);border-radius:12px;padding:32px;max-width:440px;width:90%;text-align:center;">' +
+                        '<h3 style="color:var(--text-primary,#fff);margin:0 0 8px;">Password Reset Resolved</h3>' +
+                        '<p style="color:var(--text-secondary,#aaa);font-size:14px;margin:0 0 20px;">A temporary password has been generated. Share it securely with the user.</p>' +
+                        '<div style="background:var(--bg-primary,#0d0d1a);border:1px solid var(--accent-color,#6366f1);border-radius:8px;padding:16px;margin:0 0 16px;">' +
+                        '<div style="color:var(--text-secondary,#aaa);font-size:12px;margin-bottom:4px;">Temporary Password</div>' +
+                        '<div style="color:var(--accent-color,#6366f1);font-size:20px;font-family:monospace;letter-spacing:2px;word-break:break-all;">' + data.tempPassword + '</div></div>' +
+                        '<p style="color:#f59e0b;font-size:12px;margin:0 0 20px;">⚠️ The user will be forced to change their password on next login.</p>' +
+                        '<div style="display:flex;gap:8px;justify-content:center;">' +
+                        '<button onclick="copyText(\'' + data.tempPassword + '\');this.textContent=\'Copied!\';setTimeout(function(){this.textContent=\'Copy Password\";},1500)" style="padding:10px 20px;background:var(--accent-color,#6366f1);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Copy Password</button>' +
+                        '<button id="adminCloseTempModal" style="padding:10px 20px;background:var(--bg-primary,#0d0d1a);color:var(--text-primary,#fff);border:1px solid var(--border-color,#333);border-radius:8px;cursor:pointer;font-size:14px;">Close</button></div></div>';
+                    document.body.appendChild(overlay);
+                    document.getElementById('adminCloseTempModal').onclick = function() { overlay.remove(); };
+                    overlay.addEventListener('click', function(ev) { if (ev.target === overlay) overlay.remove(); });
+                }
                 loadResetRequests();
             } catch (e) {
                 alert('Failed to resolve request.');

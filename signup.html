@@ -352,6 +352,11 @@
                 localStorage.setItem('ai_plan_' + svartId, 'unlimited');
             }
 
+            // Mod accounts get unlimited AI too
+            if (users[svartId].role === 'mod') {
+                localStorage.setItem('ai_plan_' + svartId, 'unlimited');
+            }
+
             // Register on server (enforces unique email server-side)
             try {
                 const resp = await fetch('/api/registrations', {
