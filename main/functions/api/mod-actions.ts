@@ -127,7 +127,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
                   message,
                   "",
                   "---",
-                  "Svart Suite Mod System",
+                  "Svart Security Mod System",
                 ].join("\n"),
               },
             ],

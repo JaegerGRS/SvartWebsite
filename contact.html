@@ -59,15 +59,16 @@
                     </div>
                 </div>
 
-                <form class="contact-form">
-                    <input type="text" placeholder="Your Svart ID (optional)">
-                    <input type="email" placeholder="Your Email" required>
-                    <textarea placeholder="Your Message" rows="5" required></textarea>
-                    <button type="submit" class="btn btn-primary">Send Message</button>
+                <form class="contact-form" id="contactForm">
+                    <input type="text" id="contactKey" placeholder="Your Secret Key (optional, e.g. CB-XXXX)" autocomplete="off">
+                    <input type="email" id="contactEmail" placeholder="Your Email" required>
+                    <textarea id="contactMessage" placeholder="Your Message" rows="5" required></textarea>
+                    <button type="submit" class="btn btn-primary" id="contactSubmit">Send Message</button>
+                    <div id="contactStatus" style="margin-top:12px;font-size:0.95em;display:none;"></div>
                 </form>
 
                 <div class="privacy-note" style="margin-top:18px;font-size:0.92em;color:#7c6bf0;">
-                    <b>Privacy Tip:</b> For maximum privacy, use an alias or forwarding email when contacting us. Your Svart ID is optional and never required. We never store personal data—your privacy is our priority.
+                    <b>Privacy Tip:</b> For maximum privacy, use an alias or forwarding email when contacting us. Your secret key is optional and helps us identify your account faster. We never store personal data&mdash;your privacy is our priority.
                 </div>
             </div>
         </div>
@@ -117,5 +118,71 @@
         </div>
     </footer>
     <script src="js/script.js"></script>
+    <script>
+    (function() {
+        // Auto-fill secret key from logged-in user
+        try {
+            var session = JSON.parse(localStorage.getItem('ct_persistent_session') || localStorage.getItem('ct_session') || '{}');
+            if (session && session.activationKey) {
+                document.getElementById('contactKey').value = session.activationKey;
+            }
+            if (session && session.email) {
+                document.getElementById('contactEmail').value = session.email;
+            }
+        } catch(e) {}
+
+        var form = document.getElementById('contactForm');
+        var status = document.getElementById('contactStatus');
+        var btn = document.getElementById('contactSubmit');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var secretKey = document.getElementById('contactKey').value.trim();
+            var email = document.getElementById('contactEmail').value.trim();
+            var message = document.getElementById('contactMessage').value.trim();
+
+            if (!email || !message) {
+                status.style.display = 'block';
+                status.style.color = '#ef4444';
+                status.textContent = 'Please fill in your email and message.';
+                return;
+            }
+            if (message.length < 10) {
+                status.style.display = 'block';
+                status.style.color = '#ef4444';
+                status.textContent = 'Message must be at least 10 characters.';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+            status.style.display = 'none';
+
+            try {
+                var res = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ secretKey: secretKey, email: email, message: message })
+                });
+                var data = await res.json();
+                status.style.display = 'block';
+                if (data.success) {
+                    status.style.color = '#22c55e';
+                    status.textContent = data.message || 'Message sent successfully!';
+                    document.getElementById('contactMessage').value = '';
+                } else {
+                    status.style.color = '#ef4444';
+                    status.textContent = data.error || 'Failed to send. Please try again.';
+                }
+            } catch(err) {
+                status.style.display = 'block';
+                status.style.color = '#ef4444';
+                status.textContent = 'Network error. Please try again.';
+            }
+            btn.disabled = false;
+            btn.textContent = 'Send Message';
+        });
+    })();
+    </script>
 </body>
 </html>

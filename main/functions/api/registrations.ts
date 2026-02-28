@@ -48,15 +48,15 @@ async function notifyAdmin(record: {
         ],
         from: {
           email: "noreply@svartsecurity.org",
-          name: "Svart Suite",
+          name: "Svart Security",
         },
         subject: `New Signup: ${record.email}`,
         content: [
           {
             type: "text/plain",
             value: [
-              "New Svart Suite Registration",
-              "============================",
+              "New Svart Security Registration",
+              "=============================",
               "",
               `Email:          ${record.email}`,
               `Secret Key: ${record.activationKey}`,
@@ -66,14 +66,14 @@ async function notifyAdmin(record: {
               `IP:             ${record.ip}`,
               "",
               "---",
-              "Svart Suite Admin Notification",
+              "Svart Security Admin Notification",
             ].join("\n"),
           },
           {
             type: "text/html",
             value: `
               <div style="font-family:monospace;background:#0a0a0f;color:#e0e0e0;padding:24px;border-radius:12px;max-width:500px;">
-                <h2 style="color:#7c6aef;margin-top:0;">New Svart Suite Registration</h2>
+                <h2 style="color:#7c6aef;margin-top:0;">New Svart Security Registration</h2>
                 <table style="width:100%;border-collapse:collapse;">
                   <tr><td style="padding:6px 12px;color:#888;">Email</td><td style="padding:6px 12px;color:#fff;">${record.email}</td></tr>
                   <tr><td style="padding:6px 12px;color:#888;">Secret Key</td><td style="padding:6px 12px;color:#7c6aef;font-weight:bold;">${record.activationKey}</td></tr>
@@ -83,7 +83,7 @@ async function notifyAdmin(record: {
                   <tr><td style="padding:6px 12px;color:#888;">IP</td><td style="padding:6px 12px;color:#fff;">${record.ip}</td></tr>
                 </table>
                 <hr style="border:none;border-top:1px solid #333;margin:16px 0;">
-                <p style="color:#666;font-size:0.85em;margin:0;">Svart Suite Admin Notification</p>
+                <p style="color:#666;font-size:0.85em;margin:0;">Svart Security Admin Notification</p>
               </div>
             `,
           },
@@ -292,13 +292,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
             ],
             from: {
               email: "noreply@svartsecurity.org",
-              name: "Svart Suite",
+              name: "Svart Security",
             },
             subject: `Today's Signups (${todayRegs.length}) — ${today}`,
             content: [
               {
                 type: "text/plain",
-                value: `Today's Svart Suite Registrations (${todayRegs.length})\n${"=".repeat(50)}\n\n${rows}\n\n---\nSvart Suite Admin Report`,
+                value: `Today's Svart Security Registrations (${todayRegs.length})\n${"=".repeat(50)}\n\n${rows}\n\n---\nSvart Security Admin Report`,
               },
               {
                 type: "text/html",
@@ -310,7 +310,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
                       ${htmlRows}
                     </table>
                     <hr style="border:none;border-top:1px solid #333;margin:16px 0;">
-                    <p style="color:#666;font-size:0.85em;margin:0;">Svart Suite Admin Report — ${today}</p>
+                    <p style="color:#666;font-size:0.85em;margin:0;">Svart Security Admin Report — ${today}</p>
                   </div>
                 `,
               },

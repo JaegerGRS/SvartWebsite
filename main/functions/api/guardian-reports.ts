@@ -285,7 +285,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         "=========================================================",
         "",
         `Prepared by:     ${ADMIN_FULL_NAME}`,
-        `Organisation:    Svart Suite / Svart Security`,
+        `Organisation:    Svart Security`,
         `Contact:         ${ADMIN_EMAIL}`,
         `Security Email:  ${SECURITY_EMAIL}`,
         `Date Prepared:   ${escalationDate}`,
@@ -326,7 +326,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         "",
         "---",
         `${ADMIN_FULL_NAME}`,
-        "Svart Suite — Administrator",
+        "Svart Security — Administrator",
         `${ADMIN_EMAIL}`,
       ].join("\n");
 
@@ -337,7 +337,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
           <hr style="border:none;border-top:1px solid #333;">
           <table style="width:100%;border-collapse:collapse;margin:16px 0;">
             <tr><td style="padding:6px 12px;color:#888;width:180px;">Prepared by</td><td style="padding:6px 12px;color:#fff;font-weight:bold;">${ADMIN_FULL_NAME}</td></tr>
-            <tr><td style="padding:6px 12px;color:#888;">Organisation</td><td style="padding:6px 12px;color:#fff;">Svart Suite / Svart Security</td></tr>
+            <tr><td style="padding:6px 12px;color:#888;">Organisation</td><td style="padding:6px 12px;color:#fff;">Svart Security</td></tr>
             <tr><td style="padding:6px 12px;color:#888;">Contact</td><td style="padding:6px 12px;color:#7c6aef;">${ADMIN_EMAIL}</td></tr>
             <tr><td style="padding:6px 12px;color:#888;">Security Email</td><td style="padding:6px 12px;color:#7c6aef;">${SECURITY_EMAIL}</td></tr>
             <tr><td style="padding:6px 12px;color:#888;">Date Prepared</td><td style="padding:6px 12px;color:#fff;">${escalationDate}</td></tr>
@@ -367,7 +367,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
           </ol>
           <hr style="border:none;border-top:1px solid #333;margin:24px 0;">
           <p style="color:#f59e0b;font-size:0.85em;">This report has been reviewed and is being forwarded to the appropriate authorities. A PDF copy should be attached when submitting to any tip line or law enforcement portal.</p>
-          <p style="color:#888;margin-top:24px;font-size:0.85em;">${ADMIN_FULL_NAME}<br>Svart Suite — Administrator<br>${ADMIN_EMAIL}</p>
+          <p style="color:#888;margin-top:24px;font-size:0.85em;">${ADMIN_FULL_NAME}<br>Svart Security — Administrator<br>${ADMIN_EMAIL}</p>
         </div>
       `;
 
