@@ -47,6 +47,10 @@
         .badge-unread { display: inline-block; background: #ef4444; color: #fff; font-size: 0.7rem; padding: 2px 7px; border-radius: 99px; margin-left: 6px; vertical-align: middle; }
         .mod-logout { background: none; border: 1px solid var(--danger, #ef4444); color: var(--danger, #ef4444); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
         .mod-logout:hover { background: rgba(239,68,68,0.15); }
+        .copy-btn { background: none; border: 1px solid var(--border-color); color: var(--text-muted); padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: all 0.2s; }
+        .copy-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .key-cell { font-family: monospace; color: var(--accent); letter-spacing: 0.5px; }
+        .email-cell { max-width: 250px; overflow: hidden; text-overflow: ellipsis; }
         .notif-item { padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 12px; background: rgba(20,20,30,0.6); }
         .notif-item.unread { border-left: 3px solid var(--primary); }
         .notif-meta { color: var(--text-muted); font-size: 0.8rem; margin-bottom: 8px; }
@@ -94,6 +98,7 @@
 
         <div class="mod-tabs">
             <button class="mod-tab active" data-tab="resets">&#128274; Password Resets</button>
+            <button class="mod-tab" data-tab="registrations">&#128203; Registration Log</button>
             <button class="mod-tab" data-tab="notify">&#128172; Send Report to Admin</button>
             <button class="mod-tab" data-tab="logs">&#128203; My Action Log</button>
         </div>
@@ -124,6 +129,31 @@
                         </tr>
                     </thead>
                     <tbody id="resetTableBody">
+                        <tr><td colspan="6" class="no-data">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== Registration Log Section ===== -->
+        <div class="mod-section" id="section-registrations">
+            <div class="card">
+                <h3>&#128203; Registration Log</h3>
+                <p>View all registered users to help verify password reset requests. Use the email search on the Password Resets tab to look up a specific user's activation key.</p>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="reg-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Email</th>
+                            <th>Display Name</th>
+                            <th>Activation Key</th>
+                            <th>Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="regTableBody">
                         <tr><td colspan="6" class="no-data">Loading...</td></tr>
                     </tbody>
                 </table>
@@ -289,6 +319,7 @@
             keyScreen.style.display = 'none';
             modPanel.style.display = '';
             loadResetRequests();
+            loadRegistrations();
             loadActionLog();
         }
 
@@ -303,6 +334,7 @@
         // ===== Refresh =====
         refreshAllBtn.addEventListener('click', function() {
             loadResetRequests();
+            loadRegistrations();
             loadActionLog();
         });
 
@@ -559,6 +591,44 @@
                 });
             } catch (e) {
                 console.warn('Failed to log mod action:', e);
+            }
+        }
+
+        // ===== Registration Log =====
+        async function loadRegistrations() {
+            var tbody = document.getElementById('regTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="no-data">Loading...</td></tr>';
+            try {
+                var resp = await fetch('/api/registrations', {
+                    headers: { 'Authorization': 'Bearer ' + apiToken }
+                });
+                var data = await resp.json();
+                if (!data.success) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>';
+                    return;
+                }
+
+                var regs = data.registrations || [];
+                if (regs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="no-data">No registrations yet.</td></tr>';
+                    return;
+                }
+
+                var sorted = regs.slice().reverse();
+                tbody.innerHTML = sorted.map(function(r, i) {
+                    var num = regs.length - i;
+                    var dateStr = r.date ? new Date(r.date).toLocaleString() : '-';
+                    return '<tr>' +
+                        '<td>' + num + '</td>' +
+                        '<td class="email-cell">' + escHtml(r.email) + '</td>' +
+                        '<td>' + escHtml(r.displayName || '-') + '</td>' +
+                        '<td class="key-cell">' + escHtml(r.key) + '</td>' +
+                        '<td>' + dateStr + '</td>' +
+                        '<td><button class="copy-btn" onclick="copyText(\'' + escAttr(r.key) + '\')">Copy Key</button></td>' +
+                        '</tr>';
+                }).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="6" class="no-data">Network error loading registrations.</td></tr>';
             }
         }
 
