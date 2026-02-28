@@ -282,13 +282,10 @@
             keyScreen.style.display = 'none';
             modPanel.style.display = 'none';
         } else {
-            // Server confirmed role — go straight to panel
+            // Require activation key on every visit for security
             accessDenied.style.display = 'none';
-            keyScreen.style.display = 'none';
-            apiToken = (currentUser.role === 'admin' || currentUser.email.toLowerCase() === ADMIN_EMAIL)
-                ? ADMIN_API_SECRET
-                : MOD_API_SECRET;
-            showPanel();
+            keyScreen.style.display = '';
+            modPanel.style.display = 'none';
         }
 
         // ===== Key Verification =====

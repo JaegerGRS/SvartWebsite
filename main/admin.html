@@ -297,11 +297,10 @@
             loginScreen.style.display = 'none';
             panel.style.display = 'none';
         } else {
-            // Server confirmed admin role — go straight to panel
+            // Require activation key on every visit for security
             notAdminScreen.style.display = 'none';
-            loginScreen.style.display = 'none';
-            adminToken = ADMIN_API_SECRET;
-            showPanel();
+            loginScreen.style.display = '';
+            panel.style.display = 'none';
         }
 
         loginBtn.addEventListener('click', doLogin);

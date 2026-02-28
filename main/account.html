@@ -921,38 +921,8 @@
       localStorage.setItem('ai_plan_' + svartId, 'unlimited');
     }
 
-    // ===== Activation Key Gate for Admin/Mod =====
-    if (isAdmin || isMod) {
-      var mainDash = document.getElementById('mainDashboard');
-      var dashGate = document.getElementById('dashKeyGate');
-      var dashKeyInput = document.getElementById('dashKeyInput');
-      var dashKeyBtn = document.getElementById('dashKeyBtn');
-      var dashKeyError = document.getElementById('dashKeyError');
-      var userActKey = user.activationKey || svartId || '';
-
-      // Hide dashboard, show gate
-      mainDash.style.display = 'none';
-      dashGate.style.display = '';
-
-      function verifyDashKey() {
-        var entered = dashKeyInput.value.trim();
-        if (!entered) return;
-        if (entered !== userActKey) {
-          dashKeyError.textContent = 'Invalid activation key. This must match your account\'s secret key.';
-          dashKeyError.style.display = '';
-          dashKeyInput.value = '';
-          dashKeyInput.focus();
-          return;
-        }
-        dashKeyError.style.display = 'none';
-        dashGate.style.display = 'none';
-        mainDash.style.display = '';
-      }
-
-      dashKeyBtn.addEventListener('click', verifyDashKey);
-      dashKeyInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') verifyDashKey(); });
-      dashKeyInput.focus();
-    }
+    // ===== Admin/Mod dashboard — no key gate (key is visible on this page) =====
+    // Admin and mods can always see their own key here, then use it on admin/mod panels
 
     document.getElementById('userName').textContent = displayName;
     document.getElementById('userEmail').textContent = user.email || session.email || '\u2014';
