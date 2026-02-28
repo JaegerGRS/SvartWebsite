@@ -20,12 +20,6 @@
         .nav-links a, .nav-links button { padding: 8px 16px; font-size: 0.85rem; text-decoration: none; border-radius: 8px; }
         .admin-logout { background: none; border: 1px solid var(--danger, #ef4444); color: var(--danger, #ef4444); cursor: pointer; }
         .admin-logout:hover { background: rgba(239,68,68,0.15); }
-        .quick-links { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin-bottom: 28px; }
-        .quick-link { display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: rgba(20,20,30,0.7); border: 1px solid var(--border-color); border-radius: 12px; text-decoration: none; color: var(--text-light); transition: all 0.2s; }
-        .quick-link:hover { border-color: var(--primary); background: rgba(var(--primary-rgb),0.08); transform: translateY(-1px); }
-        .quick-link .ql-icon { font-size: 1.5rem; width: 40px; text-align: center; }
-        .quick-link .ql-title { font-weight: 600; font-size: 0.95rem; }
-        .quick-link .ql-desc { color: var(--text-muted); font-size: 0.8rem; margin-top: 2px; }
         .stats-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
         .stat-card { background: rgba(20,20,30,0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px 24px; min-width: 130px; }
         .stat-card .stat-num { font-size: 1.8rem; font-weight: 700; color: var(--primary); }
@@ -61,16 +55,6 @@
         .filter-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .filter-bar input { padding: 10px 14px; background: rgba(var(--bg-dark-rgb),0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 0.9rem; flex: 1; min-width: 200px; }
         .filter-bar input:focus { border-color: var(--primary); outline: none; }
-        .role-select { background: rgba(var(--bg-dark-rgb),0.8); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-light); padding: 6px 10px; font-size: 0.85rem; }
-        .role-select:focus { border-color: var(--primary); outline: none; }
-        .info-card { background: rgba(20,20,30,0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
-        .info-card h3 { color: var(--primary); margin-bottom: 8px; }
-        .info-card p { color: var(--text-muted); font-size: 0.9rem; margin: 0; }
-        .danger-zone { margin-top: 48px; border: 1px solid #ef4444; border-radius: 12px; padding: 24px; background: rgba(239,68,68,0.05); }
-        .danger-zone h3 { color: #ef4444; margin-bottom: 8px; }
-        .danger-zone p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px; }
-        .danger-btn { background: none; border: 1px solid #ef4444; color: #ef4444; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
-        .danger-btn:hover { background: rgba(239,68,68,0.15); }
         @media (max-width: 768px) {
             .reg-table { font-size: 0.8rem; }
             .reg-table th, .reg-table td { padding: 8px 10px; }
@@ -114,22 +98,6 @@
             </div>
         </div>
 
-        <!-- Quick Links to other pages -->
-        <div class="quick-links">
-            <a href="registration-log.html" class="quick-link">
-                <span class="ql-icon">&#128203;</span>
-                <div><div class="ql-title">Registration Log</div><div class="ql-desc">View all signups, search by email, copy keys</div></div>
-            </a>
-            <a href="role-management.html" class="quick-link">
-                <span class="ql-icon">&#128101;</span>
-                <div><div class="ql-title">Role Management</div><div class="ql-desc">Assign mods &amp; admins, wipe accounts</div></div>
-            </a>
-            <a href="mod-panel.html" class="quick-link">
-                <span class="ql-icon">&#128737;</span>
-                <div><div class="ql-title">Mod Panel</div><div class="ql-desc">View as a mod, action logs, reports</div></div>
-            </a>
-        </div>
-
         <!-- Stats -->
         <div class="stats-row">
             <div class="stat-card"><div class="stat-num" id="totalUsers">-</div><div class="stat-label">Total Users</div></div>
@@ -149,9 +117,7 @@
         <div class="tab-bar">
             <button class="tab-btn active" data-tab="guardian">&#128737; Guardian Reports <span class="badge" id="guardianBadge" style="display:none;">0</span></button>
             <button class="tab-btn" data-tab="resets">&#128274; Password Resets <span class="badge" id="resetBadge" style="display:none;">0</span></button>
-            <button class="tab-btn" data-tab="reglog">&#128203; Registration Log <span class="badge" id="reglogBadge" style="display:none;">0</span></button>
-            <button class="tab-btn" data-tab="modlogs">&#128203; Mod Logs</button>
-            <button class="tab-btn" data-tab="roles">&#128101; Role Management</button>
+            <button class="tab-btn" data-tab="modreports">&#128172; Mod Reports <span class="badge" id="modreportsBadge" style="display:none;">0</span></button>
         </div>
 
         <!-- Tab: Guardian Reports -->
@@ -177,69 +143,14 @@
             </div>
         </div>
 
-        <!-- Tab: Registration Log -->
-        <div class="tab-panel" id="panel-reglog">
-            <div class="stats-row" style="margin-bottom:16px;">
-                <div class="stat-card"><div class="stat-num" id="regTotalUsers">-</div><div class="stat-label">Total Registrations</div></div>
-                <div class="stat-card"><div class="stat-num" id="regTodayUsers">-</div><div class="stat-label">Today</div></div>
-            </div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
-                <button class="btn btn-primary" id="regSendTodayBtn" style="background:var(--accent,#22c55e);border-color:var(--accent,#22c55e);">&#128231; Email Today's Signups</button>
-            </div>
-            <div id="regSendTodayMsg" style="display:none;margin-bottom:12px;padding:12px 16px;border-radius:8px;font-size:0.9rem;"></div>
-            <div class="search-bar" style="margin-bottom:8px;">
-                <input type="email" id="regSearchEmail" placeholder="Search registration by email...">
-                <button class="btn btn-primary" id="regSearchBtn">Search</button>
-            </div>
-            <div id="regSearchResult" style="display:none;margin-bottom:12px;"></div>
-            <div class="filter-bar" style="margin-bottom:12px;">
-                <input type="text" id="regFilterInput" placeholder="Filter table by email, name, key, or role...">
-                <span style="color:var(--text-muted);font-size:0.85rem;" id="regFilterCount"></span>
-            </div>
+        <!-- Tab: Mod Reports (what mods report back to admin) -->
+        <div class="tab-panel" id="panel-modreports">
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Reports and notifications sent to you by moderators.</p>
             <div style="overflow-x:auto;">
                 <table class="reg-table">
-                    <thead><tr><th>#</th><th>Email</th><th>Activation Key</th><th>Display Name</th><th>Role</th><th>Date</th><th></th></tr></thead>
-                    <tbody id="regTableBody"><tr><td colspan="7" class="no-data">Loading...</td></tr></tbody>
+                    <thead><tr><th>Date</th><th>Mod</th><th>Subject</th><th>Message</th><th>Status</th></tr></thead>
+                    <tbody id="modreportsTableBody"><tr><td colspan="5" class="no-data">Loading...</td></tr></tbody>
                 </table>
-            </div>
-        </div>
-
-        <!-- Tab: Mod Logs -->
-        <div class="tab-panel" id="panel-modlogs">
-            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">All mod actions across the platform. Every search, password reset, report, and guardian action is logged here for audit.</p>
-            <div class="filter-bar" style="margin-bottom:12px;">
-                <input type="text" id="modlogFilterInput" placeholder="Filter by mod email, action, target...">
-                <span style="color:var(--text-muted);font-size:0.85rem;" id="modlogFilterCount"></span>
-            </div>
-            <div style="overflow-x:auto;">
-                <table class="reg-table">
-                    <thead><tr><th>Date</th><th>Mod</th><th>Role</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
-                    <tbody id="modlogTableBody"><tr><td colspan="6" class="no-data">Loading...</td></tr></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Tab: Role Management -->
-        <div class="tab-panel" id="panel-roles">
-            <div id="roleMsg" style="display:none;margin-bottom:16px;padding:12px 16px;border-radius:8px;font-size:0.9rem;"></div>
-            <div class="info-card">
-                <h3>&#128101; Manage User Roles</h3>
-                <p>Assign roles to registered users. <strong style="color:#f59e0b;">Mods</strong> get mod panel access for password resets, reporting, and viewing registration logs. <strong style="color:#ef4444;">Admins</strong> get full access including role management and account wipes. Changes take effect on the user's next login.</p>
-            </div>
-            <div class="filter-bar" style="margin-bottom:12px;">
-                <input type="text" id="roleFilterInput" placeholder="Filter by email or display name...">
-                <span style="color:var(--text-muted);font-size:0.85rem;" id="roleFilterCount"></span>
-            </div>
-            <div style="overflow-x:auto;">
-                <table class="reg-table">
-                    <thead><tr><th>#</th><th>Email</th><th>Display Name</th><th>Current Role</th><th>Change To</th><th></th></tr></thead>
-                    <tbody id="roleTableBody"><tr><td colspan="6" class="no-data">Loading...</td></tr></tbody>
-                </table>
-            </div>
-            <div class="danger-zone">
-                <h3>&#9888; Danger Zone</h3>
-                <p>Permanently delete ALL registered accounts, password resets, and sessions. All users will need to re-register. This cannot be undone.</p>
-                <button class="danger-btn" id="wipeAllBtn">&#9888; Wipe All Accounts</button>
             </div>
         </div>
 
@@ -340,7 +251,7 @@
         loginBtn.addEventListener('click', doLogin);
         secretInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
         logoutBtn.addEventListener('click', function() { adminToken = ''; panel.style.display = 'none'; loginScreen.style.display = ''; secretInput.value = ''; });
-        refreshBtn.addEventListener('click', function() { loadResetRequests(); loadGuardianReports(); loadRegistrations(); loadModLogs(); loadRoles(); loadStats(); });
+        refreshBtn.addEventListener('click', function() { loadResetRequests(); loadGuardianReports(); loadModReports(); loadStats(); });
         document.getElementById('searchBtn').addEventListener('click', doSearch);
         document.getElementById('searchEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
 
@@ -364,9 +275,7 @@
             loadStats();
             loadGuardianReports();
             loadResetRequests();
-            loadRegistrations();
-            loadModLogs();
-            loadRoles();
+            loadModReports();
         }
 
         // ===== Tabs =====
@@ -630,244 +539,60 @@
             btn.disabled = false; btn.innerHTML = '&#9888; Escalate to Authorities';
         });
 
-        // ===== Registration Log =====
-        var regAllRows = [];
-        var regFilterInput = document.getElementById('regFilterInput');
-        var regFilterCount = document.getElementById('regFilterCount');
-
-        regFilterInput.addEventListener('input', function() {
-            var q = regFilterInput.value.toLowerCase();
-            var visible = 0;
-            regAllRows.forEach(function(row) {
-                var text = row.textContent.toLowerCase();
-                var show = !q || text.indexOf(q) !== -1;
-                row.style.display = show ? '' : 'none';
-                if (show) visible++;
-            });
-            regFilterCount.textContent = q ? visible + ' of ' + regAllRows.length + ' shown' : '';
-        });
-
-        document.getElementById('regSearchBtn').addEventListener('click', doRegSearch);
-        document.getElementById('regSearchEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') doRegSearch(); });
-
-        // Send Today (admin only)
-        var regSendTodayBtn = document.getElementById('regSendTodayBtn');
-        var regSendTodayMsg = document.getElementById('regSendTodayMsg');
-        regSendTodayBtn.addEventListener('click', async function() {
-            regSendTodayBtn.disabled = true; regSendTodayBtn.textContent = 'Sending...'; regSendTodayMsg.style.display = 'none';
+        // ===== Mod Reports (from mods to admin) =====
+        async function loadModReports() {
+            var tbody = document.getElementById('modreportsTableBody');
+            tbody.innerHTML = '<tr><td colspan="5" class="no-data">Loading...</td></tr>';
             try {
-                var resp = await fetch(API_BASE + '?sendToday=true', { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                var resp = await fetch('/api/mod-actions?type=notifications', { headers: { 'Authorization': 'Bearer ' + adminToken } });
                 var data = await resp.json();
-                regSendTodayMsg.style.display = '';
-                if (data.success) {
-                    regSendTodayMsg.style.background = 'rgba(34,197,94,0.15)'; regSendTodayMsg.style.color = '#22c55e';
-                    regSendTodayMsg.textContent = data.message || ('Sent ' + (data.count || 0) + ' registration(s) to admin.');
-                } else {
-                    regSendTodayMsg.style.background = 'rgba(239,68,68,0.15)'; regSendTodayMsg.style.color = '#ef4444';
-                    regSendTodayMsg.textContent = data.error || 'Failed to send.';
-                }
-            } catch (e) {
-                regSendTodayMsg.style.display = ''; regSendTodayMsg.style.background = 'rgba(239,68,68,0.15)'; regSendTodayMsg.style.color = '#ef4444';
-                regSendTodayMsg.textContent = 'Network error.';
-            }
-            regSendTodayBtn.disabled = false; regSendTodayBtn.innerHTML = '&#128231; Email Today\'s Signups';
-        });
-
-        async function loadRegistrations() {
-            var tbody = document.getElementById('regTableBody');
-            tbody.innerHTML = '<tr><td colspan="7" class="no-data">Loading...</td></tr>';
-            try {
-                var resp = await fetch(API_BASE, { headers: { 'Authorization': 'Bearer ' + adminToken } });
-                var data = await resp.json();
-                if (!data.success) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>'; return; }
-                var regs = data.registrations || [];
-                document.getElementById('regTotalUsers').textContent = data.total || 0;
-                var today = new Date().toISOString().slice(0, 10);
-                document.getElementById('regTodayUsers').textContent = regs.filter(function(r) { return r.date && r.date.startsWith(today); }).length;
-                var count = regs.length;
-                if (count > 0) { document.getElementById('reglogBadge').style.display = ''; document.getElementById('reglogBadge').textContent = count; }
-                else { document.getElementById('reglogBadge').style.display = 'none'; }
-                if (regs.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">No registrations yet.</td></tr>'; regAllRows = []; return; }
-                var sorted = regs.slice().reverse();
-                tbody.innerHTML = sorted.map(function(r, i) {
-                    var num = regs.length - i;
-                    var dateStr = r.date ? new Date(r.date).toLocaleString() : '-';
-                    var roleBadge = r.role === 'admin' ? '<span style="color:#ef4444;font-weight:600;">admin</span>'
-                        : r.role === 'mod' ? '<span style="color:#f59e0b;font-weight:600;">mod</span>'
-                        : '<span style="color:var(--text-muted);">user</span>';
-                    return '<tr><td>' + num + '</td><td class="email-cell">' + escHtml(r.email) + '</td><td class="key-cell">' + escHtml(r.key) + '</td><td>' + escHtml(r.displayName || '-') + '</td><td>' + roleBadge + '</td><td>' + dateStr + '</td><td><button class="copy-btn" onclick="copyText(\'' + escAttr(r.key) + '\')">Copy Key</button></td></tr>';
+                if (!data.success) { tbody.innerHTML = '<tr><td colspan="5" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>'; return; }
+                var notifs = data.notifications || [];
+                var unread = data.unread || 0;
+                if (unread > 0) {
+                    document.getElementById('modreportsBadge').style.display = ''; document.getElementById('modreportsBadge').textContent = unread;
+                } else { document.getElementById('modreportsBadge').style.display = 'none'; }
+                if (notifs.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="no-data">No mod reports yet.</td></tr>'; return; }
+                tbody.innerHTML = notifs.map(function(n) {
+                    var dateStr = n.date ? new Date(n.date).toLocaleString() : '-';
+                    var statusBadge = n.read ? '<span style="color:#22c55e;">Read</span>' : '<span style="color:#f59e0b;font-weight:600;">Unread</span>';
+                    var msgShort = (n.message || '').substring(0, 80) + ((n.message || '').length > 80 ? '...' : '');
+                    return '<tr style="cursor:pointer;" onclick="viewModReport(\'' + escAttr(n.id) + '\')">' +
+                        '<td>' + dateStr + '</td>' +
+                        '<td class="email-cell">' + escHtml(n.modEmail || '-') + '</td>' +
+                        '<td style="font-weight:600;">' + escHtml(n.subject || '-') + '</td>' +
+                        '<td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;">' + escHtml(msgShort) + '</td>' +
+                        '<td>' + statusBadge + '</td></tr>';
                 }).join('');
-                regAllRows = Array.from(tbody.querySelectorAll('tr'));
-                regFilterInput.dispatchEvent(new Event('input'));
-            } catch (e) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">Network error.</td></tr>'; }
+            } catch (e) { tbody.innerHTML = '<tr><td colspan="5" class="no-data">Network error.</td></tr>'; }
         }
 
-        async function doRegSearch() {
-            var email = document.getElementById('regSearchEmail').value.trim();
-            var result = document.getElementById('regSearchResult');
-            if (!email) { result.style.display = 'none'; return; }
-            result.style.display = '';
-            result.innerHTML = '<p style="color:var(--text-muted);">Searching...</p>';
+        window.viewModReport = async function(notifId) {
             try {
-                var resp = await fetch(API_BASE + '?email=' + encodeURIComponent(email), { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                // Mark as read
+                await fetch('/api/mod-actions?type=notifications&markRead=' + encodeURIComponent(notifId), { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                loadModReports();
+                // Fetch and show
+                var resp = await fetch('/api/mod-actions?type=notifications', { headers: { 'Authorization': 'Bearer ' + adminToken } });
                 var data = await resp.json();
-                if (!data.success || !data.found) { result.innerHTML = '<div class="search-result"><h3>No results</h3><p style="color:var(--text-muted);">No registration found for <strong>' + escHtml(email) + '</strong></p></div>'; return; }
-                var records = data.records || [];
-                var html = '<div class="search-result"><h3>Found ' + records.length + ' key(s) for ' + escHtml(email) + '</h3>';
-                records.forEach(function(rec) {
-                    html += '<div style="padding:8px 0;border-bottom:1px solid rgba(39,39,42,0.3);">';
-                    html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;">Key</span> <span class="key-cell" style="font-size:1.1rem;cursor:pointer;" onclick="copyText(\'' + escAttr(rec.activationKey) + '\')" title="Click to copy">' + escHtml(rec.activationKey) + '</span></div>';
-                    html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;">Name</span> <span style="color:var(--text-light);">' + escHtml(rec.displayName || '-') + '</span></div>';
-                    html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;">Registered</span> <span style="color:var(--text-light);">' + new Date(rec.registeredAt).toLocaleString() + '</span></div>';
-                    if (rec.country && rec.country !== 'unknown') html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;">Country</span> <span style="color:var(--text-light);">' + escHtml(rec.country) + '</span></div>';
-                    html += '</div>';
-                });
-                html += '</div>';
-                result.innerHTML = html;
-            } catch (e) { result.innerHTML = '<div class="search-result"><h3 style="color:#ef4444;">Error</h3><p>Network error.</p></div>'; }
-        }
-
-        // ===== Mod Logs =====
-        var modlogAllRows = [];
-        var modlogFilterInput = document.getElementById('modlogFilterInput');
-        var modlogFilterCount = document.getElementById('modlogFilterCount');
-
-        modlogFilterInput.addEventListener('input', function() {
-            var q = modlogFilterInput.value.toLowerCase();
-            var visible = 0;
-            modlogAllRows.forEach(function(row) {
-                var text = row.textContent.toLowerCase();
-                var show = !q || text.indexOf(q) !== -1;
-                row.style.display = show ? '' : 'none';
-                if (show) visible++;
-            });
-            modlogFilterCount.textContent = q ? visible + ' of ' + modlogAllRows.length + ' shown' : '';
-        });
-
-        async function loadModLogs() {
-            var tbody = document.getElementById('modlogTableBody');
-            tbody.innerHTML = '<tr><td colspan="6" class="no-data">Loading...</td></tr>';
-            try {
-                var resp = await fetch('/api/mod-actions?type=modlogs', { headers: { 'Authorization': 'Bearer ' + adminToken } });
-                var data = await resp.json();
-                if (!data.success) { tbody.innerHTML = '<tr><td colspan="6" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>'; return; }
-                var logs = data.logs || [];
-                if (logs.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="no-data">No mod actions logged yet.</td></tr>'; modlogAllRows = []; return; }
-                var actionLabels = { 'resolve-password': '\u{1F512} Resolved Password', 'search-user': '\u{1F50D} Searched User', 'send-report': '\u{1F4E8} Sent Report',
-                    'guardian-notes': '\u{1F6E1} Guardian Notes', 'guardian-review': '\u{1F6E1} Guardian Reviewed', 'guardian-dismiss': '\u{1F6E1} Guardian Dismissed', 'guardian-pdf': '\u{1F4C4} Guardian PDF' };
-                tbody.innerHTML = logs.map(function(l) {
-                    var dateStr = l.date ? new Date(l.date).toLocaleString() : '-';
-                    var actionLabel = actionLabels[l.actionType] || escHtml(l.actionType);
-                    var roleBadge = l.role === 'admin' ? '<span style="color:#ef4444;font-weight:600;">admin</span>' : '<span style="color:#f59e0b;font-weight:600;">mod</span>';
-                    return '<tr><td>' + dateStr + '</td><td class="email-cell">' + escHtml(l.modEmail || '-') + '</td><td>' + roleBadge + '</td><td>' + actionLabel + '</td><td>' + escHtml(l.targetEmail || '-') + '</td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;">' + escHtml(l.details || '-') + '</td></tr>';
-                }).join('');
-                modlogAllRows = Array.from(tbody.querySelectorAll('tr'));
-                modlogFilterInput.dispatchEvent(new Event('input'));
-            } catch (e) { tbody.innerHTML = '<tr><td colspan="6" class="no-data">Network error.</td></tr>'; }
-        }
-
-        // ===== Role Management =====
-        var roleAllRows = [];
-        var roleFilterInput = document.getElementById('roleFilterInput');
-        var roleFilterCount = document.getElementById('roleFilterCount');
-        var roleMsg = document.getElementById('roleMsg');
-
-        roleFilterInput.addEventListener('input', function() {
-            var q = roleFilterInput.value.toLowerCase();
-            var visible = 0;
-            roleAllRows.forEach(function(row) {
-                var text = row.textContent.toLowerCase();
-                var show = !q || text.indexOf(q) !== -1;
-                row.style.display = show ? '' : 'none';
-                if (show) visible++;
-            });
-            roleFilterCount.textContent = q ? visible + ' of ' + roleAllRows.length + ' shown' : '';
-        });
-
-        async function loadRoles() {
-            var tbody = document.getElementById('roleTableBody');
-            tbody.innerHTML = '<tr><td colspan="6" class="no-data">Loading...</td></tr>';
-            try {
-                var resp = await fetch(API_BASE, { headers: { 'Authorization': 'Bearer ' + adminToken } });
-                var data = await resp.json();
-                if (!data.success) { tbody.innerHTML = '<tr><td colspan="6" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>'; return; }
-                var regs = data.registrations || [];
-                if (regs.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="no-data">No users registered yet.</td></tr>'; roleAllRows = []; return; }
-                var sorted = regs.slice().reverse();
-                tbody.innerHTML = sorted.map(function(r, i) {
-                    var num = regs.length - i;
-                    var currentRole = r.role || 'user';
-                    var roleBadge = currentRole === 'admin' ? '<span style="color:#ef4444;font-weight:600;">admin</span>'
-                        : currentRole === 'mod' ? '<span style="color:#f59e0b;font-weight:600;">mod</span>'
-                        : '<span style="color:var(--text-muted);">user</span>';
-                    var isProtected = r.email.toLowerCase() === ADMIN_EMAIL;
-                    var selectHtml = isProtected
-                        ? '<span style="color:var(--text-muted);font-size:0.8rem;">Protected</span>'
-                        : '<select data-email="' + escAttr(r.email) + '" class="role-select">'
-                            + '<option value="user"' + (currentRole === 'user' ? ' selected' : '') + '>User</option>'
-                            + '<option value="mod"' + (currentRole === 'mod' ? ' selected' : '') + '>Mod</option>'
-                            + '<option value="admin"' + (currentRole === 'admin' ? ' selected' : '') + '>Admin</option>'
-                            + '</select>';
-                    var actionHtml = isProtected ? '' : '<button class="resolve-btn role-save-btn" data-email="' + escAttr(r.email) + '" style="font-size:0.8rem;">Save</button>';
-                    return '<tr><td>' + num + '</td><td class="email-cell">' + escHtml(r.email) + '</td><td>' + escHtml(r.displayName || '-') + '</td><td>' + roleBadge + '</td><td>' + selectHtml + '</td><td>' + actionHtml + '</td></tr>';
-                }).join('');
-                roleAllRows = Array.from(tbody.querySelectorAll('tr'));
-                roleFilterInput.dispatchEvent(new Event('input'));
-                tbody.querySelectorAll('.role-save-btn').forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        var email = btn.dataset.email;
-                        var select = tbody.querySelector('select[data-email="' + email + '"]');
-                        if (select) changeRole(email, select.value, btn);
-                    });
-                });
-            } catch (e) { tbody.innerHTML = '<tr><td colspan="6" class="no-data">Network error.</td></tr>'; }
-        }
-
-        async function changeRole(email, newRole, btn) {
-            btn.disabled = true; btn.textContent = 'Saving...'; roleMsg.style.display = 'none';
-            try {
-                var resp = await fetch('/api/auth', { method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email, adminSecret: ADMIN_API_SECRET, updates: { role: newRole } }) });
-                var data = await resp.json();
-                if (data.success) {
-                    roleMsg.style.display = ''; roleMsg.style.background = 'rgba(34,197,94,0.15)'; roleMsg.style.color = '#22c55e';
-                    roleMsg.textContent = '\u2713 Role for ' + email + ' changed to ' + newRole;
-                    loadRoles();
-                } else {
-                    roleMsg.style.display = ''; roleMsg.style.background = 'rgba(239,68,68,0.15)'; roleMsg.style.color = '#ef4444';
-                    roleMsg.textContent = 'Error: ' + (data.error || 'Failed.');
-                }
-            } catch (e) {
-                roleMsg.style.display = ''; roleMsg.style.background = 'rgba(239,68,68,0.15)'; roleMsg.style.color = '#ef4444';
-                roleMsg.textContent = 'Network error.';
-            }
-            btn.disabled = false; btn.textContent = 'Save';
-        }
-
-        document.getElementById('wipeAllBtn').addEventListener('click', async function() {
-            if (!confirm('\u26a0\ufe0f DANGER: This will permanently delete ALL registered accounts and password reset requests.\n\nAll users will need to re-register.\n\nAre you absolutely sure?')) return;
-            var typed = prompt('Type DELETE to confirm wiping all accounts:');
-            if (typed !== 'DELETE') { alert('Wipe cancelled.'); return; }
-            var btn = this; btn.disabled = true; btn.textContent = 'Wiping...';
-            try {
-                var resp = await fetch(API_BASE, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + adminToken } });
-                var data = await resp.json();
-                if (data.success) {
-                    localStorage.removeItem('ct_users'); localStorage.removeItem('ct_session');
-                    Object.keys(localStorage).forEach(function(k) { if (k.startsWith('ai_plan_') || k.startsWith('ai_requests_')) localStorage.removeItem(k); });
-                    roleMsg.style.display = ''; roleMsg.style.background = 'rgba(239,68,68,0.15)'; roleMsg.style.color = '#ef4444';
-                    roleMsg.textContent = '\u2713 ' + (data.message || 'All accounts wiped.');
-                    loadRoles(); loadRegistrations(); loadStats();
-                } else {
-                    roleMsg.style.display = ''; roleMsg.style.background = 'rgba(239,68,68,0.15)'; roleMsg.style.color = '#ef4444';
-                    roleMsg.textContent = 'Error: ' + (data.error || 'Failed.');
-                }
-            } catch (e) {
-                roleMsg.style.display = ''; roleMsg.style.background = 'rgba(239,68,68,0.15)'; roleMsg.style.color = '#ef4444';
-                roleMsg.textContent = 'Network error.';
-            }
-            btn.disabled = false; btn.innerHTML = '&#9888; Wipe All Accounts';
-        });
+                var notif = (data.notifications || []).find(function(n) { return n.id === notifId; });
+                if (!notif) { alert('Report not found.'); return; }
+                var overlay = document.createElement('div');
+                overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10001;display:flex;align-items:center;justify-content:center;overflow-y:auto;';
+                overlay.innerHTML = '<div style="background:rgba(20,20,30,0.98);border:1px solid var(--border-color);border-radius:16px;padding:32px;max-width:560px;width:90%;">' +
+                    '<h3 style="color:var(--primary);margin-bottom:16px;">&#128172; Mod Report</h3>' +
+                    '<table style="width:100%;border-collapse:collapse;">' +
+                    '<tr><td style="padding:6px 12px;color:var(--text-muted);width:100px;">From</td><td style="padding:6px 12px;color:var(--text-light);">' + escHtml(notif.modEmail) + ' <span style="color:#f59e0b;">(' + escHtml(notif.role || 'mod') + ')</span></td></tr>' +
+                    '<tr><td style="padding:6px 12px;color:var(--text-muted);">Date</td><td style="padding:6px 12px;color:var(--text-light);">' + new Date(notif.date).toLocaleString() + '</td></tr>' +
+                    '<tr><td style="padding:6px 12px;color:var(--text-muted);">Subject</td><td style="padding:6px 12px;color:var(--text-light);font-weight:600;">' + escHtml(notif.subject) + '</td></tr>' +
+                    '</table>' +
+                    '<div style="margin-top:16px;background:rgba(var(--bg-dark-rgb),0.5);border:1px solid var(--border-color);border-radius:8px;padding:16px;white-space:pre-wrap;color:var(--text-light);font-size:0.9rem;">' + escHtml(notif.message) + '</div>' +
+                    '<button class="btn btn-secondary" style="margin-top:16px;padding:10px 24px;" onclick="this.closest(\'div[style]\').remove()">Close</button>' +
+                    '</div>';
+                document.body.appendChild(overlay);
+                overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+            } catch (e) { alert('Failed to load report.'); }
+        };
 
         // Helpers
         function escHtml(str) { var d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
