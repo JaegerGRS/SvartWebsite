@@ -6,6 +6,10 @@ interface Env {
 // In production, this should be an environment variable
 const ACTIVATION_SECRET = "CipherBaseAI-Activation-v1-Secret";
 
+// Access control secrets
+const ADMIN_SECRET = "svart-admin-2026";
+const APP_SECRET = "svart-app-verify-2026";
+
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -65,12 +69,13 @@ export const onRequestOptions: PagesFunction<Env> = async () => {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 };
 
-// GET - List all activation numbers (admin only)
+// GET - List all activation numbers (admin only — locked down)
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
-    const auth = context.request.headers.get("Authorization");
-    if (!auth || !auth.startsWith("Bearer ")) {
-      return errorResponse("Unauthorized", 401);
+    const auth = context.request.headers.get("Authorization") || "";
+    const token = auth.replace("Bearer ", "").trim();
+    if (token !== ADMIN_SECRET) {
+      return errorResponse("Unauthorized. Admin access only.", 401);
     }
 
     if (!checkKV(context.env)) {
@@ -108,12 +113,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 };
 
-// POST - Generate new activation numbers
+// POST - Generate new activation numbers (admin only — locked down)
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
-    const auth = context.request.headers.get("Authorization");
-    if (!auth || !auth.startsWith("Bearer ")) {
-      return errorResponse("Unauthorized", 401);
+    const auth = context.request.headers.get("Authorization") || "";
+    const token = auth.replace("Bearer ", "").trim();
+    if (token !== ADMIN_SECRET) {
+      return errorResponse("Unauthorized. Admin access only.", 401);
     }
 
     if (!checkKV(context.env)) {
@@ -160,8 +166,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 };
 
 // PUT - Mark a number as claimed (called when app activates)
+// Requires APP_SECRET or ADMIN_SECRET token
 export const onRequestPut: PagesFunction<Env> = async (context) => {
   try {
+    const auth = context.request.headers.get("Authorization") || "";
+    const token = auth.replace("Bearer ", "").trim();
+    if (token !== APP_SECRET && token !== ADMIN_SECRET) {
+      return errorResponse("Unauthorized. Valid app token required.", 401);
+    }
+
     if (!checkKV(context.env)) {
       return errorResponse("Server storage not configured.", 503);
     }

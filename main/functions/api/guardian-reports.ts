@@ -4,6 +4,8 @@ interface Env {
 
 const ADMIN_SECRET = "svart-admin-2026";
 const MOD_SECRET = "svart-mod-2026";
+const APP_SECRET = "svart-app-verify-2026";
+const GUARDIAN_SECRET = "svart-guardian-2026";
 const ADMIN_EMAIL = "admin@svartsecurity.org";
 const SECURITY_EMAIL = "security@svartsecurity.org";
 const ADMIN_FULL_NAME = "Jaeger George Richard Stratton";
@@ -34,6 +36,8 @@ function isAuthorized(request: Request): { authorized: boolean; role: string } {
   const token = auth.replace("Bearer ", "");
   if (token === ADMIN_SECRET) return { authorized: true, role: "admin" };
   if (token === MOD_SECRET) return { authorized: true, role: "mod" };
+  if (token === GUARDIAN_SECRET) return { authorized: true, role: "guardian" };
+  if (token === APP_SECRET) return { authorized: true, role: "app" };
   return { authorized: false, role: "" };
 }
 
@@ -41,13 +45,19 @@ export const onRequestOptions: PagesFunction<Env> = async () => {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 };
 
-// POST — Submit a new guardian report (from Svart apps or manual submission)
-// No auth required for app submissions (uses activation key for identity)
+// POST — Submit a new guardian report (from Svart apps or NetworkGuardian)
+// Requires valid app, guardian, admin, or mod token
 // Body: { app, userId, violationType, description, details?, submitterEmail? }
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     if (!checkKV(context.env)) {
       return errorResponse("Server storage not configured.", 503);
+    }
+
+    // Require a valid token to submit reports
+    const { authorized, role } = isAuthorized(context.request);
+    if (!authorized) {
+      return errorResponse("Unauthorized. Valid app or guardian token required.", 401);
     }
 
     let body: any;
@@ -77,6 +87,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       app: app || "Unknown",
       userId,
       submitterEmail,
+      submitterRole: role, // app | guardian | admin | mod — identifies who submitted
       violationType,
       description,
       details,
@@ -166,9 +177,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       return errorResponse("Server storage not configured.", 503);
     }
 
-    const { authorized } = isAuthorized(context.request);
-    if (!authorized) {
-      return errorResponse("Unauthorized", 401);
+    const { authorized, role } = isAuthorized(context.request);
+    if (!authorized || (role !== "admin" && role !== "mod")) {
+      return errorResponse("Unauthorized. Admin or Mod access only.", 401);
     }
 
     const url = new URL(context.request.url);
@@ -217,8 +228,8 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     }
 
     const { authorized, role } = isAuthorized(context.request);
-    if (!authorized) {
-      return errorResponse("Unauthorized", 401);
+    if (!authorized || (role !== "admin" && role !== "mod")) {
+      return errorResponse("Unauthorized. Admin or Mod access only.", 401);
     }
 
     let body: any;
