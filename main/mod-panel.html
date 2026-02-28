@@ -276,16 +276,19 @@
             }
         }
 
-        // Gate: must be logged in as mod or admin
+        // Gate: must be logged in as mod or admin (server-side role verified above)
         if (!currentUser || (currentUser.role !== 'mod' && currentUser.role !== 'admin' && currentUser.email.toLowerCase() !== ADMIN_EMAIL)) {
             accessDenied.style.display = '';
             keyScreen.style.display = 'none';
             modPanel.style.display = 'none';
         } else {
-            // ALWAYS require activation key — no session caching
+            // Server confirmed role — go straight to panel
             accessDenied.style.display = 'none';
-            keyScreen.style.display = '';
-            modPanel.style.display = 'none';
+            keyScreen.style.display = 'none';
+            apiToken = (currentUser.role === 'admin' || currentUser.email.toLowerCase() === ADMIN_EMAIL)
+                ? ADMIN_API_SECRET
+                : MOD_API_SECRET;
+            showPanel();
         }
 
         // ===== Key Verification =====

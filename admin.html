@@ -291,22 +291,17 @@
             }
         }
 
-        // Gate: must be logged in as admin
+        // Gate: must be logged in as admin (server-side role verified above)
         if (!adminUser) {
             notAdminScreen.style.display = '';
             loginScreen.style.display = 'none';
             panel.style.display = 'none';
-        } else if (adminUser.email.toLowerCase() === ADMIN_EMAIL) {
-            // Primary admin bypasses key gate — always has access to view keys
+        } else {
+            // Server confirmed admin role — go straight to panel
             notAdminScreen.style.display = 'none';
             loginScreen.style.display = 'none';
             adminToken = ADMIN_API_SECRET;
             showPanel();
-        } else {
-            // Other admins require activation key on every visit
-            notAdminScreen.style.display = 'none';
-            loginScreen.style.display = '';
-            panel.style.display = 'none';
         }
 
         loginBtn.addEventListener('click', doLogin);
