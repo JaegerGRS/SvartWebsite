@@ -33,4 +33,10 @@ for (const f of ['robots.txt', 'sitemap.xml', '_headers', '_redirects']) {
   if (existsSync(f)) cpSync(f, `main/${f}`);
 }
 
+// Cloudflare Pages Functions — copy into main/ so root_dir=main can find them
+if (existsSync('functions')) {
+  cpSync('functions', 'main/functions', { recursive: true });
+  console.log('Copied functions/ → main/functions/');
+}
+
 console.log('Build complete! Output directory: main/');
