@@ -4,11 +4,14 @@
  * This is the autonomous protection layer for Svart Security.
  * 
  * CORE PRINCIPLE: No human — not even the admin — ever sees an IP address.
- * The Guardian uses SHA-256 hashed network fingerprints internally to:
- *   1. Prevent duplicate account registrations from the same network
- *   2. Block abusive networks from accessing the service
- *   3. Track and auto-flag rapid login failures (brute force protection)
- *   4. Maintain a block list of network hashes and URLs
+ * The Guardian uses SHA-256 hashed network fingerprints internally.
+ * 
+ * LEGAL SCOPE — The Guardian is ONLY permitted to track IP addresses for:
+ *   1. Registration enforcement — one account per network (duplicate prevention)
+ *   2. Illegal activity reports — when a user is reported for illegal activities,
+ *      the Guardian may include the network hash in the formal incident report
+ * 
+ * The Guardian does NOT track IPs for logins, browsing, or any other purpose.
  * 
  * All enforcement decisions are automated. Admin can only see:
  *   - Network hash identifiers (irreversible, e.g. "net_a3f8b2...")
@@ -16,12 +19,11 @@
  *   - Abuse statistics (counts, not raw data)
  * 
  * KV Keys used:
- *   guardian:nethash:{hash}         → { accounts: [email], firstSeen, lastSeen, loginAttempts, failedAttempts }
+ *   guardian:nethash:{hash}         → { accounts: [email], firstSeen }
  *   guardian:blocked:net:{hash}     → { reason, blockedAt, blockedBy }
  *   guardian:blocked:url:{urlhash}  → { url, reason, blockedAt, blockedBy }
  *   guardian:blocked:list           → [{ type: 'net'|'url', hash, reason, blockedAt }]
- *   guardian:login:fails:{hash}     → { count, firstFail, lastFail, flagged }
- *   guardian:stats                  → { totalBlocked, totalFlagged, totalNetworks }
+ *   guardian:stats                  → { totalBlocked, totalFlagged, totalRegistrations }
  */
 
 interface Env {
@@ -99,13 +101,14 @@ export const onRequestOptions: PagesFunction<Env> = async () => {
 // ============================
 // Actions:
 //   check-registration  — Can this network register? Returns { allowed, reason, networkId }
-//   check-login         — Can this network log in? Returns { allowed, reason, networkId }
 //   record-registration — Record that a registration happened from this network
-//   record-login        — Record a login attempt (success or failure)
 //   block-network       — Admin blocks a network hash
 //   unblock-network     — Admin unblocks a network hash
 //   block-url           — Admin blocks a URL
 //   unblock-url         — Admin unblocks a URL
+//   check-url           — Check if a URL is blocked
+//
+// NOTE: Login IP tracking is NOT permitted. The Guardian only tracks IPs at registration.
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     if (!checkKV(context.env)) {
@@ -170,7 +173,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       const netHash = await hashNetwork(ip);
       const now = new Date().toISOString();
 
-      let netData: any = { accounts: [], firstSeen: now, lastSeen: now, loginAttempts: 0, failedAttempts: 0 };
+      let netData: any = { accounts: [], firstSeen: now };
       const existingRaw = await context.env.USAGE_DATA.get(`guardian:nethash:${netHash}`);
       if (existingRaw) {
         try { netData = JSON.parse(existingRaw); } catch {}
@@ -180,145 +183,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       if (!netData.accounts.includes(email)) {
         netData.accounts.push(email);
       }
-      netData.lastSeen = now;
       if (!netData.firstSeen) netData.firstSeen = now;
 
       await context.env.USAGE_DATA.put(`guardian:nethash:${netHash}`, JSON.stringify(netData));
 
       // Update stats
       await updateStats(context.env, "registration");
-
-      return jsonResponse({ success: true, networkId: netHash });
-    }
-
-    // ───────────────────────────────────────────
-    // INTERNAL: check-login
-    // Called by auth.ts before processing login
-    // ───────────────────────────────────────────
-    if (action === "check-login") {
-      const ip = (body.ip || "").trim();
-      if (!ip) return jsonResponse({ allowed: true, networkId: "unknown" });
-
-      const netHash = await hashNetwork(ip);
-
-      // Check if this network is blocked
-      const blockedRaw = await context.env.USAGE_DATA.get(`guardian:blocked:net:${netHash}`);
-      if (blockedRaw) {
-        return jsonResponse({
-          allowed: false,
-          reason: "This network has been blocked by NetworkGuardian.",
-          networkId: netHash,
-        });
-      }
-
-      // Check for rapid login failures (brute force protection)
-      const failsRaw = await context.env.USAGE_DATA.get(`guardian:login:fails:${netHash}`);
-      if (failsRaw) {
-        const fails = JSON.parse(failsRaw);
-        // If 10+ failures in the last hour, temporarily block
-        if (fails.count >= 10) {
-          const lastFail = new Date(fails.lastFail).getTime();
-          const oneHourAgo = Date.now() - (60 * 60 * 1000);
-          if (lastFail > oneHourAgo) {
-            return jsonResponse({
-              allowed: false,
-              reason: "Too many failed login attempts. Please try again later. NetworkGuardian has temporarily restricted this network.",
-              networkId: netHash,
-              tempBlocked: true,
-            });
-          } else {
-            // Reset — the hour has passed
-            await context.env.USAGE_DATA.delete(`guardian:login:fails:${netHash}`);
-          }
-        }
-      }
-
-      return jsonResponse({ allowed: true, networkId: netHash });
-    }
-
-    // ───────────────────────────────────────────
-    // INTERNAL: record-login
-    // Called by auth.ts after login attempt (success or failure)
-    // ───────────────────────────────────────────
-    if (action === "record-login") {
-      const ip = (body.ip || "").trim();
-      const email = (body.email || "").trim().toLowerCase();
-      const success = body.success === true;
-      if (!ip) return jsonResponse({ success: true });
-
-      const netHash = await hashNetwork(ip);
-      const now = new Date().toISOString();
-
-      // Update network tracking
-      let netData: any = { accounts: [], firstSeen: now, lastSeen: now, loginAttempts: 0, failedAttempts: 0 };
-      const existingRaw = await context.env.USAGE_DATA.get(`guardian:nethash:${netHash}`);
-      if (existingRaw) {
-        try { netData = JSON.parse(existingRaw); } catch {}
-      }
-      netData.lastSeen = now;
-      netData.loginAttempts = (netData.loginAttempts || 0) + 1;
-
-      if (!success) {
-        netData.failedAttempts = (netData.failedAttempts || 0) + 1;
-
-        // Track rapid failures separately with TTL
-        let fails: any = { count: 0, firstFail: now, lastFail: now };
-        const failsRaw = await context.env.USAGE_DATA.get(`guardian:login:fails:${netHash}`);
-        if (failsRaw) {
-          try { fails = JSON.parse(failsRaw); } catch {}
-        }
-        fails.count = (fails.count || 0) + 1;
-        fails.lastFail = now;
-        if (!fails.firstFail) fails.firstFail = now;
-
-        // Auto-flag if 5+ failures
-        if (fails.count >= 5) {
-          fails.flagged = true;
-        }
-
-        // Store with 2-hour expiration (auto-cleanup)
-        await context.env.USAGE_DATA.put(
-          `guardian:login:fails:${netHash}`,
-          JSON.stringify(fails),
-          { expirationTtl: 7200 }
-        );
-
-        // If 10+ failures, auto-submit a guardian report
-        if (fails.count === 10) {
-          const reportId = `guardian:${Date.now()}-brute-${Math.random().toString(36).slice(2, 6)}`;
-          const autoReport = {
-            id: reportId,
-            app: "NetworkGuardian",
-            userId: netHash,
-            submitterEmail: "guardian@system",
-            submitterRole: "guardian",
-            violationType: "Security",
-            description: `Automated: Brute force login detected. Network ${netHash} has made ${fails.count} failed login attempts. The network has been temporarily restricted for 1 hour.`,
-            details: { networkId: netHash, failedAttempts: fails.count, targetEmail: email || "unknown" },
-            date: now,
-            status: "pending",
-            reviewedBy: null,
-            reviewedAt: null,
-            notes: "",
-            escalatedAt: null,
-          };
-          await context.env.USAGE_DATA.put(reportId, JSON.stringify(autoReport), {
-            expirationTtl: 60 * 60 * 24 * 365,
-          });
-
-          // Add to guardian log
-          let log: string[] = [];
-          try {
-            const existing = await context.env.USAGE_DATA.get("guardian:log");
-            if (existing) log = JSON.parse(existing);
-          } catch {}
-          log.push(reportId);
-          if (log.length > 2000) log = log.slice(-2000);
-          await context.env.USAGE_DATA.put("guardian:log", JSON.stringify(log));
-        }
-      }
-
-      await context.env.USAGE_DATA.put(`guardian:nethash:${netHash}`, JSON.stringify(netData));
 
       return jsonResponse({ success: true, networkId: netHash });
     }
@@ -471,7 +341,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     // ─── Stats ───
     if (view === "stats") {
       const statsRaw = await context.env.USAGE_DATA.get("guardian:stats");
-      let stats: any = { totalBlocked: 0, totalFlagged: 0, totalRegistrations: 0, totalLoginChecks: 0 };
+      let stats: any = { totalBlocked: 0, totalFlagged: 0, totalRegistrations: 0 };
       if (statsRaw) {
         try { stats = JSON.parse(statsRaw); } catch {}
       }
@@ -525,9 +395,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         networkId: netId,
         accounts: netData.accounts || [],
         firstSeen: netData.firstSeen,
-        lastSeen: netData.lastSeen,
-        loginAttempts: netData.loginAttempts || 0,
-        failedAttempts: netData.failedAttempts || 0,
         blocked: isBlocked,
         blockInfo,
       });
@@ -577,15 +444,13 @@ async function removeFromBlockList(env: Env, type: string, hash: string): Promis
 // Helper: Update guardian stats
 // ============================
 async function updateStats(env: Env, eventType: string): Promise<void> {
-  let stats: any = { totalBlocked: 0, totalFlagged: 0, totalRegistrations: 0, totalLoginChecks: 0, flaggedNetworks: [] };
+  let stats: any = { totalBlocked: 0, totalFlagged: 0, totalRegistrations: 0, flaggedNetworks: [] };
   const raw = await env.USAGE_DATA.get("guardian:stats");
   if (raw) {
     try { stats = JSON.parse(raw); } catch {}
   }
   if (eventType === "registration") {
     stats.totalRegistrations = (stats.totalRegistrations || 0) + 1;
-  } else if (eventType === "login") {
-    stats.totalLoginChecks = (stats.totalLoginChecks || 0) + 1;
   } else if (eventType === "block") {
     stats.totalBlocked = (stats.totalBlocked || 0) + 1;
   } else if (eventType === "flag") {

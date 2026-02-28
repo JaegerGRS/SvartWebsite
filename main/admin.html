@@ -143,7 +143,6 @@
             <div class="stats-row" style="margin-bottom:24px;">
                 <div class="stat-card"><div class="stat-num" id="enfActiveBlocks">-</div><div class="stat-label">Active Blocks</div></div>
                 <div class="stat-card"><div class="stat-num" id="enfTotalRegs">-</div><div class="stat-label">Registrations Checked</div></div>
-                <div class="stat-card"><div class="stat-num" id="enfTotalLogins">-</div><div class="stat-label">Logins Checked</div></div>
                 <div class="stat-card"><div class="stat-num" id="enfTotalFlagged">-</div><div class="stat-label">Flagged</div></div>
             </div>
 
@@ -687,7 +686,6 @@
                 if (data.success && data.stats) {
                     document.getElementById('enfActiveBlocks').textContent = data.stats.activeBlocks || 0;
                     document.getElementById('enfTotalRegs').textContent = data.stats.totalRegistrations || 0;
-                    document.getElementById('enfTotalLogins').textContent = data.stats.totalLoginChecks || 0;
                     document.getElementById('enfTotalFlagged').textContent = data.stats.totalFlagged || 0;
                 }
             } catch (e) {}
