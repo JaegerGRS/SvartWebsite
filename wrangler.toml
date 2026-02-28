@@ -1,4 +1,4 @@
-name = "ciphertools-website"
+name = "svart-suite-website"
 compatibility_date = "2026-02-01"
 
 # Pages-specific configuration
@@ -7,9 +7,12 @@ pages_build_output_dir = "main"
 # R2 bucket binding for hosting downloadable build artifacts
 [[r2_buckets]]
 binding = "BUILD_STORAGE"
-bucket_name = "ciphertools-builds"
+bucket_name = "svart-suite-builds"
 
-# KV namespace binding for tracking usage/requests
+# KV namespace binding for tracking registrations, password resets, and usage
+# NOTE: For Cloudflare Pages, KV bindings must ALSO be configured in the
+# Cloudflare Dashboard: Pages project → Settings → Functions → KV namespace bindings
+# Set binding name = "USAGE_DATA" and select your KV namespace.
 [[kv_namespaces]]
 binding = "USAGE_DATA"
 id = "REPLACE_WITH_KV_NAMESPACE_ID"
@@ -22,7 +25,7 @@ id = "REPLACE_WITH_KV_NAMESPACE_ID"
 
 [[env.production.r2_buckets]]
 binding = "BUILD_STORAGE"
-bucket_name = "ciphertools-builds"
+bucket_name = "svart-suite-builds"
 
 [[env.production.kv_namespaces]]
 binding = "USAGE_DATA"

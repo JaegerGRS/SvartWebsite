@@ -278,7 +278,7 @@
         const generatedKeyEl = document.getElementById('generatedKey');
         const copyKeyBtn = document.getElementById('copyKey');
 
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
@@ -310,53 +310,51 @@
             btn.disabled = true;
             btn.textContent = 'Creating account...';
 
-            setTimeout(function() {
-                // Check for existing user by email
-                const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
-                const emailExists = Object.values(users).some(u => u.email === email);
-                if (emailExists) {
-                    showMsg('An account with this email already exists. <a href="login.html">Log in with your Svart ID</a>', 'error');
-                    btn.disabled = false;
-                    btn.textContent = 'Create Account';
-                    return;
-                }
+            // Check for existing user by email (local)
+            const users = JSON.parse(localStorage.getItem('ct_users') || '{}');
+            const emailExists = Object.values(users).some(u => u.email === email);
+            if (emailExists) {
+                showMsg('An account with this email already exists. <a href="login.html">Log in instead</a>', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Create Account';
+                return;
+            }
 
-                                // Generate activation key in format XXXX-XXXX-XXXX-XXXX
-                                function generateKey() {
-                                    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                                    let key = '';
-                                    for (let i = 0; i < 4; i++) {
-                                        if (i > 0) key += '-';
-                                        for (let j = 0; j < 4; j++) {
-                                            key += chars.charAt(Math.floor(Math.random() * chars.length));
-                                        }
+                            // Generate activation key in format XXXX-XXXX-XXXX-XXXX
+                            function generateKey() {
+                                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                                let key = '';
+                                for (let i = 0; i < 4; i++) {
+                                    if (i > 0) key += '-';
+                                    for (let j = 0; j < 4; j++) {
+                                        key += chars.charAt(Math.floor(Math.random() * chars.length));
                                     }
-                                    return key;
                                 }
-                                const activationKey = generateKey();
+                                return key;
+                            }
+                            const activationKey = generateKey();
 
-                // Save user
-                // Store user by activation key (no names, no personal data)
-                const svartId = activationKey;
-                users[svartId] = {
-                    username: document.getElementById('displayName').value.trim(),
-                    password: hashPassword(password),
-                    email: email,
-                    activationKey: activationKey,
-                    createdAt: new Date().toISOString()
-                };
+            // Save user
+            // Store user by activation key (this IS the secret key)
+            const svartId = activationKey;
+            users[svartId] = {
+                username: document.getElementById('displayName').value.trim(),
+                password: hashPassword(password),
+                email: email,
+                activationKey: activationKey,
+                createdAt: new Date().toISOString()
+            };
 
-                // Admin account auto-setup
-                if (email.toLowerCase() === 'admin@svartsecurity.org') {
-                    users[svartId].isAdmin = true;
-                    users[svartId].role = 'admin';
-                    localStorage.setItem('ai_plan_' + svartId, 'unlimited');
-                }
+            // Admin account auto-setup
+            if (email.toLowerCase() === 'admin@svartsecurity.org') {
+                users[svartId].isAdmin = true;
+                users[svartId].role = 'admin';
+                localStorage.setItem('ai_plan_' + svartId, 'unlimited');
+            }
 
-                localStorage.setItem('ct_users', JSON.stringify(users));
-
-                // Log registration to server (for admin key recovery)
-                fetch('/api/registrations', {
+            // Register on server (enforces unique email server-side)
+            try {
+                const resp = await fetch('/api/registrations', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -364,24 +362,42 @@
                         activationKey: activationKey,
                         displayName: document.getElementById('displayName').value.trim()
                     })
-                }).catch(function() { /* silent - localStorage is primary */ });
+                });
+                const data = await resp.json();
+                if (!data.success) {
+                    if (resp.status === 409) {
+                        showMsg('This email is already registered. Each email can only be used once. <a href="login.html">Log in instead</a> or <a href="forgot-password.html">recover your account</a>.', 'error');
+                    } else {
+                        showMsg(data.error || 'Registration failed. Please try again.', 'error');
+                    }
+                    btn.disabled = false;
+                    btn.textContent = 'Create Account';
+                    return;
+                }
+            } catch (e) {
+                // If server is unreachable, allow local-only registration but warn
+                console.warn('Server registration failed, proceeding locally:', e);
+                showMsg('Account created locally. Server logging is temporarily unavailable — your account still works.', 'warning');
+            }
 
-                // Auto login via Svart ID
-                localStorage.setItem('ct_session', JSON.stringify({
-                    svartId: svartId,
-                    email: email,
-                    loggedIn: true,
-                    ts: Date.now()
-                }));
+            // Save to localStorage after server confirms
+            localStorage.setItem('ct_users', JSON.stringify(users));
 
-                // Show key
-                form.style.display = 'none';
-                msgBox.style.display = 'none';
-                generatedKeyEl.textContent = activationKey;
-                document.getElementById('userSvartId').textContent = svartId;
-                document.getElementById('userDisplayName').textContent = document.getElementById('displayName').value.trim();
-                resultBox.style.display = 'block';
-            }, 1000);
+            // Auto login via activation key (the key IS the secret)
+            localStorage.setItem('ct_session', JSON.stringify({
+                svartId: svartId,
+                email: email,
+                loggedIn: true,
+                ts: Date.now()
+            }));
+
+            // Show key
+            form.style.display = 'none';
+            msgBox.style.display = 'none';
+            generatedKeyEl.textContent = activationKey;
+            document.getElementById('userSvartId').textContent = svartId;
+            document.getElementById('userDisplayName').textContent = document.getElementById('displayName').value.trim();
+            resultBox.style.display = 'block';
         });
 
         copyKeyBtn.addEventListener('click', function() {

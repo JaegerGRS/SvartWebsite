@@ -75,6 +75,7 @@
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                 <button class="btn btn-primary" id="sendTodayBtn" style="padding:8px 16px;font-size:0.85rem;background:var(--accent,#22c55e);border-color:var(--accent,#22c55e);">&#128231; Email Today's Signups</button>
                 <button class="btn btn-primary" id="refreshBtn" style="padding:8px 16px;font-size:0.85rem;">Refresh</button>
+                <button class="admin-logout" id="wipeAllBtn" style="border-color:#ef4444;color:#ef4444;">&#9888; Wipe All Accounts</button>
                 <button class="admin-logout" id="adminLogoutBtn">Logout</button>
             </div>
         </div>
@@ -217,6 +218,48 @@
             }
             sendTodayBtn.disabled = false;
             sendTodayBtn.innerHTML = '&#128231; Email Today\'s Signups';
+        });
+
+        // Wipe All Accounts
+        const wipeAllBtn = document.getElementById('wipeAllBtn');
+        wipeAllBtn.addEventListener('click', async function() {
+            if (!confirm('⚠️ DANGER: This will permanently delete ALL registered accounts and password reset requests.\n\nAll users will need to re-register.\n\nAre you absolutely sure?')) return;
+            if (!confirm('Final confirmation: Type DELETE in the next prompt to wipe all accounts.')) return;
+            const typed = prompt('Type DELETE to confirm wiping all accounts:');
+            if (typed !== 'DELETE') {
+                alert('Wipe cancelled.');
+                return;
+            }
+            wipeAllBtn.disabled = true;
+            wipeAllBtn.textContent = 'Wiping...';
+            sendTodayMsg.style.display = 'none';
+            try {
+                const resp = await fetch(API_BASE, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + adminToken }
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    sendTodayMsg.style.display = '';
+                    sendTodayMsg.style.background = 'rgba(239,68,68,0.15)';
+                    sendTodayMsg.style.color = '#ef4444';
+                    sendTodayMsg.textContent = '✓ ' + (data.message || 'All accounts wiped.');
+                    loadRegistrations();
+                    loadResetRequests();
+                } else {
+                    sendTodayMsg.style.display = '';
+                    sendTodayMsg.style.background = 'rgba(239,68,68,0.15)';
+                    sendTodayMsg.style.color = '#ef4444';
+                    sendTodayMsg.textContent = 'Error: ' + (data.error || 'Failed to wipe accounts.');
+                }
+            } catch (e) {
+                sendTodayMsg.style.display = '';
+                sendTodayMsg.style.background = 'rgba(239,68,68,0.15)';
+                sendTodayMsg.style.color = '#ef4444';
+                sendTodayMsg.textContent = 'Network error wiping accounts.';
+            }
+            wipeAllBtn.disabled = false;
+            wipeAllBtn.innerHTML = '&#9888; Wipe All Accounts';
         });
 
         function doLogin() {

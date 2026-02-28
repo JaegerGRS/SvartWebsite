@@ -61,14 +61,14 @@
               <span>&#128273;</span>
               <h3>Your Activation Key</h3>
             </div>
-            <p>Use this key in all Svart Suite desktop apps when prompted for activation.</p>
+            <p>Use this key in all Svart Suite desktop apps when prompted for activation. This is your <strong>secret key</strong> &mdash; keep it safe, you need it to reset your password.</p>
             <div class="activation-key-display" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
               <code id="userKey" style="letter-spacing:2px;">&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;</code>
               <button id="showKey" class="btn btn-secondary btn-sm" type="button">Show</button>
               <button id="copyKey" class="btn btn-primary btn-sm" type="button">Copy</button>
             </div>
             <div class="key-info">
-              <span>&#128274; This key works with all 6 Svart Suite apps &mdash; <a href="#tools" style="color:var(--primary);" class="dash-tab-link" data-target="tools">view your tools</a></span>
+              <span>&#128274; Your secret key &mdash; works with all 6 Svart Suite apps and is needed to reset your password &mdash; <a href="#tools" style="color:var(--primary);" class="dash-tab-link" data-target="tools">view your tools</a></span>
             </div>
           </div>
 
@@ -265,14 +265,14 @@
         </div>
 
         <div class="settings-card">
-          <h3><span class="card-icon">&#128273;</span> Activation Key</h3>
-          <p>Your activation key is used across all Svart Suite desktop apps. Keep it safe &mdash; it is your unique identifier.</p>
+          <h3><span class="card-icon">&#128273;</span> Activation Key (Your Secret Key)</h3>
+          <p>Your activation key is your <strong>secret key</strong> for all Svart Suite apps and password recovery. Keep it private and safe &mdash; treat it like a master password. If you lose access, this key is the only way to reset your password instantly.</p>
           <div class="activation-key-display" style="max-width:480px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <code id="settingsKey" style="letter-spacing:2px;">&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;</code>
             <button id="showKeyBtn" class="btn btn-secondary btn-sm" type="button">Show</button>
             <button id="copyKeyBtn" class="btn btn-primary btn-sm" type="button">Copy</button>
           </div>
-          <p style="color:var(--text-muted);font-size:0.8rem;margin-top:12px;">&#128274; This key works with all 6 Svart Suite apps. The server can only see this key and your email &mdash; never your data.</p>
+          <p style="color:var(--text-muted);font-size:0.8rem;margin-top:12px;">&#128274; This is your <strong>secret key</strong> &mdash; it unlocks all 6 Svart Suite apps and is required to reset your password. Never share it. The server only stores your email and this key.</p>
         </div>
 
         <div class="settings-card">
