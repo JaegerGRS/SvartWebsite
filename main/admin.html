@@ -58,6 +58,9 @@
         .search-bar input:focus { border-color: var(--primary); outline: none; }
         .search-result { background: rgba(20,20,30,0.8); border: 1px solid var(--primary); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
         .search-result h3 { color: var(--primary); margin-bottom: 12px; }
+        .filter-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .filter-bar input { padding: 10px 14px; background: rgba(var(--bg-dark-rgb),0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 0.9rem; flex: 1; min-width: 200px; }
+        .filter-bar input:focus { border-color: var(--primary); outline: none; }
         @media (max-width: 768px) {
             .reg-table { font-size: 0.8rem; }
             .reg-table th, .reg-table td { padding: 8px 10px; }
@@ -136,6 +139,7 @@
         <div class="tab-bar">
             <button class="tab-btn active" data-tab="guardian">&#128737; Guardian Reports <span class="badge" id="guardianBadge" style="display:none;">0</span></button>
             <button class="tab-btn" data-tab="resets">&#128274; Password Resets <span class="badge" id="resetBadge" style="display:none;">0</span></button>
+            <button class="tab-btn" data-tab="reglog">&#128203; Registration Log <span class="badge" id="reglogBadge" style="display:none;">0</span></button>
         </div>
 
         <!-- Tab: Guardian Reports -->
@@ -157,6 +161,33 @@
                 <table class="reg-table">
                     <thead><tr><th>#</th><th>Email</th><th>Registered?</th><th>Date</th><th>Status</th><th></th></tr></thead>
                     <tbody id="resetTableBody"><tr><td colspan="6" class="no-data">Loading...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab: Registration Log -->
+        <div class="tab-panel" id="panel-reglog">
+            <div class="stats-row" style="margin-bottom:16px;">
+                <div class="stat-card"><div class="stat-num" id="regTotalUsers">-</div><div class="stat-label">Total Registrations</div></div>
+                <div class="stat-card"><div class="stat-num" id="regTodayUsers">-</div><div class="stat-label">Today</div></div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+                <button class="btn btn-primary" id="regSendTodayBtn" style="background:var(--accent,#22c55e);border-color:var(--accent,#22c55e);">&#128231; Email Today's Signups</button>
+            </div>
+            <div id="regSendTodayMsg" style="display:none;margin-bottom:12px;padding:12px 16px;border-radius:8px;font-size:0.9rem;"></div>
+            <div class="search-bar" style="margin-bottom:8px;">
+                <input type="email" id="regSearchEmail" placeholder="Search registration by email...">
+                <button class="btn btn-primary" id="regSearchBtn">Search</button>
+            </div>
+            <div id="regSearchResult" style="display:none;margin-bottom:12px;"></div>
+            <div class="filter-bar" style="margin-bottom:12px;">
+                <input type="text" id="regFilterInput" placeholder="Filter table by email, name, key, or role...">
+                <span style="color:var(--text-muted);font-size:0.85rem;" id="regFilterCount"></span>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="reg-table">
+                    <thead><tr><th>#</th><th>Email</th><th>Activation Key</th><th>Display Name</th><th>Role</th><th>Date</th><th></th></tr></thead>
+                    <tbody id="regTableBody"><tr><td colspan="7" class="no-data">Loading...</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -255,7 +286,7 @@
         loginBtn.addEventListener('click', doLogin);
         secretInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
         logoutBtn.addEventListener('click', function() { adminToken = ''; panel.style.display = 'none'; loginScreen.style.display = ''; secretInput.value = ''; });
-        refreshBtn.addEventListener('click', function() { loadResetRequests(); loadGuardianReports(); loadStats(); });
+        refreshBtn.addEventListener('click', function() { loadResetRequests(); loadGuardianReports(); loadRegistrations(); loadStats(); });
         document.getElementById('searchBtn').addEventListener('click', doSearch);
         document.getElementById('searchEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
 
@@ -279,6 +310,7 @@
             loadStats();
             loadGuardianReports();
             loadResetRequests();
+            loadRegistrations();
         }
 
         // ===== Tabs =====
@@ -541,6 +573,103 @@
             } catch (e) { guardianMsg.style.display = ''; guardianMsg.style.background = 'rgba(239,68,68,0.15)'; guardianMsg.style.color = '#ef4444'; guardianMsg.textContent = 'Failed to escalate.'; }
             btn.disabled = false; btn.innerHTML = '&#9888; Escalate to Authorities';
         });
+
+        // ===== Registration Log =====
+        var regAllRows = [];
+        var regFilterInput = document.getElementById('regFilterInput');
+        var regFilterCount = document.getElementById('regFilterCount');
+
+        regFilterInput.addEventListener('input', function() {
+            var q = regFilterInput.value.toLowerCase();
+            var visible = 0;
+            regAllRows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                var show = !q || text.indexOf(q) !== -1;
+                row.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            regFilterCount.textContent = q ? visible + ' of ' + regAllRows.length + ' shown' : '';
+        });
+
+        document.getElementById('regSearchBtn').addEventListener('click', doRegSearch);
+        document.getElementById('regSearchEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') doRegSearch(); });
+
+        // Send Today (admin only)
+        var regSendTodayBtn = document.getElementById('regSendTodayBtn');
+        var regSendTodayMsg = document.getElementById('regSendTodayMsg');
+        regSendTodayBtn.addEventListener('click', async function() {
+            regSendTodayBtn.disabled = true; regSendTodayBtn.textContent = 'Sending...'; regSendTodayMsg.style.display = 'none';
+            try {
+                var resp = await fetch(API_BASE + '?sendToday=true', { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                var data = await resp.json();
+                regSendTodayMsg.style.display = '';
+                if (data.success) {
+                    regSendTodayMsg.style.background = 'rgba(34,197,94,0.15)'; regSendTodayMsg.style.color = '#22c55e';
+                    regSendTodayMsg.textContent = data.message || ('Sent ' + (data.count || 0) + ' registration(s) to admin.');
+                } else {
+                    regSendTodayMsg.style.background = 'rgba(239,68,68,0.15)'; regSendTodayMsg.style.color = '#ef4444';
+                    regSendTodayMsg.textContent = data.error || 'Failed to send.';
+                }
+            } catch (e) {
+                regSendTodayMsg.style.display = ''; regSendTodayMsg.style.background = 'rgba(239,68,68,0.15)'; regSendTodayMsg.style.color = '#ef4444';
+                regSendTodayMsg.textContent = 'Network error.';
+            }
+            regSendTodayBtn.disabled = false; regSendTodayBtn.innerHTML = '&#128231; Email Today\'s Signups';
+        });
+
+        async function loadRegistrations() {
+            var tbody = document.getElementById('regTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" class="no-data">Loading...</td></tr>';
+            try {
+                var resp = await fetch(API_BASE, { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                var data = await resp.json();
+                if (!data.success) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>'; return; }
+                var regs = data.registrations || [];
+                document.getElementById('regTotalUsers').textContent = data.total || 0;
+                var today = new Date().toISOString().slice(0, 10);
+                document.getElementById('regTodayUsers').textContent = regs.filter(function(r) { return r.date && r.date.startsWith(today); }).length;
+                var count = regs.length;
+                if (count > 0) { document.getElementById('reglogBadge').style.display = ''; document.getElementById('reglogBadge').textContent = count; }
+                else { document.getElementById('reglogBadge').style.display = 'none'; }
+                if (regs.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">No registrations yet.</td></tr>'; regAllRows = []; return; }
+                var sorted = regs.slice().reverse();
+                tbody.innerHTML = sorted.map(function(r, i) {
+                    var num = regs.length - i;
+                    var dateStr = r.date ? new Date(r.date).toLocaleString() : '-';
+                    var roleBadge = r.role === 'admin' ? '<span style="color:#ef4444;font-weight:600;">admin</span>'
+                        : r.role === 'mod' ? '<span style="color:#f59e0b;font-weight:600;">mod</span>'
+                        : '<span style="color:var(--text-muted);">user</span>';
+                    return '<tr><td>' + num + '</td><td class="email-cell">' + escHtml(r.email) + '</td><td class="key-cell">' + escHtml(r.key) + '</td><td>' + escHtml(r.displayName || '-') + '</td><td>' + roleBadge + '</td><td>' + dateStr + '</td><td><button class="copy-btn" onclick="copyText(\'' + escAttr(r.key) + '\')">Copy Key</button></td></tr>';
+                }).join('');
+                regAllRows = Array.from(tbody.querySelectorAll('tr'));
+                regFilterInput.dispatchEvent(new Event('input'));
+            } catch (e) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">Network error.</td></tr>'; }
+        }
+
+        async function doRegSearch() {
+            var email = document.getElementById('regSearchEmail').value.trim();
+            var result = document.getElementById('regSearchResult');
+            if (!email) { result.style.display = 'none'; return; }
+            result.style.display = '';
+            result.innerHTML = '<p style="color:var(--text-muted);">Searching...</p>';
+            try {
+                var resp = await fetch(API_BASE + '?email=' + encodeURIComponent(email), { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                var data = await resp.json();
+                if (!data.success || !data.found) { result.innerHTML = '<div class="search-result"><h3>No results</h3><p style="color:var(--text-muted);">No registration found for <strong>' + escHtml(email) + '</strong></p></div>'; return; }
+                var records = data.records || [];
+                var html = '<div class="search-result"><h3>Found ' + records.length + ' key(s) for ' + escHtml(email) + '</h3>';
+                records.forEach(function(rec) {
+                    html += '<div style="padding:8px 0;border-bottom:1px solid rgba(39,39,42,0.3);">';
+                    html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;">Key</span> <span class="key-cell" style="font-size:1.1rem;cursor:pointer;" onclick="copyText(\'' + escAttr(rec.activationKey) + '\')" title="Click to copy">' + escHtml(rec.activationKey) + '</span></div>';
+                    html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;">Name</span> <span style="color:var(--text-light);">' + escHtml(rec.displayName || '-') + '</span></div>';
+                    html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;">Registered</span> <span style="color:var(--text-light);">' + new Date(rec.registeredAt).toLocaleString() + '</span></div>';
+                    if (rec.country && rec.country !== 'unknown') html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;">Country</span> <span style="color:var(--text-light);">' + escHtml(rec.country) + '</span></div>';
+                    html += '</div>';
+                });
+                html += '</div>';
+                result.innerHTML = html;
+            } catch (e) { result.innerHTML = '<div class="search-result"><h3 style="color:#ef4444;">Error</h3><p>Network error.</p></div>'; }
+        }
 
         // Helpers
         function escHtml(str) { var d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
