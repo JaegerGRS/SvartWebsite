@@ -157,7 +157,7 @@
     </div>
 
     <script>
-    (function() {
+    (async function() {
         let adminToken = '';
         const API_BASE = '/api/registrations';
         const ADMIN_EMAIL = 'admin@svartsecurity.org';
@@ -196,6 +196,27 @@
         }
 
         var adminUser = getAdminUser();
+
+        // Server-side validation: confirm account exists on server with correct role
+        if (adminUser) {
+            try {
+                var checkResp = await fetch('/api/auth?email=' + encodeURIComponent(adminUser.email) + '&key=' + encodeURIComponent(adminUser.activationKey));
+                var checkData = await checkResp.json();
+                if (!checkData.exists) {
+                    // Account doesn't exist on server — purge local data
+                    localStorage.removeItem('ct_users');
+                    localStorage.removeItem('ct_session');
+                    localStorage.removeItem('ct_persistent_session');
+                    adminUser = null;
+                } else if (checkData.account && checkData.account.role !== 'admin') {
+                    // Not an admin on server
+                    adminUser = null;
+                }
+            } catch (e) {
+                // Server unreachable — block access
+                adminUser = null;
+            }
+        }
 
         // Gate: must be logged in as admin
         if (!adminUser) {

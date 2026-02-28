@@ -386,9 +386,11 @@
                     return;
                 }
             } catch (e) {
-                // If server is unreachable, allow local-only registration but warn
-                console.warn('Server registration failed, proceeding locally:', e);
-                showMsg('Account created locally. Server logging is temporarily unavailable — your account still works.', 'warning');
+                // Server must be reachable — no local-only accounts allowed
+                showMsg('Unable to reach the server. Please check your connection and try again.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Create Account';
+                return;
             }
 
             // Save to localStorage after server confirms

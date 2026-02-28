@@ -184,7 +184,7 @@
     </div>
 
     <script>
-    (function() {
+    (async function() {
         const MOD_API_SECRET = 'svart-mod-2026';
         const ADMIN_API_SECRET = 'svart-admin-2026';
         const ADMIN_EMAIL = 'admin@svartsecurity.org';
@@ -220,6 +220,31 @@
         }
 
         currentUser = getCurrentUser();
+
+        // Server-side validation: confirm account exists on server with mod/admin role
+        if (currentUser) {
+            try {
+                var checkResp = await fetch('/api/auth?email=' + encodeURIComponent(currentUser.email) + '&key=' + encodeURIComponent(currentUser.activationKey));
+                var checkData = await checkResp.json();
+                if (!checkData.exists) {
+                    // Account doesn't exist on server — purge local data
+                    localStorage.removeItem('ct_users');
+                    localStorage.removeItem('ct_session');
+                    localStorage.removeItem('ct_persistent_session');
+                    currentUser = null;
+                } else if (checkData.account) {
+                    // Sync role from server
+                    currentUser.role = checkData.account.role || 'user';
+                    if (currentUser.role !== 'mod' && currentUser.role !== 'admin' && currentUser.email.toLowerCase() !== ADMIN_EMAIL) {
+                        // Not a mod or admin on server
+                        currentUser = null;
+                    }
+                }
+            } catch (e) {
+                // Server unreachable — block access
+                currentUser = null;
+            }
+        }
 
         // Gate: must be logged in as mod or admin
         if (!currentUser || (currentUser.role !== 'mod' && currentUser.role !== 'admin' && currentUser.email.toLowerCase() !== ADMIN_EMAIL)) {

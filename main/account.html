@@ -796,30 +796,48 @@
     var svartId = session.svartId || '';
 
     // ===== Server-side session validation =====
-    // Check if the account still exists on the server (blocks wiped accounts)
+    // Check if the account still exists on the server (blocks wiped/non-existent accounts)
     try {
       var email = (user.email || session.email || '').toLowerCase();
+      var userKey = user.activationKey || svartId || '';
       if (email) {
-        var checkResp = await fetch('/api/auth?email=' + encodeURIComponent(email));
+        var checkResp = await fetch('/api/auth?email=' + encodeURIComponent(email) + (userKey ? '&key=' + encodeURIComponent(userKey) : ''));
         if (checkResp.ok) {
           var checkData = await checkResp.json();
           if (checkData.success && !checkData.exists) {
-            // Account no longer exists on server — force logout
+            // Account no longer exists on server — force logout and purge ALL local accounts
             localStorage.removeItem('ct_session');
             localStorage.removeItem('ct_persistent_session');
-            // Clean up local user data
-            delete users[svartId];
-            localStorage.setItem('ct_users', JSON.stringify(users));
+            // Purge all local user data
+            localStorage.removeItem('ct_users');
             Object.keys(localStorage).forEach(function(k) {
-              if (k.startsWith('ai_plan_') || k.startsWith('ai_requests_')) localStorage.removeItem(k);
+              if (k.startsWith('ai_plan_') || k.startsWith('ai_requests_') || k.startsWith('ai_usage_') || k.startsWith('svart_prefs_')) localStorage.removeItem(k);
             });
             window.location.href = 'login.html';
             return;
           }
+          // If server returned full account data (key matched), sync it to local
+          if (checkData.account) {
+            user.role = checkData.account.role || user.role;
+            user.displayName = checkData.account.displayName || user.displayName;
+            user.isAdmin = checkData.account.role === 'admin';
+            users[svartId] = user;
+            localStorage.setItem('ct_users', JSON.stringify(users));
+          }
         }
+      } else {
+        // No email on session — invalid, force re-login
+        localStorage.removeItem('ct_session');
+        localStorage.removeItem('ct_persistent_session');
+        window.location.href = 'login.html';
+        return;
       }
     } catch (e) {
-      // Server unreachable — allow local session (offline mode)
+      // Server unreachable — block access, accounts must validate against server
+      localStorage.removeItem('ct_session');
+      localStorage.removeItem('ct_persistent_session');
+      window.location.href = 'login.html';
+      return;
     }
 
     // ===== Helper: show message =====

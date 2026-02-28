@@ -312,42 +312,9 @@
                 return;
             }
 
-            // ===== Fallback: server offline, check local only =====
-            var users = JSON.parse(localStorage.getItem('ct_users') || '{}');
-            var foundKey = null;
-            var foundUser = null;
-            for (var key in users) {
-                if (users[key].email && users[key].email.toLowerCase() === email) {
-                    foundKey = key;
-                    foundUser = users[key];
-                    break;
-                }
-            }
-
-            if (foundUser) {
-                if (foundUser.password === pwHash) {
-                    const remember = document.getElementById('remember').checked;
-                    var sessionData = {
-                        svartId: foundKey,
-                        email: email,
-                        loggedIn: true,
-                        ts: Date.now(),
-                        persistent: remember
-                    };
-                    localStorage.setItem('ct_session', JSON.stringify(sessionData));
-                    if (remember) {
-                        localStorage.setItem('ct_persistent_session', JSON.stringify(sessionData));
-                    } else {
-                        localStorage.removeItem('ct_persistent_session');
-                    }
-                    showMsg('Login successful (offline mode). Redirecting...', 'success');
-                    setTimeout(function() { window.location.href = 'account.html'; }, 1000);
-                    return;
-                }
-                showMsg('Incorrect password.', 'error');
-            } else {
-                showMsg('No account found with that email. <a href="signup.html">Sign up</a>', 'error');
-            }
+            // ===== Server offline — block login entirely =====
+            // No local-only logins allowed. All accounts must exist on the server.
+            showMsg('Unable to reach the server. Please check your connection and try again.', 'error');
             btn.disabled = false;
             btn.textContent = 'Log In';
         });
