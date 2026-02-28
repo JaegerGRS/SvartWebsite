@@ -138,6 +138,9 @@
         function getAdminUser() {
             try {
                 var session = JSON.parse(localStorage.getItem('ct_session') || '{}');
+                if (!session.loggedIn || !session.email) {
+                    session = JSON.parse(localStorage.getItem('ct_persistent_session') || '{}');
+                }
                 if (!session.loggedIn || !session.email) return null;
                 if (session.email.toLowerCase() !== ADMIN_EMAIL) return null;
                 var users = JSON.parse(localStorage.getItem('ct_users') || '{}');

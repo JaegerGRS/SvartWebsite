@@ -270,6 +270,9 @@
         function getCurrentUser() {
             try {
                 var session = JSON.parse(localStorage.getItem('ct_session') || '{}');
+                if (!session.loggedIn || !session.email) {
+                    session = JSON.parse(localStorage.getItem('ct_persistent_session') || '{}');
+                }
                 if (!session.loggedIn || !session.email) return null;
                 var users = JSON.parse(localStorage.getItem('ct_users') || '{}');
                 var user = users[session.svartId];
