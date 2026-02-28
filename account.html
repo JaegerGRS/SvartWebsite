@@ -33,7 +33,19 @@
   </nav>
   <div class="nav-overlay" id="navOverlay"></div>
 
-  <section class="settings-section">
+  <!-- Activation Key Gate for Admin/Mod (hidden for regular users) -->
+  <div id="dashKeyGate" style="display:none;">
+    <div style="max-width:400px;margin:140px auto;padding:32px;background:rgba(20,20,30,0.95);border:1px solid var(--border-color);border-radius:16px;text-align:center;">
+      <h2 style="color:var(--primary);margin-bottom:8px;">&#128272; Verification Required</h2>
+      <p style="color:var(--text-muted);margin-bottom:20px;font-size:0.9rem;">Your account has elevated privileges. Enter your activation key to access the dashboard.</p>
+      <input type="password" id="dashKeyInput" placeholder="Your activation key (XXXX-XXXX-XXXX-XXXX)" autocomplete="off" style="width:100%;padding:12px 16px;background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:8px;color:var(--text-light);font-size:1rem;margin-bottom:12px;">
+      <button class="btn btn-primary" id="dashKeyBtn" style="width:100%;padding:12px;font-size:1rem;">Verify &amp; Access Dashboard</button>
+      <p id="dashKeyError" style="color:#ef4444;margin-top:12px;display:none;font-size:0.9rem;"></p>
+      <a href="login.html" style="display:block;text-align:center;margin-top:16px;color:var(--text-muted);font-size:0.85rem;text-decoration:none;">&#8592; Back to Login</a>
+    </div>
+  </div>
+
+  <section class="settings-section" id="mainDashboard">
     <div class="container">
       <div class="settings-header">
         <h2>Welcome back, <span id="userName" style="font-size:0.75em;font-family:monospace;letter-spacing:1px;">User</span> <span id="adminBadge" style="display:none;font-size:0.55em;background:var(--primary);color:#000;padding:3px 10px;border-radius:6px;vertical-align:middle;font-family:inherit;letter-spacing:0;">ADMIN</span> <span id="modBadge" style="display:none;font-size:0.55em;background:#22c55e;color:#000;padding:3px 10px;border-radius:6px;vertical-align:middle;font-family:inherit;letter-spacing:0;">MOD</span></h2>
@@ -907,6 +919,39 @@
     // Mods also get unlimited AI plan
     if (isMod) {
       localStorage.setItem('ai_plan_' + svartId, 'unlimited');
+    }
+
+    // ===== Activation Key Gate for Admin/Mod =====
+    if (isAdmin || isMod) {
+      var mainDash = document.getElementById('mainDashboard');
+      var dashGate = document.getElementById('dashKeyGate');
+      var dashKeyInput = document.getElementById('dashKeyInput');
+      var dashKeyBtn = document.getElementById('dashKeyBtn');
+      var dashKeyError = document.getElementById('dashKeyError');
+      var userActKey = user.activationKey || svartId || '';
+
+      // Hide dashboard, show gate
+      mainDash.style.display = 'none';
+      dashGate.style.display = '';
+
+      function verifyDashKey() {
+        var entered = dashKeyInput.value.trim();
+        if (!entered) return;
+        if (entered !== userActKey) {
+          dashKeyError.textContent = 'Invalid activation key. This must match your account\'s secret key.';
+          dashKeyError.style.display = '';
+          dashKeyInput.value = '';
+          dashKeyInput.focus();
+          return;
+        }
+        dashKeyError.style.display = 'none';
+        dashGate.style.display = 'none';
+        mainDash.style.display = '';
+      }
+
+      dashKeyBtn.addEventListener('click', verifyDashKey);
+      dashKeyInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') verifyDashKey(); });
+      dashKeyInput.focus();
     }
 
     document.getElementById('userName').textContent = displayName;
