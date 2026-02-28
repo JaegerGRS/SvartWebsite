@@ -79,8 +79,8 @@
     <div id="adminLoginScreen" style="display:none;">
         <div class="page-login">
             <h2>&#128272; Admin Verification</h2>
-            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your activation key to access the admin panel.</p>
-            <input type="password" id="adminSecret" placeholder="Your activation key (XXXX-XXXX-XXXX-XXXX)" autocomplete="off">
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your secret key to access the admin panel.</p>
+            <input type="password" id="adminSecret" placeholder="Your secret key (XXXX-XXXX-XXXX-XXXX)" autocomplete="off">
             <button class="btn btn-primary btn-full" id="adminLoginBtn">Verify &amp; Access</button>
             <p id="adminLoginError" style="color:#ef4444;margin-top:12px;display:none;font-size:0.9rem;"></p>
             <a href="account.html" style="display:block;text-align:center;margin-top:16px;color:var(--text-muted);font-size:0.85rem;text-decoration:none;">&#8592; Back to Dashboard</a>
@@ -108,7 +108,7 @@
 
         <!-- Search Bar -->
         <div class="search-bar">
-            <input type="email" id="searchEmail" placeholder="Search by email to find activation key...">
+            <input type="email" id="searchEmail" placeholder="Search by email to find secret key...">
             <button class="btn btn-primary" id="searchBtn">Search</button>
         </div>
         <div id="searchResult" style="display:none;"></div>
@@ -135,7 +135,7 @@
 
         <!-- Tab: Password Resets -->
         <div class="tab-panel" id="panel-resets">
-            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Users who forgot their password. Search their email above to find their activation key, then resolve to generate a temporary password.</p>
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Users who forgot their password. Search their email above to find their secret key, then resolve to generate a temporary password.</p>
             <div style="overflow-x:auto;">
                 <table class="reg-table">
                     <thead><tr><th>#</th><th>Email</th><th>Registered?</th><th>Date</th><th>Status</th><th></th></tr></thead>
@@ -146,10 +146,10 @@
 
         <!-- Tab: Registration Log -->
         <div class="tab-panel" id="panel-reglog">
-            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">All registered accounts with their emails and activation keys.</p>
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">All registered accounts with their emails and secret keys.</p>
             <div style="overflow-x:auto;">
                 <table class="reg-table">
-                    <thead><tr><th>#</th><th>Email</th><th>Activation Key</th><th>Display Name</th><th>Role</th><th>Date</th><th></th></tr></thead>
+                    <thead><tr><th>#</th><th>Email</th><th>Secret Key</th><th>Display Name</th><th>Role</th><th>Date</th><th></th></tr></thead>
                     <tbody id="regTableBody"><tr><td colspan="7" class="no-data">Loading...</td></tr></tbody>
                 </table>
             </div>
@@ -271,7 +271,7 @@
             var enteredKey = secretInput.value.trim();
             if (!enteredKey || !adminUser) return;
             if (enteredKey !== adminUser.activationKey) {
-                loginError.textContent = 'Invalid activation key.';
+                loginError.textContent = 'Invalid secret key.';
                 loginError.style.display = '';
                 secretInput.value = '';
                 return;

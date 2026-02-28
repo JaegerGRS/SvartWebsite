@@ -1,7 +1,7 @@
 /**
  * /api/verify — App & NetworkGuardian key verification endpoint
  *
- * This is the ONLY way Svart apps and the NetworkGuardian can verify activation keys.
+ * This is the ONLY way Svart apps and the NetworkGuardian can verify secret keys.
  * Regular users / public cannot access this endpoint.
  *
  * Auth tokens (embedded in apps):
@@ -13,7 +13,7 @@
  *   Body: { email, activationKey }
  *   Headers: Authorization: Bearer <APP_SECRET|GUARDIAN_SECRET|ADMIN_SECRET|MOD_SECRET>
  *   Returns: { success, valid, role, displayName } — enough to confirm legitimacy
- *            Never returns the activation key back — just confirms it's correct
+ *            Never returns the secret key back — just confirms it's correct
  *
  * GET /api/verify?email=<email>&key=<key>
  *   Same as POST but via query params (for simple GET requests from apps)
@@ -66,7 +66,7 @@ export const onRequestOptions: PagesFunction<Env> = async () => {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 };
 
-// POST — Verify an activation key
+// POST — Verify a secret key
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     if (!checkKV(context.env)) {
@@ -148,12 +148,12 @@ async function verifyKey(
 
   const account = JSON.parse(accountRaw);
 
-  // Check the activation key matches
+  // Check the secret key matches
   if (account.activationKey !== activationKey) {
     return jsonResponse({
       success: true,
       valid: false,
-      reason: "Invalid activation key",
+      reason: "Invalid secret key",
     });
   }
 

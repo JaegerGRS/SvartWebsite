@@ -93,7 +93,7 @@
                         <li>Priority community support</li>
                         <li>No ads &mdash; ever</li>
                     </ul>
-                    <a href="signup.html" class="btn btn-secondary">Upgrade</a>
+                    <a href="checkout.html?item=svart-ai" class="btn btn-secondary">Upgrade</a>
                 </div>
 
                 <div class="pricing-card featured">
@@ -113,7 +113,7 @@
                         <li>Early access to new AI models</li>
                         <li>No ads &mdash; ever</li>
                     </ul>
-                    <a href="signup.html" class="btn btn-primary">Get Unlimited</a>
+                    <a href="checkout.html?item=unlimited" class="btn btn-primary">Get Unlimited</a>
                 </div>
             </div>
 
@@ -601,14 +601,11 @@
         pricingBtns.forEach(function(btn) {
           if (btn.href && btn.href.indexOf('signup.html') !== -1) {
             btn.href = 'account.html#plan';
-            // Update button text based on context
             if (btn.textContent.trim() === 'Get Started Free') {
               btn.textContent = 'Your Dashboard';
-            } else if (btn.textContent.trim() === 'Upgrade') {
-              btn.textContent = 'Manage Plan';
-            } else if (btn.textContent.trim() === 'Get Unlimited') {
-              btn.textContent = 'Manage Plan';
             }
+          } else if (btn.href && btn.href.indexOf('checkout.html') !== -1) {
+            // Keep checkout links for paid plans — logged-in users go straight to checkout
           }
         });
       }

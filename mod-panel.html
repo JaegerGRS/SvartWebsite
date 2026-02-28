@@ -76,12 +76,12 @@
         </div>
     </div>
 
-    <!-- Activation Key Verification Screen -->
+    <!-- Secret Key Verification Screen -->
     <div id="keyScreen" style="display:none;">
         <div class="mod-login">
             <h2>&#128272; Verification Required</h2>
-            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your activation key to access the mod panel. Required every visit.</p>
-            <input type="password" id="keyInput" placeholder="Your activation key (XXXX-XXXX-XXXX-XXXX)" autocomplete="off">
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your secret key to access the mod panel. Required every visit.</p>
+            <input type="password" id="keyInput" placeholder="Your secret key (XXXX-XXXX-XXXX-XXXX)" autocomplete="off">
             <button class="btn btn-primary btn-full" id="keyVerifyBtn">Verify &amp; Access</button>
             <p id="keyError" style="color:#ef4444;margin-top:12px;display:none;font-size:0.9rem;"></p>
             <a href="account.html" style="display:block;text-align:center;margin-top:16px;color:var(--text-muted);font-size:0.85rem;text-decoration:none;">&#8592; Back to Dashboard</a>
@@ -127,7 +127,7 @@
                 <p>Review pending resets. Search a user's email to find their key, then resolve to generate a temporary password.</p>
             </div>
             <div class="search-bar">
-                <input type="email" id="searchEmail" placeholder="Search by email to find their activation key...">
+                <input type="email" id="searchEmail" placeholder="Search by email to find their secret key...">
                 <button class="btn btn-primary" id="searchBtn">Search</button>
             </div>
             <div id="searchResult" style="display:none;"></div>
@@ -141,10 +141,10 @@
 
         <!-- Tab: Registration Log -->
         <div class="tab-panel" id="panel-reglog">
-            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">All registered accounts with their emails and activation keys.</p>
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">All registered accounts with their emails and secret keys.</p>
             <div style="overflow-x:auto;">
                 <table class="reg-table">
-                    <thead><tr><th>#</th><th>Email</th><th>Activation Key</th><th>Display Name</th><th>Role</th><th>Date</th><th></th></tr></thead>
+                    <thead><tr><th>#</th><th>Email</th><th>Secret Key</th><th>Display Name</th><th>Role</th><th>Date</th><th></th></tr></thead>
                     <tbody id="regTableBody"><tr><td colspan="7" class="no-data">Loading...</td></tr></tbody>
                 </table>
             </div>
@@ -279,7 +279,7 @@
             var enteredKey = keyInput.value.trim();
             if (!enteredKey || !currentUser) return;
             if (enteredKey !== currentUser.activationKey) {
-                keyError.textContent = 'Invalid activation key.'; keyError.style.display = ''; keyInput.value = ''; return;
+                keyError.textContent = 'Invalid secret key.'; keyError.style.display = ''; keyInput.value = ''; return;
             }
             keyError.style.display = 'none';
             apiToken = (currentUser.role === 'admin' || currentUser.email.toLowerCase() === ADMIN_EMAIL) ? ADMIN_API_SECRET : MOD_API_SECRET;
@@ -510,12 +510,12 @@
                 var resp = await fetch('/api/registrations?email=' + encodeURIComponent(email), { headers: { 'Authorization': 'Bearer ' + apiToken } });
                 var data = await resp.json();
                 if (!data.success || !data.found) { result.innerHTML = '<div class="card"><h3>No results</h3><p>No registration found for <strong>' + escHtml(email) + '</strong></p></div>'; return; }
-                await logModAction('search-user', email, 'Searched for user activation key');
+                await logModAction('search-user', email, 'Searched for user secret key');
                 var records = data.records || [];
                 var html = '<div class="card"><h3>Found ' + records.length + ' key(s) for ' + escHtml(email) + '</h3>';
                 records.forEach(function(rec) {
                     html += '<div style="padding:8px 0;border-bottom:1px solid rgba(39,39,42,0.3);">';
-                    html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;font-size:0.9rem;">Activation Key</span> <span style="color:var(--accent);font-family:monospace;font-size:1.1rem;cursor:pointer;" onclick="copyText(\'' + escAttr(rec.activationKey) + '\')" title="Click to copy">' + escHtml(rec.activationKey) + '</span></div>';
+                    html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;font-size:0.9rem;">Secret Key</span> <span style="color:var(--accent);font-family:monospace;font-size:1.1rem;cursor:pointer;" onclick="copyText(\'' + escAttr(rec.activationKey) + '\')" title="Click to copy">' + escHtml(rec.activationKey) + '</span></div>';
                     html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;font-size:0.9rem;">Display Name</span> <span style="color:var(--text-light);font-weight:600;">' + escHtml(rec.displayName || '-') + '</span></div>';
                     html += '<div><span style="color:var(--text-muted);min-width:120px;display:inline-block;font-size:0.9rem;">Registered</span> <span style="color:var(--text-light);">' + new Date(rec.registeredAt).toLocaleString() + '</span></div>';
                     html += '</div>';

@@ -273,7 +273,7 @@
                         <p>Works on all plans</p>
                         <p>Perfect for quick top-offs</p>
                     </div>
-                    <a href="signup.html" class="topup-btn topup-btn-secondary">Buy 500</a>
+                    <a href="checkout.html?item=topup-500" class="topup-btn topup-btn-secondary">Buy 500</a>
                 </div>
 
                 <!-- £1.00 -->
@@ -287,7 +287,7 @@
                         <p>Works on all plans</p>
                         <p>Good for a few days&rsquo; extra use</p>
                     </div>
-                    <a href="signup.html" class="topup-btn topup-btn-secondary">Buy 1,000</a>
+                    <a href="checkout.html?item=topup-1000" class="topup-btn topup-btn-secondary">Buy 1,000</a>
                 </div>
 
                 <!-- £1.50 -->
@@ -301,7 +301,7 @@
                         <p>Works on all plans</p>
                         <p>About a week of average use</p>
                     </div>
-                    <a href="signup.html" class="topup-btn topup-btn-secondary">Buy 1,500</a>
+                    <a href="checkout.html?item=topup-1500" class="topup-btn topup-btn-secondary">Buy 1,500</a>
                 </div>
 
                 <!-- £2.00 -->
@@ -315,7 +315,7 @@
                         <p>Works on all plans</p>
                         <p>Same as a full month on Svart AI plan</p>
                     </div>
-                    <a href="signup.html" class="topup-btn topup-btn-secondary">Buy 2,000</a>
+                    <a href="checkout.html?item=topup-2000" class="topup-btn topup-btn-secondary">Buy 2,000</a>
                 </div>
 
                 <!-- £2.50 (POPULAR) -->
@@ -331,7 +331,7 @@
                         <p>Most purchased top-up pack</p>
                         <p>~2 weeks of heavy daily use</p>
                     </div>
-                    <a href="signup.html" class="topup-btn topup-btn-primary">Buy 2,500</a>
+                    <a href="checkout.html?item=topup-2500" class="topup-btn topup-btn-primary">Buy 2,500</a>
                 </div>
             </div>
 
@@ -356,7 +356,7 @@
                         <p>Equivalent to ~3 months on Free Premium</p>
                         <p>Great for medium-term coverage</p>
                     </div>
-                    <a href="signup.html" class="topup-btn topup-btn-secondary">Buy 5,000</a>
+                    <a href="checkout.html?item=topup-5000" class="topup-btn topup-btn-secondary">Buy 5,000</a>
                 </div>
 
                 <!-- £10.00 -->
@@ -371,7 +371,7 @@
                         <p>Equivalent to ~6 months on Free Premium</p>
                         <p>Solid buffer for heavy users</p>
                     </div>
-                    <a href="signup.html" class="topup-btn topup-btn-secondary">Buy 10,000</a>
+                    <a href="checkout.html?item=topup-10000" class="topup-btn topup-btn-secondary">Buy 10,000</a>
                 </div>
 
                 <!-- £20.00 (BEST VALUE) -->
@@ -389,7 +389,7 @@
                         <p>Best cost-per-request at &pound;0.0008</p>
                         <p>Perfect for power users who want flexibility</p>
                     </div>
-                    <a href="signup.html" class="topup-btn topup-btn-primary">Buy 25,000</a>
+                    <a href="checkout.html?item=topup-25000" class="topup-btn topup-btn-primary">Buy 25,000</a>
                 </div>
 
                 <!-- £50.00 (MEGA PACK) -->
@@ -407,7 +407,7 @@
                         <p>Lowest cost-per-request at &pound;0.00077</p>
                         <p>Maximum savings for heavy use</p>
                     </div>
-                    <a href="signup.html" class="topup-btn topup-btn-primary">Buy 65,000</a>
+                    <a href="checkout.html?item=topup-65000" class="topup-btn topup-btn-primary">Buy 65,000</a>
                 </div>
             </div>
 
@@ -832,13 +832,7 @@
             var cta = document.getElementById('topupUserCta');
             if (cta) cta.style.display = 'block';
 
-            // Update buy buttons to point to account
-            var btns = document.querySelectorAll('.topup-btn');
-            btns.forEach(function(btn) {
-                if (btn.href && btn.href.indexOf('signup.html') !== -1) {
-                    btn.href = 'account.html#plan-topups';
-                }
-            });
+            // Buy buttons already point to checkout.html — no change needed for logged-in users
         }
     })();
     </script>

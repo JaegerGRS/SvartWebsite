@@ -34,12 +34,12 @@
   </nav>
   <div class="nav-overlay" id="navOverlay"></div>
 
-  <!-- Activation Key Gate for Admin/Mod (hidden for regular users) -->
+  <!-- Secret Key Gate for Admin/Mod (hidden for regular users) -->
   <div id="dashKeyGate" style="display:none;">
     <div style="max-width:400px;margin:140px auto;padding:32px;background:rgba(20,20,30,0.95);border:1px solid var(--border-color);border-radius:16px;text-align:center;">
       <h2 style="color:var(--primary);margin-bottom:8px;">&#128272; Verification Required</h2>
-      <p style="color:var(--text-muted);margin-bottom:20px;font-size:0.9rem;">Your account has elevated privileges. Enter your activation key to access the dashboard.</p>
-      <input type="password" id="dashKeyInput" placeholder="Your activation key (XXXX-XXXX-XXXX-XXXX)" autocomplete="off" style="width:100%;padding:12px 16px;background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:8px;color:var(--text-light);font-size:1rem;margin-bottom:12px;">
+      <p style="color:var(--text-muted);margin-bottom:20px;font-size:0.9rem;">Your account has elevated privileges. Enter your secret key to access the dashboard.</p>
+      <input type="password" id="dashKeyInput" placeholder="Your secret key (XXXX-XXXX-XXXX-XXXX)" autocomplete="off" style="width:100%;padding:12px 16px;background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:8px;color:var(--text-light);font-size:1rem;margin-bottom:12px;">
       <button class="btn btn-primary" id="dashKeyBtn" style="width:100%;padding:12px;font-size:1rem;">Verify &amp; Access Dashboard</button>
       <p id="dashKeyError" style="color:#ef4444;margin-top:12px;display:none;font-size:0.9rem;"></p>
       <a href="login.html" style="display:block;text-align:center;margin-top:16px;color:var(--text-muted);font-size:0.85rem;text-decoration:none;">&#8592; Back to Login</a>
@@ -68,15 +68,15 @@
       <!-- ===== Dashboard Panel ===== -->
       <div class="settings-panel active" id="panel-dashboard">
 
-        <!-- Activation Key Card -->
+        <!-- Secret Key Card -->
         <div class="account-grid">
           <div class="account-card account-key-card">
             <div class="card-header">
               <span>&#128273;</span>
-              <h3>Your Activation Key</h3>
+              <h3>Your Secret Key</h3>
             </div>
             <p>Use this key in all Svart Security desktop apps when prompted for activation. This is your <strong>secret key</strong> &mdash; keep it safe, you need it to reset your password.</p>
-            <div class="activation-key-display" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div class="secret-key-display" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
               <code id="userKey" style="letter-spacing:2px;">&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;</code>
               <button id="showKey" class="btn btn-secondary btn-sm" type="button">Show</button>
               <button id="copyKey" class="btn btn-primary btn-sm" type="button">Copy</button>
@@ -106,14 +106,14 @@
             <!-- Privacy Notice -->
             <div style="margin-top:24px;">
               <h4 style="font-size:0.95rem;margin-bottom:10px;color:var(--text-light);">Privacy</h4>
-              <p style="font-size:0.82rem;color:var(--text-muted);">Svart stores only your email address and activation key. No usage logs, browsing history, or request data is tracked. We recommend using a forwarding or alias email for maximum privacy.</p>
+              <p style="font-size:0.82rem;color:var(--text-muted);">Svart stores only your email address and secret key. No usage logs, browsing history, or request data is tracked. We recommend using a forwarding or alias email for maximum privacy.</p>
             </div>
           </div>
         </div>
 
         <!-- Downloads -->
         <h3 class="account-section-title">Your Downloads</h3>
-        <p class="section-subtitle" style="margin-bottom:30px;">Download any Svart Security app. Use your activation key above to unlock each one.</p>
+        <p class="section-subtitle" style="margin-bottom:30px;">Download any Svart Security app. Use your secret key above to unlock each one.</p>
 
         <div class="download-grid">
           <div class="download-tile">
@@ -179,7 +179,7 @@
             <span class="detail-value" id="userEmail">&mdash;</span>
           </div>
           <div class="account-detail-row">
-            <span class="detail-label">Activation Key</span>
+            <span class="detail-label">Secret Key</span>
             <span class="detail-value" id="userSvartId" style="font-family:monospace;letter-spacing:1px;">&mdash;</span>
           </div>
           <div class="account-detail-row">
@@ -211,7 +211,7 @@
             <span class="settings-row-value" id="currentEmail">&mdash;</span>
           </div>
           <div class="settings-row">
-            <span class="settings-row-label">Svart ID (Activation Key)</span>
+            <span class="settings-row-label">Svart ID (Secret Key)</span>
             <span class="settings-row-value" style="display:flex;align-items:center;gap:8px;">
               <span id="currentSvartId" style="font-family:monospace;letter-spacing:1px;">&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;</span>
               <button type="button" id="profileShowKeyBtn" style="background:none;border:1px solid var(--border-color);color:var(--text-muted);padding:2px 8px;border-radius:4px;font-size:0.75rem;cursor:pointer;font-family:inherit;" title="Show/Hide">Show</button>
@@ -279,9 +279,9 @@
         </div>
 
         <div class="settings-card">
-          <h3><span class="card-icon">&#128273;</span> Activation Key (Your Secret Key)</h3>
-          <p>Your activation key is your <strong>secret key</strong> for all Svart Security apps and password recovery. Keep it private and safe &mdash; treat it like a master password. If you lose access, this key is the only way to reset your password instantly.</p>
-          <div class="activation-key-display" style="max-width:480px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <h3><span class="card-icon">&#128273;</span> Secret Key (Your Secret Key)</h3>
+          <p>Your secret key is your <strong>secret key</strong> for all Svart Security apps and password recovery. Keep it private and safe &mdash; treat it like a master password. If you lose access, this key is the only way to reset your password instantly.</p>
+          <div class="secret-key-display" style="max-width:480px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <code id="settingsKey" style="letter-spacing:2px;">&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;-&#8226;&#8226;&#8226;&#8226;</code>
             <button id="showKeyBtn" class="btn btn-secondary btn-sm" type="button">Show</button>
             <button id="copyKeyBtn" class="btn btn-primary btn-sm" type="button">Copy</button>
@@ -338,7 +338,7 @@
 
           <div class="settings-card">
             <h3><span class="card-icon">&#128274;</span> Privacy</h3>
-            <p>Svart does not log or track your usage. Only your email address and activation key are stored.</p>
+            <p>Svart does not log or track your usage. Only your email address and secret key are stored.</p>
             <p style="color:var(--text-muted);font-size:0.8rem;margin-top:14px;">All Svart Security tools are free and unlimited. We recommend using a forwarding or alias email for maximum privacy.</p>
           </div>
 
@@ -421,7 +421,7 @@
       <div class="settings-panel" id="panel-tools">
         <div class="settings-card">
           <h3><span class="card-icon">&#128736;</span> Your Svart Security Tools</h3>
-          <p>All tools use your activation key. Everything is free and unlimited. Svart does not log or track any usage.</p>
+          <p>All tools use your secret key. Everything is free and unlimited. Svart does not log or track any usage.</p>
 
           <div class="settings-tool-grid">
             <div class="settings-tool-tile">
@@ -952,7 +952,7 @@
       document.getElementById('modQuickLink').style.display = 'inline-block';
     }
 
-    // ===== Activation key (synced across all panels) =====
+    // ===== Secret key (synced across all panels) =====
     var realKey = user.activationKey || svartId || 'XXXX-XXXX-XXXX-XXXX';
     var maskedKey = realKey.replace(/[A-Za-z0-9]/g, '\u2022');
     var keyVisible = false;
@@ -1232,7 +1232,7 @@
 
     // ===== Danger zone =====
     document.getElementById('clearDataBtn').addEventListener('click', function() {
-      if (!confirm('Clear all local Svart data (preferences, cached data)? Your account and activation key will not be affected.')) return;
+      if (!confirm('Clear all local Svart data (preferences, cached data)? Your account and secret key will not be affected.')) return;
       localStorage.removeItem('ai_usage_' + svartId);
       localStorage.removeItem('ai_usage_reset_' + svartId);
       localStorage.removeItem('svart_prefs_' + svartId);
@@ -1242,9 +1242,9 @@
 
     document.getElementById('deleteAccountBtn').addEventListener('click', async function() {
       if (!confirm('DELETE YOUR ACCOUNT? This will permanently remove all your data from our servers and this device. This cannot be undone.')) return;
-      if (!confirm('Are you absolutely sure? Type your activation key in the next prompt to confirm.')) return;
-      var typed = prompt('Type your activation key to confirm deletion:');
-      if (typed !== svartId && typed !== (user.activationKey || '')) { alert('Activation key does not match. Deletion cancelled.'); return; }
+      if (!confirm('Are you absolutely sure? Type your secret key in the next prompt to confirm.')) return;
+      var typed = prompt('Type your secret key to confirm deletion:');
+      if (typed !== svartId && typed !== (user.activationKey || '')) { alert('Secret key does not match. Deletion cancelled.'); return; }
 
       // Delete from server first
       try {

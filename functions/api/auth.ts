@@ -151,7 +151,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     const account = JSON.parse(accountRaw);
 
-    // If activation key provided, return full account details (for session restore)
+    // If secret key provided, return full account details (for session restore)
     if (key && account.activationKey === key) {
       return jsonResponse({
         success: true,
@@ -229,14 +229,14 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       return jsonResponse({ success: true, message: "Account updated by admin", role: account.role });
     }
 
-    // Normal user self-update: requires activation key
+    // Normal user self-update: requires secret key
     if (!activationKey) {
-      return errorResponse("Activation key is required", 400);
+      return errorResponse("Secret key is required", 400);
     }
 
-    // Verify ownership via activation key
+    // Verify ownership via secret key
     if (account.activationKey !== activationKey) {
-      return errorResponse("Invalid activation key", 403);
+      return errorResponse("Invalid secret key", 403);
     }
 
     // Apply updates (users cannot change their own role)
@@ -283,7 +283,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
     }
 
     if (!email || !activationKey) {
-      return errorResponse("Email and activation key are required", 400);
+      return errorResponse("Email and secret key are required", 400);
     }
 
     // Verify the account exists and key matches
@@ -294,7 +294,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
 
     const account = JSON.parse(accountRaw);
     if (account.activationKey !== activationKey) {
-      return errorResponse("Invalid activation key", 403);
+      return errorResponse("Invalid secret key", 403);
     }
 
     // Delete the server-side account

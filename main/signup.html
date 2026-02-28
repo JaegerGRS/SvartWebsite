@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Svart Security</title>
-    <meta name="description" content="Create a Svart Security account to get your activation keys and access the full security suite.">
+    <meta name="description" content="Create a Svart Security account to get your secret keys and access the full security suite.">
     <meta name="theme-color" content="#0a0a0f">
     <link rel="stylesheet" href="css/style.css">
     <script>!function(){var t=localStorage.getItem("svart_theme")||"midnight";document.documentElement.setAttribute("data-theme",t)}()</script>
@@ -41,9 +41,9 @@
                     <div class="auth-header">
                         <span class="SVART-logo-large" style="font-size:3rem;">&#9670;</span>
                         <h2>Create Your Account</h2>
-                        <p>Sign up and get your activation key instantly</p>
+                        <p>Sign up and get your secret key instantly</p>
                         <p style="color:var(--primary);font-size:0.8rem;margin-top:4px;">&#9888; Svart Security is in development. Sign up now to reserve your key for launch.</p>
-                        <p style="color:var(--text-muted);font-size:0.85rem;margin-top:6px;">Get your activation key here, then use it in Svart Chat to connect to servers and choose your display name &mdash; your identity stays in the app, not on the web.</p>
+                        <p style="color:var(--text-muted);font-size:0.85rem;margin-top:6px;">Get your secret key here, then use it in Svart Chat to connect to servers and choose your display name &mdash; your identity stays in the app, not on the web.</p>
                     </div>
 
                     <form id="signupForm" class="auth-form-site" novalidate>
@@ -104,7 +104,7 @@
 
                     <div id="signupMessage" class="auth-message" style="display:none;"></div>
 
-                    <!-- Activation key display (shown after successful signup) -->
+                    <!-- Secret key display (shown after successful signup) -->
                     <div id="activationResult" class="activation-result" style="display:none;">
                                                 <div class="user-info">
                                                     <p><strong>Svart ID:</strong> <span id="userSvartId"></span></p>
@@ -114,8 +114,8 @@
                             <span class="activation-icon">&#10003;</span>
                             <h3>Account Created!</h3>
                         </div>
-                        <p>Your activation key for all Svart Security apps:</p>
-                        <div class="activation-key-display">
+                        <p>Your secret key for all Svart Security apps:</p>
+                        <div class="secret-key-display">
                             <code id="generatedKey"></code>
                             <button id="copyKey" class="btn btn-primary btn-sm" type="button">Copy</button>
                         </div>
@@ -130,8 +130,8 @@
                         <div class="perk">
                             <span class="perk-icon">&#128273;</span>
                             <div>
-                                <strong>Instant Activation Key</strong>
-                                <p>Get your unique activation key immediately after sign-up.</p>
+                                <strong>Instant Secret Key</strong>
+                                <p>Get your unique secret key immediately after sign-up.</p>
                             </div>
                         </div>
                         <div class="perk">
@@ -159,7 +159,7 @@
                             <span class="perk-icon">&#127760;</span>
                             <div>
                                 <strong>Your Own Chat Identity</strong>
-                                <p>Use your activation key in Svart Chat to set your display name, self-host your own servers, and connect with others &mdash; you control the infrastructure, all from the desktop app.</p>
+                                <p>Use your secret key in Svart Chat to set your display name, self-host your own servers, and connect with others &mdash; you control the infrastructure, all from the desktop app.</p>
                             </div>
                         </div>
                     </div>
@@ -253,7 +253,7 @@
             strengthLabel.style.color = lvl.color;
         });
 
-        // Generate activation key (HMAC-SHA256 demo — mirrors the Tauri app logic)
+        // Generate secret key (HMAC-SHA256 demo — mirrors the Tauri app logic)
         function generateActivationKey() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             const seg = (len) => Array.from({length:len}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
@@ -322,7 +322,7 @@
                 return;
             }
 
-                            // Generate activation key in format XXXX-XXXX-XXXX-XXXX
+                            // Generate secret key in format XXXX-XXXX-XXXX-XXXX
                             function generateKey() {
                                 const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
                                 let key = '';
@@ -337,7 +337,7 @@
                             const activationKey = generateKey();
 
             // Save user
-            // Store user by activation key (this IS the secret key)
+            // Store user by secret key (this IS the secret key)
             const svartId = activationKey;
             users[svartId] = {
                 username: document.getElementById('displayName').value.trim(),
@@ -398,7 +398,7 @@
             // Save to localStorage after server confirms
             localStorage.setItem('ct_users', JSON.stringify(users));
 
-            // Auto login via activation key (the key IS the secret)
+            // Auto login via secret key (the key IS the secret)
             localStorage.setItem('ct_session', JSON.stringify({
                 svartId: svartId,
                 email: email,

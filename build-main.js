@@ -13,7 +13,8 @@ const htmlFiles = [
   'login.html', 'signup.html', 'account.html', 'account-settings.html',
   'roadmap.html', 'SVART.html', 'tools.html',
   'website-security.html', 'eula.html', 'tools-template.html', 'admin.html',
-  'forgot-password.html', 'mod-panel.html'
+  'forgot-password.html', 'mod-panel.html', 'checkout.html',
+  'registration-log.html', 'role-management.html', 'how-it-works.html'
 ];
 for (const f of htmlFiles) {
   if (existsSync(f)) cpSync(f, `main/${f}`);

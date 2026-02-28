@@ -59,7 +59,7 @@ async function notifyAdmin(record: {
               "============================",
               "",
               `Email:          ${record.email}`,
-              `Activation Key: ${record.activationKey}`,
+              `Secret Key: ${record.activationKey}`,
               `Display Name:   ${record.displayName || "Not set"}`,
               `Registered:     ${record.registeredAt}`,
               `Country:        ${record.country}`,
@@ -76,7 +76,7 @@ async function notifyAdmin(record: {
                 <h2 style="color:#7c6aef;margin-top:0;">New Svart Suite Registration</h2>
                 <table style="width:100%;border-collapse:collapse;">
                   <tr><td style="padding:6px 12px;color:#888;">Email</td><td style="padding:6px 12px;color:#fff;">${record.email}</td></tr>
-                  <tr><td style="padding:6px 12px;color:#888;">Activation Key</td><td style="padding:6px 12px;color:#7c6aef;font-weight:bold;">${record.activationKey}</td></tr>
+                  <tr><td style="padding:6px 12px;color:#888;">Secret Key</td><td style="padding:6px 12px;color:#7c6aef;font-weight:bold;">${record.activationKey}</td></tr>
                   <tr><td style="padding:6px 12px;color:#888;">Display Name</td><td style="padding:6px 12px;color:#fff;">${record.displayName || "Not set"}</td></tr>
                   <tr><td style="padding:6px 12px;color:#888;">Registered</td><td style="padding:6px 12px;color:#fff;">${record.registeredAt}</td></tr>
                   <tr><td style="padding:6px 12px;color:#888;">Country</td><td style="padding:6px 12px;color:#fff;">${record.country}</td></tr>
@@ -152,7 +152,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       country: context.request.headers.get("CF-IPCountry") || "unknown",
     };
 
-    // Store by activation key (primary lookup)
+    // Store by secret key (primary lookup)
     await context.env.USAGE_DATA.put(
       `reg:key:${activationKey}`,
       JSON.stringify(record)

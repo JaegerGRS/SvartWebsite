@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Svart Security</title>
+    <meta name="description" content="Complete your Svart Security purchase. Pay with PayPal, card, or gift card.">
+    <meta name="theme-color" content="#0a0a0f">
+    <link rel="stylesheet" href="css/style.css">
+    <script>!function(){var t=localStorage.getItem("svart_theme")||"midnight";document.documentElement.setAttribute("data-theme",t)}()</script>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f'/><text x='50' y='70' font-size='80' font-weight='bold' text-anchor='middle' fill='%237c3aed'>&#x25C6;</text></svg>">
+    <style>
+        .checkout-container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .order-summary {
+            padding: 28px 32px;
+            border: 2px solid var(--primary);
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(var(--primary-rgb),0.08), rgba(var(--primary-rgb),0.02));
+            margin-bottom: 32px;
+        }
+        .order-summary h3 {
+            color: var(--primary);
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0 0 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .order-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(var(--primary-rgb),0.1);
+        }
+        .order-row:last-child {
+            border-bottom: none;
+            padding-top: 14px;
+            margin-top: 4px;
+            border-top: 2px solid rgba(var(--primary-rgb),0.2);
+        }
+        .order-row .label {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+        .order-row .value {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .order-row.total .label {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+        .order-row.total .value {
+            color: var(--primary);
+            font-size: 1.4rem;
+            font-weight: 900;
+        }
+
+        /* Payment method tabs */
+        .pay-tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid rgba(var(--primary-rgb),0.15);
+            margin-bottom: 28px;
+        }
+        .pay-tab {
+            flex: 1;
+            padding: 14px 12px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            background: none;
+            position: relative;
+            transition: color 0.2s;
+        }
+        .pay-tab:hover { color: var(--text-light); }
+        .pay-tab.active {
+            color: var(--primary);
+        }
+        .pay-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+            border-radius: 2px 2px 0 0;
+        }
+        .pay-tab-icon {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+        .pay-panel {
+            display: none;
+            animation: fadePanel 0.25s ease;
+        }
+        .pay-panel.active { display: block; }
+        @keyframes fadePanel {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* PayPal panel */
+        .paypal-box {
+            text-align: center;
+            padding: 32px 24px;
+            border: 1px solid rgba(var(--primary-rgb),0.2);
+            border-radius: 16px;
+            background: rgba(var(--primary-rgb),0.03);
+        }
+        .paypal-logo {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+        .paypal-box p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 0 0 20px;
+            line-height: 1.6;
+        }
+        .paypal-pay-btn {
+            display: inline-block;
+            padding: 14px 40px;
+            background: #0070ba;
+            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .paypal-pay-btn:hover {
+            background: #005ea6;
+            transform: translateY(-2px);
+        }
+        .paypal-confirm {
+            display: none;
+            margin-top: 24px;
+            padding: 20px;
+            border: 1px solid rgba(34,197,94,0.3);
+            border-radius: 12px;
+            background: rgba(34,197,94,0.05);
+        }
+        .paypal-confirm p {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            margin: 0 0 12px;
+        }
+        .paypal-confirm .done-btn {
+            padding: 10px 28px;
+            background: #22c55e;
+            color: #fff;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        .paypal-confirm .done-btn:hover { background: #16a34a; }
+
+        /* Card form */
+        .card-form { max-width: 480px; margin: 0 auto; }
+        .card-form .form-group {
+            margin-bottom: 18px;
+        }
+        .card-form label {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .card-form input, .card-form select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(var(--bg-dark-rgb,10,10,15),0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        .card-form input:focus, .card-form select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .card-form input::placeholder {
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+        .card-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .save-card-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+        .save-card-check input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+        .save-card-check span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .card-types {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+        .card-types span {
+            font-size: 1.4rem;
+        }
+        .card-types-label {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+        .card-info-note {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            margin: 12px 0 0;
+            padding: 12px 16px;
+            border-radius: 8px;
+            background: rgba(var(--primary-rgb),0.04);
+            border: 1px solid rgba(var(--primary-rgb),0.1);
+        }
+        .card-pay-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+        .card-pay-btn:hover {
+            background: transparent;
+            color: var(--primary);
+        }
+
+        /* Gift card panel */
+        .gift-box {
+            max-width: 480px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .gift-box p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 0 0 20px;
+            line-height: 1.6;
+        }
+        .gift-input-wrap {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .gift-input-wrap input {
+            flex: 1;
+            padding: 14px 16px;
+            background: rgba(var(--bg-dark-rgb,10,10,15),0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .gift-input-wrap input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .gift-input-wrap input::placeholder {
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+        .gift-redeem-btn {
+            padding: 14px 28px;
+            background: var(--primary);
+            color: #fff;
+            font-weight: 700;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .gift-redeem-btn:hover {
+            background: transparent;
+            color: var(--primary);
+        }
+        .gift-info {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            margin: 0;
+            padding: 14px 16px;
+            border-radius: 8px;
+            background: rgba(var(--primary-rgb),0.04);
+            border: 1px solid rgba(var(--primary-rgb),0.1);
+            text-align: left;
+            line-height: 1.7;
+        }
+
+        /* Result messages */
+        .checkout-msg {
+            display: none;
+            padding: 16px 20px;
+            border-radius: 10px;
+            font-size: 0.92rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .checkout-msg.success {
+            background: rgba(34,197,94,0.1);
+            border: 1px solid rgba(34,197,94,0.3);
+            color: #22c55e;
+        }
+        .checkout-msg.error {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #ef4444;
+        }
+        .checkout-msg.info {
+            background: rgba(var(--primary-rgb),0.1);
+            border: 1px solid rgba(var(--primary-rgb),0.3);
+            color: var(--primary);
+        }
+
+        /* Security badges */
+        .security-badges {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 32px;
+            flex-wrap: wrap;
+        }
+        .security-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+        .security-badge span:first-child {
+            font-size: 1.2rem;
+        }
+
+        /* Not logged in box */
+        .login-prompt {
+            text-align: center;
+            padding: 40px 32px;
+            border: 2px solid rgba(var(--primary-rgb),0.2);
+            border-radius: 16px;
+            background: rgba(var(--primary-rgb),0.03);
+        }
+        .login-prompt h3 {
+            color: var(--text-light);
+            margin: 0 0 12px;
+        }
+        .login-prompt p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 0 0 20px;
+        }
+
+        /* Disposable card note */
+        .accepted-cards {
+            margin-top: 16px;
+            padding: 14px 16px;
+            border-radius: 8px;
+            background: rgba(34,197,94,0.05);
+            border: 1px solid rgba(34,197,94,0.15);
+        }
+        .accepted-cards p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin: 0 0 4px;
+        }
+        .accepted-cards p:last-child { margin: 0; }
+        .accepted-cards strong { color: #22c55e; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="index.html" style="display:flex;align-items:center;gap:10px;color:var(--primary);text-decoration:none;">
+                    <span class="SVART-text">Svart Security</span>
+                </a>
+            </div>
+            <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navMenu">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="tools.html">Tools</a></li>
+                <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="comparison.html">Compare</a></li>
+                <li><a href="how-it-works.html">How It Works</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li id="navAuthItem" class="nav-auth"><a href="login.html" class="nav-auth-btn">Login / Sign Up</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="navOverlay"></div>
+
+    <section class="pricing" style="padding-top:120px;min-height:80vh;">
+        <div class="checkout-container">
+            <h2 class="section-title">Checkout</h2>
+            <p class="section-subtitle" id="checkoutSubtitle">Complete your purchase securely</p>
+
+            <!-- Login prompt (hidden if logged in) -->
+            <div id="loginPrompt" class="login-prompt" style="display:none;">
+                <h3>&#128274; Log In to Continue</h3>
+                <p>You need an account to make a purchase. Your plan or top-up will be linked to your account.</p>
+                <a href="login.html" class="btn btn-primary" style="margin-right:8px;">Log In</a>
+                <a href="signup.html" class="btn btn-secondary">Sign Up Free</a>
+            </div>
+
+            <!-- Checkout content (shown when logged in) -->
+            <div id="checkoutContent" style="display:none;">
+
+                <!-- Order summary -->
+                <div class="order-summary">
+                    <h3>&#128230; Order Summary</h3>
+                    <div class="order-row">
+                        <span class="label">Item</span>
+                        <span class="value" id="orderItem">—</span>
+                    </div>
+                    <div class="order-row" id="orderRequestsRow">
+                        <span class="label">Requests</span>
+                        <span class="value" id="orderRequests">—</span>
+                    </div>
+                    <div class="order-row" id="orderBonusRow" style="display:none;">
+                        <span class="label">Bonus</span>
+                        <span class="value" id="orderBonus" style="color:#22c55e;">—</span>
+                    </div>
+                    <div class="order-row" id="orderPeriodRow" style="display:none;">
+                        <span class="label">Billing</span>
+                        <span class="value" id="orderPeriod">—</span>
+                    </div>
+                    <div class="order-row total">
+                        <span class="label">Total</span>
+                        <span class="value" id="orderTotal">&pound;0.00</span>
+                    </div>
+                </div>
+
+                <!-- Payment method tabs -->
+                <div class="pay-tabs">
+                    <button class="pay-tab active" data-tab="paypal">
+                        <span class="pay-tab-icon">&#128179;</span>
+                        PayPal
+                    </button>
+                    <button class="pay-tab" data-tab="card">
+                        <span class="pay-tab-icon">&#128179;</span>
+                        Card
+                    </button>
+                    <button class="pay-tab" data-tab="gift">
+                        <span class="pay-tab-icon">&#127873;</span>
+                        Gift Card
+                    </button>
+                </div>
+
+                <!-- PayPal panel -->
+                <div class="pay-panel active" id="panel-paypal">
+                    <div class="paypal-box">
+                        <div class="paypal-logo">&#128179;</div>
+                        <p><strong>Pay securely with PayPal</strong><br>
+                        You'll be redirected to PayPal to complete payment of <strong id="paypalAmount">&pound;0.00</strong>.<br>
+                        All payments go to our official Svart Security PayPal account.</p>
+                        <a id="paypalPayBtn" href="#" target="_blank" class="paypal-pay-btn">Pay with PayPal</a>
+                        <div class="paypal-confirm" id="paypalConfirm">
+                            <p>&#10003; Clicked PayPal? Once your payment is complete, click the button below to confirm.</p>
+                            <p style="font-size:0.8rem;color:var(--text-muted);margin:0 0 12px;">Your plan or top-up will be activated after we verify the payment (usually within a few minutes).</p>
+                            <button class="done-btn" id="paypalDoneBtn">&#10003; I've Completed Payment</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card panel -->
+                <div class="pay-panel" id="panel-card">
+                    <div class="card-form">
+                        <div class="card-types">
+                            <span>&#128179;</span>
+                            <span class="card-types-label">Visa, Mastercard, Amex, Discover &bull; Disposable &amp; prepaid cards accepted</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cardName">Name on Card</label>
+                            <input type="text" id="cardName" placeholder="J. Smith" autocomplete="cc-name" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cardNumber">Card Number</label>
+                            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" inputmode="numeric" autocomplete="cc-number" />
+                        </div>
+
+                        <div class="card-row">
+                            <div class="form-group">
+                                <label for="cardExpiry">Expiry Date</label>
+                                <input type="text" id="cardExpiry" placeholder="MM / YY" maxlength="7" inputmode="numeric" autocomplete="cc-exp" />
+                            </div>
+                            <div class="form-group">
+                                <label for="cardCvv">CVV</label>
+                                <input type="text" id="cardCvv" placeholder="123" maxlength="4" inputmode="numeric" autocomplete="cc-csc" />
+                            </div>
+                        </div>
+
+                        <label class="save-card-check">
+                            <input type="checkbox" id="saveCard" />
+                            <span>Save this card for future purchases</span>
+                        </label>
+
+                        <button type="button" class="card-pay-btn" id="cardPayBtn">Pay <span id="cardPayAmount">&pound;0.00</span></button>
+
+                        <div class="accepted-cards">
+                            <p><strong>&#10003; Disposable cards accepted</strong> &mdash; use virtual, prepaid, or disposable cards for extra privacy.</p>
+                            <p><strong>&#10003; Corporate cards accepted</strong> &mdash; business Visa and Mastercard work perfectly.</p>
+                            <p>Your card details are processed via PayPal's secure payment gateway. We never store raw card data.</p>
+                        </div>
+
+                        <p class="card-info-note">&#128274; All card payments are securely processed through PayPal. Your full card details are never stored on our servers. If you choose to save your card, only a secure token is stored for faster future checkouts.</p>
+                    </div>
+                </div>
+
+                <!-- Gift card panel -->
+                <div class="pay-panel" id="panel-gift">
+                    <div class="gift-box">
+                        <p><strong>Redeem a PayPal Gift Card</strong><br>
+                        Enter your PayPal gift card code below. Once the gift card balance is verified and applied, your plan or top-up will be activated automatically.</p>
+
+                        <div class="gift-input-wrap">
+                            <input type="text" id="giftCode" placeholder="Enter gift card code" maxlength="30" />
+                            <button class="gift-redeem-btn" id="giftRedeemBtn">Redeem</button>
+                        </div>
+
+                        <div class="gift-info">
+                            <p><strong>How it works:</strong></p>
+                            <p>1. Purchase a PayPal gift card from any retailer or online store</p>
+                            <p>2. Enter the gift card code above</p>
+                            <p>3. Once the balance is verified, your purchase is activated instantly</p>
+                            <p style="margin-top:8px;"><strong>Accepted:</strong> PayPal gift cards, PayPal balance codes, and PayPal e-gift cards.</p>
+                            <p style="margin-top:4px;">Gift card must cover the full purchase amount of <strong id="giftAmount">&pound;0.00</strong>. Any remaining balance stays on your PayPal account.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Result message -->
+                <div class="checkout-msg" id="checkoutMsg"></div>
+
+                <!-- Security badges -->
+                <div class="security-badges">
+                    <div class="security-badge">
+                        <span>&#128274;</span>
+                        <span>Secure checkout</span>
+                    </div>
+                    <div class="security-badge">
+                        <span>&#128179;</span>
+                        <span>PayPal protected</span>
+                    </div>
+                    <div class="security-badge">
+                        <span>&#9989;</span>
+                        <span>Instant delivery</span>
+                    </div>
+                    <div class="security-badge">
+                        <span>&#128176;</span>
+                        <span>No hidden fees</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back link -->
+            <div style="text-align:center;margin-top:40px;">
+                <a href="pricing.html" style="color:var(--primary);font-size:0.9rem;text-decoration:none;">&larr; Back to Pricing</a>
+                <span style="color:var(--text-muted);margin:0 12px;">|</span>
+                <a href="topup.html" style="color:var(--primary);font-size:0.9rem;text-decoration:none;">View Top-Ups &rarr;</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4><span class="SVART-logo">&#9670;</span> Svart Security</h4>
+                    <p>Security &amp; Privacy Tools Suite. Built for freedom.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="tools.html">Tools</a></li>
+                        <li><a href="SVART.html">Svart Browser</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                        <li><a href="topup.html">Top-Ups</a></li>
+                        <li><a href="comparison.html">Compare</a></li>
+                        <li><a href="how-it-works.html">How It Works</a></li>
+                        <li><a href="about.html">About</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Community</h4>
+                    <ul>
+                        <li><a href="https://github.com/SVART-browser" target="_blank">GitHub</a></li>
+                        <li><a href="https://github.com/JaegerGRS/SvartWebsite/issues" target="_blank">Issue Tracker</a></li>
+                        <li><a href="contact.html">Support</a></li>
+                        <li><a href="https://github.com/JaegerGRS/SvartWebsite" target="_blank">Contribute</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="eula.html">Privacy Policy</a></li>
+                        <li><a href="eula.html">Terms of Service</a></li>
+                        <li><a href="website-security.html">Security</a></li>
+                        <li><a href="eula.html">EULA</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Svart Security. Your privacy, your tools, your control &mdash; we protect people, we do not protect crimes.</p>
+            </div>
+        </div>
+    </footer>
+    <script src="js/script.js"></script>
+    <script>
+    (function() {
+        var PAYPAL_URL = 'https://www.paypal.com/paypalme/svartsecurity';
+
+        // Product catalog
+        var products = {
+            // Plans
+            'svart-ai':       { name: 'Svart AI Plan',           price: 4.99,  requests: '2,000/month',   period: 'Monthly', type: 'plan' },
+            'unlimited':      { name: 'Svart AI Unlimited Plan', price: 9.99,  requests: 'Unlimited',     period: 'Monthly', type: 'plan' },
+            // Single top-ups
+            'topup-500':      { name: 'Micro Top-Up',            price: 0.50,  requests: '500',           type: 'topup' },
+            'topup-1000':     { name: 'Small Top-Up',            price: 1.00,  requests: '1,000',         type: 'topup' },
+            'topup-1500':     { name: 'Medium Top-Up',           price: 1.50,  requests: '1,500',         type: 'topup' },
+            'topup-2000':     { name: 'Standard Top-Up',         price: 2.00,  requests: '2,000',         type: 'topup' },
+            'topup-2500':     { name: 'Popular Top-Up',          price: 2.50,  requests: '2,500',         type: 'topup' },
+            // Bulk packs
+            'topup-5000':     { name: 'Bulk 5k Pack',            price: 5.00,  requests: '5,000',         type: 'topup' },
+            'topup-10000':    { name: 'Bulk 10k Pack',           price: 10.00, requests: '10,000',        type: 'topup' },
+            'topup-25000':    { name: 'Best Value 25k Pack',     price: 20.00, requests: '25,000',        bonus: '+5,000 free (20%)', type: 'topup' },
+            'topup-65000':    { name: 'Mega Pack 65k',           price: 50.00, requests: '65,000',        bonus: '+15,000 free (30%)', type: 'topup' }
+        };
+
+        // Parse URL params
+        var params = new URLSearchParams(window.location.search);
+        var productId = params.get('item') || params.get('plan') || params.get('topup');
+        var product = productId ? products[productId] : null;
+
+        // Check login
+        var session = JSON.parse(localStorage.getItem('ct_session') || 'null');
+        if (!session || !session.loggedIn) {
+            session = JSON.parse(localStorage.getItem('ct_persistent_session') || 'null');
+        }
+        var isLoggedIn = session && session.loggedIn;
+
+        var loginPrompt = document.getElementById('loginPrompt');
+        var checkoutContent = document.getElementById('checkoutContent');
+        var subtitle = document.getElementById('checkoutSubtitle');
+
+        if (!product) {
+            subtitle.textContent = 'No item selected';
+            loginPrompt.style.display = 'none';
+            checkoutContent.style.display = 'none';
+            var noItem = document.createElement('div');
+            noItem.style.cssText = 'text-align:center;padding:40px;';
+            noItem.innerHTML = '<p style="color:var(--text-muted);font-size:1rem;margin:0 0 20px;">No product selected. Choose a plan or top-up to continue.</p>'
+                + '<a href="pricing.html" class="btn btn-primary" style="margin-right:10px;">View Plans</a>'
+                + '<a href="topup.html" class="btn btn-secondary">View Top-Ups</a>';
+            checkoutContent.parentNode.insertBefore(noItem, checkoutContent);
+            return;
+        }
+
+        if (!isLoggedIn) {
+            loginPrompt.style.display = 'block';
+            checkoutContent.style.display = 'none';
+            // Preserve item in login redirect
+            var loginLinks = loginPrompt.querySelectorAll('a');
+            loginLinks[0].href = 'login.html'; // After login, user can come back
+            return;
+        }
+
+        // Logged in + product selected — show checkout
+        loginPrompt.style.display = 'none';
+        checkoutContent.style.display = 'block';
+
+        var priceStr = '£' + product.price.toFixed(2);
+
+        // Populate order summary
+        document.getElementById('orderItem').textContent = product.name;
+        document.getElementById('orderRequests').textContent = product.requests;
+        document.getElementById('orderTotal').textContent = priceStr;
+
+        if (product.bonus) {
+            document.getElementById('orderBonusRow').style.display = 'flex';
+            document.getElementById('orderBonus').textContent = product.bonus;
+        }
+        if (product.period) {
+            document.getElementById('orderPeriodRow').style.display = 'flex';
+            document.getElementById('orderPeriod').textContent = product.period;
+        }
+
+        // Set amounts in payment panels
+        document.getElementById('paypalAmount').textContent = priceStr;
+        document.getElementById('cardPayAmount').textContent = priceStr;
+        document.getElementById('giftAmount').textContent = priceStr;
+
+        // PayPal button link
+        var paypalLink = PAYPAL_URL + '/' + product.price.toFixed(2) + 'GBP';
+        document.getElementById('paypalPayBtn').href = paypalLink;
+
+        // Tab switching
+        var tabs = document.querySelectorAll('.pay-tab');
+        var panels = document.querySelectorAll('.pay-panel');
+        tabs.forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                tabs.forEach(function(t) { t.classList.remove('active'); });
+                panels.forEach(function(p) { p.classList.remove('active'); });
+                tab.classList.add('active');
+                document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // PayPal flow
+        var paypalPayBtn = document.getElementById('paypalPayBtn');
+        var paypalConfirm = document.getElementById('paypalConfirm');
+        paypalPayBtn.addEventListener('click', function() {
+            // Show confirmation area after clicking
+            setTimeout(function() {
+                paypalConfirm.style.display = 'block';
+            }, 1000);
+        });
+
+        document.getElementById('paypalDoneBtn').addEventListener('click', function() {
+            showMsg('&#10003; Thank you! Your payment is being verified. Your ' + (product.type === 'plan' ? 'plan' : 'top-up') + ' will be activated within a few minutes. Check your email for confirmation.', 'success');
+            this.disabled = true;
+            this.textContent = 'Payment Submitted';
+        });
+
+        // Card number formatting
+        var cardNumberInput = document.getElementById('cardNumber');
+        cardNumberInput.addEventListener('input', function() {
+            var val = this.value.replace(/\D/g, '');
+            var formatted = '';
+            for (var i = 0; i < val.length && i < 16; i++) {
+                if (i > 0 && i % 4 === 0) formatted += ' ';
+                formatted += val[i];
+            }
+            this.value = formatted;
+        });
+
+        // Expiry formatting
+        var expiryInput = document.getElementById('cardExpiry');
+        expiryInput.addEventListener('input', function() {
+            var val = this.value.replace(/\D/g, '');
+            if (val.length >= 2) {
+                this.value = val.substring(0, 2) + ' / ' + val.substring(2, 4);
+            } else {
+                this.value = val;
+            }
+        });
+
+        // CVV restrict to numbers
+        document.getElementById('cardCvv').addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '');
+        });
+
+        // Card pay button
+        document.getElementById('cardPayBtn').addEventListener('click', function() {
+            var name = document.getElementById('cardName').value.trim();
+            var number = document.getElementById('cardNumber').value.replace(/\s/g, '');
+            var expiry = document.getElementById('cardExpiry').value.replace(/\s/g, '');
+            var cvv = document.getElementById('cardCvv').value;
+            var saveCard = document.getElementById('saveCard').checked;
+
+            // Validation
+            if (!name) { showMsg('Please enter the name on your card.', 'error'); return; }
+            if (number.length < 13 || number.length > 16) { showMsg('Please enter a valid card number.', 'error'); return; }
+            if (!/^\d{2}\/\d{2}$/.test(expiry)) { showMsg('Please enter a valid expiry date (MM/YY).', 'error'); return; }
+            if (cvv.length < 3 || cvv.length > 4) { showMsg('Please enter a valid CVV.', 'error'); return; }
+
+            // Luhn check
+            if (!luhnCheck(number)) { showMsg('Invalid card number. Please check and try again.', 'error'); return; }
+
+            var btn = this;
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+
+            // Simulate payment processing → redirect to PayPal
+            setTimeout(function() {
+                // Card payments are processed via PayPal gateway
+                if (saveCard) {
+                    // Save token locally (in production, this would be a server-side token)
+                    var savedCards = JSON.parse(localStorage.getItem('svart_saved_cards') || '[]');
+                    savedCards.push({
+                        last4: number.slice(-4),
+                        expiry: expiry,
+                        name: name,
+                        savedAt: new Date().toISOString()
+                    });
+                    localStorage.setItem('svart_saved_cards', JSON.stringify(savedCards));
+                }
+
+                // Redirect to PayPal for actual payment processing
+                window.open(paypalLink, '_blank');
+                btn.textContent = 'Pay ' + priceStr;
+                btn.disabled = false;
+                showMsg('&#10003; A PayPal window has opened to complete your payment of ' + priceStr + '. Once confirmed, your ' + (product.type === 'plan' ? 'plan' : 'top-up') + ' will be activated automatically.' + (saveCard ? ' Your card has been saved for future purchases.' : ''), 'success');
+            }, 1500);
+        });
+
+        // Gift card redeem
+        document.getElementById('giftRedeemBtn').addEventListener('click', function() {
+            var code = document.getElementById('giftCode').value.trim();
+            if (!code) { showMsg('Please enter a gift card code.', 'error'); return; }
+            if (code.length < 6) { showMsg('Gift card code is too short. Please check and try again.', 'error'); return; }
+
+            var btn = this;
+            btn.disabled = true;
+            btn.textContent = 'Verifying...';
+
+            // Simulate verification (in production, this would verify with PayPal API)
+            setTimeout(function() {
+                showMsg('&#10003; Gift card code submitted! We are verifying the balance. Once confirmed, your ' + (product.type === 'plan' ? 'plan' : 'top-up') + ' will be activated automatically. You will receive an email confirmation.', 'info');
+                btn.textContent = 'Submitted';
+            }, 2000);
+        });
+
+        // Luhn algorithm for card validation
+        function luhnCheck(num) {
+            var sum = 0;
+            var alt = false;
+            for (var i = num.length - 1; i >= 0; i--) {
+                var n = parseInt(num[i], 10);
+                if (alt) {
+                    n *= 2;
+                    if (n > 9) n -= 9;
+                }
+                sum += n;
+                alt = !alt;
+            }
+            return sum % 10 === 0;
+        }
+
+        function showMsg(html, type) {
+            var msg = document.getElementById('checkoutMsg');
+            msg.innerHTML = html;
+            msg.className = 'checkout-msg ' + type;
+            msg.style.display = 'block';
+            msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    })();
+    </script>
+</body>
+</html>

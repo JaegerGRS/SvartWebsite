@@ -117,7 +117,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Always return the same message (don't reveal if email exists)
     return jsonResponse({
       success: true,
-      message: "If this email is registered, an admin will be able to assist you. You can also reset your password immediately using your activation key (secret key).",
+      message: "If this email is registered, an admin or moderator will review your request. This is a free service. You can also reset your password instantly at forgot-password.html using your secret key.",
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Internal server error";

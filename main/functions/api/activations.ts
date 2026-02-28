@@ -82,7 +82,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       return errorResponse("Server storage not configured.", 503);
     }
 
-    // List all activation keys from KV
+    // List all secret keys from KV
     const list = await context.env.USAGE_DATA.list({ prefix: "act:" });
     const numbers: Array<{
       number: string;
