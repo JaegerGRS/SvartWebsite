@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community - Svart Security</title>
+    <meta name="description" content="Svart Security community forum — report bugs, suggest features, and discuss our tools and services.">
+    <meta name="theme-color" content="#0a0a0f">
+    <link rel="stylesheet" href="css/style.css">
+    <script>!function(){var t=localStorage.getItem("svart_theme")||"midnight";document.documentElement.setAttribute("data-theme",t)}()</script>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f'/><text x='50' y='70' font-size='80' font-weight='bold' text-anchor='middle' fill='%237c3aed'>&#x25C6;</text></svg>">
+    <style>
+        /* ============ Community Page Styles ============ */
+        .community-hero {
+            padding: 80px 20px 40px;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(var(--primary-rgb), 0.06) 0%, transparent 100%);
+        }
+        .community-hero .section-subtitle {
+            margin: 0 auto 30px;
+        }
+
+        /* Category Filter Bar */
+        .community-filters {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            padding: 0 20px 30px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .filter-btn {
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.25s ease;
+        }
+        .filter-btn:hover,
+        .filter-btn.active {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(var(--primary-rgb), 0.08);
+        }
+        .filter-btn .filter-count {
+            display: inline-block;
+            min-width: 20px;
+            text-align: center;
+            font-size: 0.75rem;
+            padding: 1px 6px;
+            border-radius: 10px;
+            background: rgba(var(--primary-rgb), 0.15);
+            margin-left: 6px;
+        }
+
+        /* New Post Button */
+        .community-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px 20px;
+        }
+        .community-toolbar .post-count {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+        .btn-new-post {
+            padding: 10px 24px;
+            border-radius: 8px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-new-post:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(var(--primary-rgb), 0.3);
+        }
+
+        /* Post List */
+        .community-posts {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+        .post-card {
+            background: rgba(24, 24, 30, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin-bottom: 14px;
+            backdrop-filter: blur(10px);
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+        .post-card:hover {
+            border-color: var(--primary);
+            background: rgba(var(--primary-rgb), 0.04);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+        .post-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        .post-vote {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 40px;
+            gap: 2px;
+        }
+        .post-vote button {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        .post-vote button:hover {
+            color: var(--primary);
+            background: rgba(var(--primary-rgb), 0.1);
+        }
+        .post-vote button.voted {
+            color: var(--primary);
+        }
+        .post-vote .vote-count {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+        .post-card-body {
+            flex: 1;
+            min-width: 0;
+        }
+        .post-card-body h3 {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .post-card-body .post-excerpt {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .post-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 10px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+        .post-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .tag-bug { background: rgba(239,68,68,0.15); color: #f87171; }
+        .tag-feature { background: rgba(34,197,94,0.15); color: #4ade80; }
+        .tag-discussion { background: rgba(99,102,241,0.15); color: #818cf8; }
+        .tag-question { background: rgba(234,179,8,0.15); color: #facc15; }
+        .tag-announcement { background: rgba(168,85,247,0.15); color: #c084fc; }
+        .post-meta .reply-count {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Post Detail View */
+        .post-detail {
+            display: none;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+        .post-detail.active {
+            display: block;
+        }
+        .post-detail-back {
+            color: var(--primary);
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 0;
+        }
+        .post-detail-back:hover {
+            text-decoration: underline;
+        }
+        .post-detail-card {
+            background: rgba(24, 24, 30, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 28px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 24px;
+        }
+        .post-detail-card h2 {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            margin-bottom: 12px;
+        }
+        .post-detail-card .post-body {
+            color: var(--text-muted);
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .post-detail-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Replies */
+        .replies-section h3 {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 16px;
+        }
+        .reply-card {
+            background: rgba(24, 24, 30, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 10px;
+        }
+        .reply-card .reply-author {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+        .reply-card .reply-time {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-left: 10px;
+        }
+        .reply-card .reply-body {
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-top: 8px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .reply-form {
+            margin-top: 20px;
+        }
+        .reply-form textarea {
+            width: 100%;
+            min-height: 80px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--text-light);
+            padding: 12px;
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            resize: vertical;
+        }
+        .reply-form textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .reply-form .reply-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+
+        /* New Post Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-box {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 32px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .modal-box h2 {
+            font-size: 1.4rem;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+        .modal-box label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            margin-top: 14px;
+        }
+        .modal-box label:first-of-type {
+            margin-top: 0;
+        }
+        .modal-box input,
+        .modal-box select,
+        .modal-box textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--text-light);
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+        }
+        .modal-box input:focus,
+        .modal-box select:focus,
+        .modal-box textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .modal-box textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .modal-box select {
+            cursor: pointer;
+            appearance: auto;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .btn-cancel {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+        .btn-cancel:hover {
+            border-color: var(--text-muted);
+            color: var(--text-light);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state .empty-icon {
+            font-size: 3.5rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        .empty-state p {
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+        }
+        .empty-state .empty-hint {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* Loading */
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+        .loading-spinner .spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Status message */
+        .form-status {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .form-status.error { color: #ef4444; }
+        .form-status.success { color: #22c55e; }
+
+        /* Login prompt */
+        .login-prompt {
+            text-align: center;
+            padding: 30px;
+            background: rgba(var(--primary-rgb), 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .login-prompt p {
+            color: var(--text-muted);
+            margin-bottom: 14px;
+        }
+        .login-prompt a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .login-prompt a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .post-card-header { flex-direction: column; gap: 8px; }
+            .post-vote { flex-direction: row; min-width: auto; }
+            .post-detail-card { padding: 18px; }
+            .modal-box { padding: 20px; }
+            .community-toolbar { flex-direction: column; gap: 12px; align-items: stretch; }
+            .btn-new-post { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="index.html" style="display:flex;align-items:center;gap:10px;color:var(--primary);text-decoration:none;">
+                    <span class="SVART-text">Svart Security</span>
+                </a>
+            </div>
+            <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navMenu">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="tools.html">Tools</a></li>
+                <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li id="navAuthItem" class="nav-auth"><a href="login.html" class="nav-auth-btn">Login / Sign Up</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="navOverlay"></div>
+
+    <!-- Hero -->
+    <section class="community-hero">
+        <div class="container">
+            <h2 class="section-title">Community</h2>
+            <p class="section-subtitle">Report bugs, suggest features, share ideas, and discuss everything Svart Security</p>
+        </div>
+    </section>
+
+    <!-- Category Filters -->
+    <div class="community-filters" id="communityFilters">
+        <button class="filter-btn active" data-filter="all">All <span class="filter-count" id="countAll">0</span></button>
+        <button class="filter-btn" data-filter="bug">&#128027; Bug Reports <span class="filter-count" id="countBug">0</span></button>
+        <button class="filter-btn" data-filter="feature">&#128161; Feature Requests <span class="filter-count" id="countFeature">0</span></button>
+        <button class="filter-btn" data-filter="discussion">&#128172; Discussion <span class="filter-count" id="countDiscussion">0</span></button>
+        <button class="filter-btn" data-filter="question">&#10067; Questions <span class="filter-count" id="countQuestion">0</span></button>
+        <button class="filter-btn" data-filter="announcement">&#128227; Announcements <span class="filter-count" id="countAnnouncement">0</span></button>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="community-toolbar">
+        <span class="post-count" id="postCount">Loading posts...</span>
+        <button class="btn-new-post" id="btnNewPost">&#10010; New Post</button>
+    </div>
+
+    <!-- Post list view -->
+    <div class="community-posts" id="postList">
+        <div class="loading-spinner"><div class="spinner"></div><p style="margin-top:12px;">Loading posts...</p></div>
+    </div>
+
+    <!-- Post detail view -->
+    <div class="post-detail" id="postDetail">
+        <button class="post-detail-back" id="btnBackToList">&#8592; Back to posts</button>
+        <div id="postDetailContent"></div>
+    </div>
+
+    <!-- New Post Modal -->
+    <div class="modal-overlay" id="newPostModal">
+        <div class="modal-box">
+            <h2>Create a Post</h2>
+            <label for="postTitle">Title</label>
+            <input type="text" id="postTitle" placeholder="Short, descriptive title" maxlength="120" required>
+
+            <label for="postCategory">Category</label>
+            <select id="postCategory">
+                <option value="bug">&#128027; Bug Report</option>
+                <option value="feature">&#128161; Feature Request</option>
+                <option value="discussion" selected>&#128172; Discussion</option>
+                <option value="question">&#10067; Question</option>
+            </select>
+
+            <label for="postBody">Details</label>
+            <textarea id="postBody" placeholder="Describe the bug, feature, or topic in detail..." maxlength="5000"></textarea>
+
+            <div class="form-status" id="newPostStatus"></div>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" id="btnCancelPost">Cancel</button>
+                <button class="btn-new-post" id="btnSubmitPost">Post</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4><span class="SVART-logo">&#9670;</span> Svart Security</h4>
+                    <p>Security &amp; Privacy Tools Suite. Built for freedom.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="tools.html">Tools</a></li>
+                        <li><a href="SVART.html">Svart Browser</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                        <li><a href="topup.html">Top-Ups</a></li>
+                        <li><a href="about.html">About</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Community</h4>
+                    <ul>
+                        <li><a href="https://github.com/SVART-browser" target="_blank">GitHub</a></li>
+                        <li><a href="https://github.com/JaegerGRS/SvartWebsite/issues" target="_blank">Issue Tracker</a></li>
+                        <li><a href="community.html">Forum</a></li>
+                        <li><a href="contact.html">Support</a></li>
+                        <li><a href="https://github.com/JaegerGRS/SvartWebsite" target="_blank">Contribute</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="eula.html">Privacy Policy</a></li>
+                        <li><a href="eula.html">Terms of Service</a></li>
+                        <li><a href="website-security.html">Security</a></li>
+                        <li><a href="eula.html">EULA</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Svart Security. Your privacy, your tools, your control &mdash; we protect people, we do not protect crimes.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+    (function() {
+        // ========== Auth helpers ==========
+        function getSession() {
+            try {
+                return JSON.parse(localStorage.getItem('ct_persistent_session') || localStorage.getItem('ct_session') || 'null');
+            } catch(e) { return null; }
+        }
+        function getUsername() {
+            var s = getSession();
+            return s && s.username ? s.username : null;
+        }
+        function isLoggedIn() { return !!getUsername(); }
+
+        // ========== State ==========
+        let allPosts = [];
+        let currentFilter = 'all';
+        let currentPostId = null;
+
+        // ========== DOM refs ==========
+        const postListEl = document.getElementById('postList');
+        const postDetailEl = document.getElementById('postDetail');
+        const postDetailContent = document.getElementById('postDetailContent');
+        const postCountEl = document.getElementById('postCount');
+        const filtersEl = document.getElementById('communityFilters');
+        const modal = document.getElementById('newPostModal');
+        const btnNew = document.getElementById('btnNewPost');
+        const btnCancel = document.getElementById('btnCancelPost');
+        const btnSubmit = document.getElementById('btnSubmitPost');
+        const btnBack = document.getElementById('btnBackToList');
+        const statusEl = document.getElementById('newPostStatus');
+
+        // ========== API ==========
+        const API = '/api/community';
+
+        async function apiCall(method, path, body) {
+            const opts = { method, headers: { 'Content-Type': 'application/json' } };
+            if (body) opts.body = JSON.stringify(body);
+            const res = await fetch(API + path, opts);
+            return res.json();
+        }
+
+        // ========== Posts loading ==========
+        async function loadPosts() {
+            try {
+                const data = await apiCall('GET', '');
+                if (data.success) {
+                    allPosts = data.posts || [];
+                    // Sort by newest first
+                    allPosts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                } else {
+                    allPosts = [];
+                }
+            } catch(e) {
+                allPosts = [];
+            }
+            updateFilterCounts();
+            renderPosts();
+        }
+
+        function updateFilterCounts() {
+            const counts = { all: allPosts.length, bug: 0, feature: 0, discussion: 0, question: 0, announcement: 0 };
+            allPosts.forEach(p => { if (counts[p.category] !== undefined) counts[p.category]++; });
+            document.getElementById('countAll').textContent = counts.all;
+            document.getElementById('countBug').textContent = counts.bug;
+            document.getElementById('countFeature').textContent = counts.feature;
+            document.getElementById('countDiscussion').textContent = counts.discussion;
+            document.getElementById('countQuestion').textContent = counts.question;
+            document.getElementById('countAnnouncement').textContent = counts.announcement;
+        }
+
+        function getFilteredPosts() {
+            if (currentFilter === 'all') return allPosts;
+            return allPosts.filter(p => p.category === currentFilter);
+        }
+
+        function renderPosts() {
+            const posts = getFilteredPosts();
+            postCountEl.textContent = posts.length + ' post' + (posts.length !== 1 ? 's' : '');
+
+            if (posts.length === 0) {
+                postListEl.innerHTML = '<div class="empty-state"><div class="empty-icon">&#128172;</div><p>No posts yet</p><p class="empty-hint">Be the first to start a conversation!</p></div>';
+                return;
+            }
+
+            const tagLabels = { bug: 'Bug Report', feature: 'Feature Request', discussion: 'Discussion', question: 'Question', announcement: 'Announcement' };
+            const userVotes = JSON.parse(localStorage.getItem('community_votes') || '{}');
+
+            postListEl.innerHTML = posts.map(p => {
+                const tag = p.category || 'discussion';
+                const replyCount = (p.replies || []).length;
+                const hasVoted = userVotes[p.id] ? ' voted' : '';
+                const timeAgo = formatTimeAgo(p.createdAt);
+                return `
+                <div class="post-card" data-id="${p.id}">
+                    <div class="post-card-header">
+                        <div class="post-vote">
+                            <button class="vote-btn${hasVoted}" data-id="${p.id}" title="Upvote" onclick="event.stopPropagation(); window.communityVote('${p.id}')">&#9650;</button>
+                            <span class="vote-count">${p.votes || 0}</span>
+                        </div>
+                        <div class="post-card-body">
+                            <h3>${escapeHtml(p.title)}</h3>
+                            <p class="post-excerpt">${escapeHtml(p.body || '')}</p>
+                            <div class="post-meta">
+                                <span class="post-tag tag-${tag}">${tagLabels[tag] || tag}</span>
+                                <span>by <strong>${escapeHtml(p.author || 'Anonymous')}</strong></span>
+                                <span>${timeAgo}</span>
+                                <span class="reply-count">&#128488; ${replyCount} repl${replyCount !== 1 ? 'ies' : 'y'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // Click to open detail
+            postListEl.querySelectorAll('.post-card').forEach(card => {
+                card.addEventListener('click', () => openPost(card.dataset.id));
+            });
+        }
+
+        // ========== Post detail ==========
+        async function openPost(id) {
+            currentPostId = id;
+            // Get fresh data
+            let post;
+            try {
+                const data = await apiCall('GET', '/' + id);
+                if (data.success) post = data.post;
+            } catch(e) {}
+
+            if (!post) {
+                post = allPosts.find(p => p.id === id);
+            }
+            if (!post) return;
+
+            // Update local cache
+            const idx = allPosts.findIndex(p => p.id === id);
+            if (idx >= 0) allPosts[idx] = post;
+
+            const tagLabels = { bug: 'Bug Report', feature: 'Feature Request', discussion: 'Discussion', question: 'Question', announcement: 'Announcement' };
+            const tag = post.category || 'discussion';
+            const replies = post.replies || [];
+
+            postDetailContent.innerHTML = `
+                <div class="post-detail-card">
+                    <div class="post-detail-meta">
+                        <span class="post-tag tag-${tag}">${tagLabels[tag] || tag}</span>
+                        <span style="color:var(--text-muted)">by <strong style="color:var(--primary)">${escapeHtml(post.author || 'Anonymous')}</strong></span>
+                        <span style="color:var(--text-muted)">${formatTimeAgo(post.createdAt)}</span>
+                        <span style="color:var(--text-muted)">&#9650; ${post.votes || 0} votes</span>
+                    </div>
+                    <h2>${escapeHtml(post.title)}</h2>
+                    <div class="post-body">${escapeHtml(post.body || '')}</div>
+                </div>
+                <div class="replies-section">
+                    <h3>&#128488; ${replies.length} Repl${replies.length !== 1 ? 'ies' : 'y'}</h3>
+                    ${replies.map(r => `
+                        <div class="reply-card">
+                            <span class="reply-author">${escapeHtml(r.author || 'Anonymous')}</span>
+                            <span class="reply-time">${formatTimeAgo(r.createdAt)}</span>
+                            <div class="reply-body">${escapeHtml(r.body || '')}</div>
+                        </div>
+                    `).join('')}
+                    ${isLoggedIn() ? `
+                        <div class="reply-form">
+                            <textarea id="replyBody" placeholder="Write a reply..."></textarea>
+                            <div class="reply-actions">
+                                <button class="btn-new-post" id="btnSubmitReply" style="font-size:0.9rem;padding:8px 18px;">Reply</button>
+                            </div>
+                            <div class="form-status" id="replyStatus"></div>
+                        </div>
+                    ` : `
+                        <div class="login-prompt">
+                            <p><a href="login.html">Log in</a> or <a href="signup.html">sign up</a> to reply</p>
+                        </div>
+                    `}
+                </div>
+            `;
+
+            // Wire reply button
+            const replyBtn = document.getElementById('btnSubmitReply');
+            if (replyBtn) {
+                replyBtn.addEventListener('click', () => submitReply(id));
+            }
+
+            postListEl.style.display = 'none';
+            document.querySelector('.community-filters').style.display = 'none';
+            document.querySelector('.community-toolbar').style.display = 'none';
+            postDetailEl.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function submitReply(postId) {
+            const body = document.getElementById('replyBody').value.trim();
+            const statusEl = document.getElementById('replyStatus');
+            if (!body) {
+                statusEl.className = 'form-status error';
+                statusEl.textContent = 'Reply cannot be empty.';
+                return;
+            }
+            if (body.length < 3) {
+                statusEl.className = 'form-status error';
+                statusEl.textContent = 'Reply is too short.';
+                return;
+            }
+
+            const btn = document.getElementById('btnSubmitReply');
+            btn.disabled = true;
+            btn.textContent = 'Posting...';
+
+            try {
+                const data = await apiCall('POST', '/' + postId + '/reply', {
+                    username: getUsername(),
+                    body: body
+                });
+                if (data.success) {
+                    statusEl.className = 'form-status success';
+                    statusEl.textContent = 'Reply posted!';
+                    // Reload post
+                    setTimeout(() => openPost(postId), 500);
+                } else {
+                    statusEl.className = 'form-status error';
+                    statusEl.textContent = data.error || 'Failed to post reply.';
+                }
+            } catch(e) {
+                statusEl.className = 'form-status error';
+                statusEl.textContent = 'Network error. Please try again.';
+            }
+            btn.disabled = false;
+            btn.textContent = 'Reply';
+        }
+
+        // ========== Back to list ==========
+        btnBack.addEventListener('click', () => {
+            postDetailEl.classList.remove('active');
+            postListEl.style.display = '';
+            document.querySelector('.community-filters').style.display = '';
+            document.querySelector('.community-toolbar').style.display = '';
+            currentPostId = null;
+            loadPosts();
+        });
+
+        // ========== New Post Modal ==========
+        btnNew.addEventListener('click', () => {
+            if (!isLoggedIn()) {
+                modal.classList.add('active');
+                modal.querySelector('.modal-box').innerHTML = `
+                    <h2>Create a Post</h2>
+                    <div class="login-prompt" style="margin:0;">
+                        <p>You need to be logged in to create a post.</p>
+                        <p><a href="login.html">Log in</a> or <a href="signup.html">sign up</a> to get started.</p>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-cancel" onclick="document.getElementById('newPostModal').classList.remove('active')">Close</button>
+                    </div>
+                `;
+                return;
+            }
+            // Reset modal
+            modal.querySelector('.modal-box').innerHTML = `
+                <h2>Create a Post</h2>
+                <label for="postTitle">Title</label>
+                <input type="text" id="postTitle" placeholder="Short, descriptive title" maxlength="120">
+                <label for="postCategory">Category</label>
+                <select id="postCategory">
+                    <option value="bug">&#128027; Bug Report</option>
+                    <option value="feature">&#128161; Feature Request</option>
+                    <option value="discussion" selected>&#128172; Discussion</option>
+                    <option value="question">&#10067; Question</option>
+                </select>
+                <label for="postBody">Details</label>
+                <textarea id="postBody" placeholder="Describe the bug, feature, or topic in detail..." maxlength="5000"></textarea>
+                <div class="form-status" id="newPostStatus"></div>
+                <div class="modal-actions">
+                    <button class="btn-cancel" id="btnCancelPost2">Cancel</button>
+                    <button class="btn-new-post" id="btnSubmitPost2">Post</button>
+                </div>
+            `;
+            modal.classList.add('active');
+            document.getElementById('btnCancelPost2').addEventListener('click', () => modal.classList.remove('active'));
+            document.getElementById('btnSubmitPost2').addEventListener('click', submitNewPost);
+        });
+
+        btnCancel.addEventListener('click', () => modal.classList.remove('active'));
+        btnSubmit.addEventListener('click', submitNewPost);
+
+        // Close modal on overlay click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('active');
+        });
+
+        async function submitNewPost() {
+            const title = document.getElementById('postTitle').value.trim();
+            const category = document.getElementById('postCategory').value;
+            const body = document.getElementById('postBody').value.trim();
+            const st = document.getElementById('newPostStatus');
+
+            if (!title || title.length < 3) {
+                st.className = 'form-status error';
+                st.textContent = 'Title must be at least 3 characters.';
+                return;
+            }
+            if (!body || body.length < 10) {
+                st.className = 'form-status error';
+                st.textContent = 'Details must be at least 10 characters.';
+                return;
+            }
+
+            const submitBtn = document.querySelector('.modal-box .btn-new-post');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Posting...';
+
+            try {
+                const data = await apiCall('POST', '', {
+                    username: getUsername(),
+                    title,
+                    category,
+                    body
+                });
+                if (data.success) {
+                    st.className = 'form-status success';
+                    st.textContent = 'Post created!';
+                    setTimeout(() => {
+                        modal.classList.remove('active');
+                        loadPosts();
+                    }, 600);
+                } else {
+                    st.className = 'form-status error';
+                    st.textContent = data.error || 'Failed to create post.';
+                }
+            } catch(e) {
+                st.className = 'form-status error';
+                st.textContent = 'Network error. Please try again.';
+            }
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Post';
+        }
+
+        // ========== Voting ==========
+        window.communityVote = async function(postId) {
+            const userVotes = JSON.parse(localStorage.getItem('community_votes') || '{}');
+            if (userVotes[postId]) return; // Already voted
+
+            try {
+                const data = await apiCall('POST', '/' + postId + '/vote', {});
+                if (data.success) {
+                    userVotes[postId] = true;
+                    localStorage.setItem('community_votes', JSON.stringify(userVotes));
+                    // Update local post
+                    const p = allPosts.find(x => x.id === postId);
+                    if (p) p.votes = (p.votes || 0) + 1;
+                    renderPosts();
+                }
+            } catch(e) {}
+        };
+
+        // ========== Filters ==========
+        filtersEl.addEventListener('click', (e) => {
+            const btn = e.target.closest('.filter-btn');
+            if (!btn) return;
+            filtersEl.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            renderPosts();
+        });
+
+        // ========== Helpers ==========
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function formatTimeAgo(ts) {
+            if (!ts) return '';
+            const diff = Date.now() - ts;
+            const mins = Math.floor(diff / 60000);
+            if (mins < 1) return 'just now';
+            if (mins < 60) return mins + 'm ago';
+            const hrs = Math.floor(mins / 60);
+            if (hrs < 24) return hrs + 'h ago';
+            const days = Math.floor(hrs / 24);
+            if (days < 30) return days + 'd ago';
+            const months = Math.floor(days / 30);
+            return months + 'mo ago';
+        }
+
+        // ========== Init ==========
+        loadPosts();
+    })();
+    </script>
+</body>
+</html>
