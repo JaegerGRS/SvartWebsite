@@ -29,7 +29,7 @@ if (existsSync('js/script.js')) cpSync('js/script.js', 'main/js/script.js');
 if (existsSync('pages')) cpSync('pages', 'main/pages', { recursive: true });
 
 // Config files
-for (const f of ['robots.txt', 'sitemap.xml', '_headers', '_redirects', 'wrangler.toml']) {
+for (const f of ['robots.txt', 'sitemap.xml', '_headers', '_redirects']) {
   if (existsSync(f)) cpSync(f, `main/${f}`);
 }
 
