@@ -6,6 +6,7 @@
     <title>Admin - Registration Log</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>!function(){var t=localStorage.getItem("svart_theme")||"midnight";document.documentElement.setAttribute("data-theme",t)}()</script>
     <style>
         .admin-login { max-width: 400px; margin: 120px auto; padding: 32px; background: rgba(20,20,30,0.9); border: 1px solid var(--border-color); border-radius: 16px; }
@@ -107,6 +108,10 @@
                 <div class="stat-num" id="pendingResets">-</div>
                 <div class="stat-label">Pending Resets</div>
             </div>
+            <div class="stat-card danger" id="guardianStatCard" style="display:none;">
+                <div class="stat-num" id="pendingGuardian">-</div>
+                <div class="stat-label">Guardian Reports</div>
+            </div>
         </div>
 
         <!-- Email Search -->
@@ -157,6 +162,49 @@
                     <tr><td colspan="6" class="no-data">Loading...</td></tr>
                 </tbody>
             </table>
+        </div>
+
+        <!-- Guardian Reports -->
+        <h2 class="section-title">&#128737; NetworkGuardian Reports</h2>
+        <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Violation reports from Svart Suite apps. Review, add notes, generate a PDF, and escalate to <strong style="color:var(--primary);">security@svartsecurity.org</strong> for law enforcement forwarding.</p>
+        <div id="guardianMsg" style="display:none;margin-bottom:16px;padding:12px 16px;border-radius:8px;font-size:0.9rem;"></div>
+        <div style="overflow-x:auto;">
+            <table class="reg-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>App</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="guardianTableBody">
+                    <tr><td colspan="7" class="no-data">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Guardian Report Detail Modal (hidden) -->
+        <div id="guardianDetailModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;overflow-y:auto;">
+            <div style="max-width:700px;margin:60px auto;padding:32px;background:rgba(20,20,30,0.98);border:1px solid var(--border-color);border-radius:16px;">
+                <h2 style="color:var(--primary);margin-bottom:16px;">&#128737; Report Details</h2>
+                <div id="guardianDetailContent"></div>
+                <div style="margin-top:20px;">
+                    <label style="color:var(--text-muted);font-size:0.85rem;display:block;margin-bottom:6px;font-weight:600;">Review Notes</label>
+                    <textarea id="guardianNotes" rows="4" style="width:100%;padding:12px;background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:8px;color:var(--text-light);font-size:0.9rem;font-family:inherit;resize:vertical;"></textarea>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+                    <button class="btn btn-primary" id="guardianSaveNotes" style="padding:10px 20px;">Save Notes</button>
+                    <button class="btn btn-primary" id="guardianMarkReviewed" style="padding:10px 20px;background:#22c55e;border-color:#22c55e;">&#10003; Mark Reviewed</button>
+                    <button class="btn btn-primary" id="guardianGenPdf" style="padding:10px 20px;background:#3b82f6;border-color:#3b82f6;">&#128196; Generate PDF</button>
+                    <button class="btn btn-primary" id="guardianEscalate" style="padding:10px 20px;background:#ef4444;border-color:#ef4444;">&#9888; Escalate to Authorities</button>
+                    <button class="btn btn-secondary" id="guardianDismiss" style="padding:10px 20px;">Dismiss</button>
+                    <button class="btn btn-secondary" id="guardianCloseModal" style="padding:10px 20px;margin-left:auto;">Close</button>
+                </div>
+            </div>
         </div>
 
         <!-- Full Registration Table -->
@@ -248,8 +296,14 @@
             notAdminScreen.style.display = '';
             loginScreen.style.display = 'none';
             panel.style.display = 'none';
+        } else if (adminUser.email.toLowerCase() === ADMIN_EMAIL) {
+            // Primary admin bypasses key gate — always has access to view keys
+            notAdminScreen.style.display = 'none';
+            loginScreen.style.display = 'none';
+            adminToken = ADMIN_API_SECRET;
+            showPanel();
         } else {
-            // ALWAYS require activation key on every visit — no session caching
+            // Other admins require activation key on every visit
             notAdminScreen.style.display = 'none';
             loginScreen.style.display = '';
             panel.style.display = 'none';
@@ -263,7 +317,7 @@
             loginScreen.style.display = '';
             secretInput.value = '';
         });
-        refreshBtn.addEventListener('click', function() { loadRegistrations(); loadResetRequests(); });
+        refreshBtn.addEventListener('click', function() { loadRegistrations(); loadResetRequests(); loadGuardianReports(); });
         searchBtn.addEventListener('click', doSearch);
         searchEmail.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
 
@@ -376,6 +430,7 @@
             loadRegistrations();
             loadResetRequests();
             loadRoles();
+            loadGuardianReports();
         }
 
         var cachedRegs = []; // shared between reg table and role table
@@ -674,6 +729,267 @@
                 setTimeout(function() { el.textContent = orig; }, 1500);
             });
         };
+
+        // ======== NetworkGuardian Reports ========
+        var ADMIN_FULL_NAME = 'Jaeger George Richard Stratton';
+        var SECURITY_EMAIL = 'security@svartsecurity.org';
+        var guardianTableBody = document.getElementById('guardianTableBody');
+        var guardianMsg = document.getElementById('guardianMsg');
+        var guardianStatCard = document.getElementById('guardianStatCard');
+        var pendingGuardianEl = document.getElementById('pendingGuardian');
+        var guardianDetailModal = document.getElementById('guardianDetailModal');
+        var guardianDetailContent = document.getElementById('guardianDetailContent');
+        var guardianNotesEl = document.getElementById('guardianNotes');
+        var currentGuardianReport = null;
+
+        async function loadGuardianReports() {
+            guardianTableBody.innerHTML = '<tr><td colspan="7" class="no-data">Loading...</td></tr>';
+            try {
+                var resp = await fetch('/api/guardian-reports', {
+                    headers: { 'Authorization': 'Bearer ' + adminToken }
+                });
+                var data = await resp.json();
+                if (!data.success) {
+                    guardianTableBody.innerHTML = '<tr><td colspan="7" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>';
+                    return;
+                }
+
+                var reports = data.reports || [];
+                var pending = data.pending || 0;
+                var escalated = data.escalated || 0;
+
+                if (pending > 0 || escalated > 0) {
+                    guardianStatCard.style.display = '';
+                    pendingGuardianEl.textContent = pending + (escalated > 0 ? ' / ' + escalated + ' esc' : '');
+                } else {
+                    guardianStatCard.style.display = 'none';
+                }
+
+                if (reports.length === 0) {
+                    guardianTableBody.innerHTML = '<tr><td colspan="7" class="no-data">No guardian reports yet.</td></tr>';
+                    return;
+                }
+
+                guardianTableBody.innerHTML = reports.map(function(r, i) {
+                    var num = reports.length - i;
+                    var dateStr = r.date ? new Date(r.date).toLocaleString() : '-';
+                    var descShort = (r.description || '').substring(0, 60) + ((r.description || '').length > 60 ? '...' : '');
+                    var statusColors = { pending: '#f59e0b', reviewed: '#22c55e', escalated: '#ef4444', dismissed: '#6b7280' };
+                    var statusBadge = '<span style="color:' + (statusColors[r.status] || '#888') + ';font-weight:600;">' + escHtml(r.status || 'pending') + '</span>';
+                    var typeBadge = r.violationType === 'Security' ? '<span style="color:#ef4444;font-weight:600;">Security</span>'
+                        : r.violationType === 'TOS' ? '<span style="color:#f59e0b;font-weight:600;">TOS</span>'
+                        : r.violationType === 'Privacy' ? '<span style="color:#3b82f6;font-weight:600;">Privacy</span>'
+                        : '<span style="color:var(--text-muted);">' + escHtml(r.violationType) + '</span>';
+                    return '<tr style="cursor:pointer;" onclick="viewGuardianReport(\'' + escAttr(r.id) + '\')">' +
+                        '<td>' + num + '</td>' +
+                        '<td>' + dateStr + '</td>' +
+                        '<td>' + escHtml(r.app) + '</td>' +
+                        '<td>' + typeBadge + '</td>' +
+                        '<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;">' + escHtml(descShort) + '</td>' +
+                        '<td>' + statusBadge + '</td>' +
+                        '<td><button class="resolve-btn" style="font-size:0.8rem;">View</button></td>' +
+                        '</tr>';
+                }).join('');
+            } catch (e) {
+                guardianTableBody.innerHTML = '<tr><td colspan="7" class="no-data">Network error loading guardian reports.</td></tr>';
+            }
+        }
+
+        // View detail
+        window.viewGuardianReport = function(reportId) {
+            // Find report in table data (re-fetch single)
+            fetch('/api/guardian-reports', { headers: { 'Authorization': 'Bearer ' + adminToken } })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var report = (data.reports || []).find(function(r) { return r.id === reportId; });
+                    if (!report) { alert('Report not found.'); return; }
+                    currentGuardianReport = report;
+                    guardianNotesEl.value = report.notes || '';
+                    guardianDetailContent.innerHTML = '<table style="width:100%;border-collapse:collapse;">' +
+                        '<tr><td style="padding:8px 12px;color:var(--text-muted);width:160px;">Report ID</td><td style="padding:8px 12px;color:var(--text-light);font-family:monospace;font-size:0.85rem;">' + escHtml(report.id) + '</td></tr>' +
+                        '<tr><td style="padding:8px 12px;color:var(--text-muted);">Date Filed</td><td style="padding:8px 12px;color:var(--text-light);">' + new Date(report.date).toLocaleString() + '</td></tr>' +
+                        '<tr><td style="padding:8px 12px;color:var(--text-muted);">Source App</td><td style="padding:8px 12px;color:var(--text-light);">' + escHtml(report.app) + '</td></tr>' +
+                        '<tr><td style="padding:8px 12px;color:var(--text-muted);">Violation Type</td><td style="padding:8px 12px;color:#ef4444;font-weight:600;">' + escHtml(report.violationType) + '</td></tr>' +
+                        '<tr><td style="padding:8px 12px;color:var(--text-muted);">Submitter</td><td style="padding:8px 12px;color:var(--text-light);">' + escHtml(report.submitterEmail || report.userId || 'Anonymous') + '</td></tr>' +
+                        '<tr><td style="padding:8px 12px;color:var(--text-muted);">Country</td><td style="padding:8px 12px;color:var(--text-light);">' + escHtml(report.country || 'Unknown') + '</td></tr>' +
+                        '<tr><td style="padding:8px 12px;color:var(--text-muted);">IP Address</td><td style="padding:8px 12px;color:var(--text-light);font-family:monospace;">' + escHtml(report.ip || 'Unknown') + '</td></tr>' +
+                        '<tr><td style="padding:8px 12px;color:var(--text-muted);">Status</td><td style="padding:8px 12px;color:var(--text-light);font-weight:600;">' + escHtml(report.status) + '</td></tr>' +
+                        (report.reviewedBy ? '<tr><td style="padding:8px 12px;color:var(--text-muted);">Reviewed By</td><td style="padding:8px 12px;color:var(--text-light);">' + escHtml(report.reviewedBy) + ' (' + (report.reviewedAt ? new Date(report.reviewedAt).toLocaleString() : '-') + ')</td></tr>' : '') +
+                        (report.escalatedAt ? '<tr><td style="padding:8px 12px;color:var(--text-muted);">Escalated At</td><td style="padding:8px 12px;color:#ef4444;font-weight:600;">' + new Date(report.escalatedAt).toLocaleString() + '</td></tr>' : '') +
+                        '</table>' +
+                        '<h3 style="color:var(--primary);margin:20px 0 8px;">Description</h3>' +
+                        '<div style="background:rgba(var(--bg-dark-rgb),0.5);border:1px solid var(--border-color);border-radius:8px;padding:16px;white-space:pre-wrap;color:var(--text-light);font-size:0.9rem;">' + escHtml(report.description) + '</div>' +
+                        (report.details ? '<h3 style="color:var(--primary);margin:20px 0 8px;">Additional Details</h3><pre style="background:rgba(var(--bg-dark-rgb),0.5);border:1px solid var(--border-color);border-radius:8px;padding:16px;color:var(--text-light);font-size:0.85rem;overflow-x:auto;">' + escHtml(JSON.stringify(report.details, null, 2)) + '</pre>' : '');
+                    guardianDetailModal.style.display = '';
+                });
+        };
+
+        // Close modal
+        document.getElementById('guardianCloseModal').addEventListener('click', function() {
+            guardianDetailModal.style.display = 'none';
+            currentGuardianReport = null;
+        });
+
+        // Save notes
+        document.getElementById('guardianSaveNotes').addEventListener('click', async function() {
+            if (!currentGuardianReport) return;
+            var btn = this;
+            btn.disabled = true; btn.textContent = 'Saving...';
+            try {
+                await fetch('/api/guardian-reports', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
+                    body: JSON.stringify({ reportId: currentGuardianReport.id, notes: guardianNotesEl.value, reviewerEmail: adminUser.email })
+                });
+                guardianMsg.style.display = ''; guardianMsg.style.background = 'rgba(34,197,94,0.15)';
+                guardianMsg.style.color = '#22c55e'; guardianMsg.textContent = '\u2713 Notes saved.';
+            } catch (e) {
+                guardianMsg.style.display = ''; guardianMsg.style.background = 'rgba(239,68,68,0.15)';
+                guardianMsg.style.color = '#ef4444'; guardianMsg.textContent = 'Failed to save notes.';
+            }
+            btn.disabled = false; btn.textContent = 'Save Notes';
+        });
+
+        // Mark reviewed
+        document.getElementById('guardianMarkReviewed').addEventListener('click', async function() {
+            if (!currentGuardianReport) return;
+            var btn = this; btn.disabled = true;
+            try {
+                await fetch('/api/guardian-reports', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
+                    body: JSON.stringify({ reportId: currentGuardianReport.id, status: 'reviewed', notes: guardianNotesEl.value, reviewerEmail: adminUser.email })
+                });
+                guardianDetailModal.style.display = 'none';
+                loadGuardianReports();
+                guardianMsg.style.display = ''; guardianMsg.style.background = 'rgba(34,197,94,0.15)';
+                guardianMsg.style.color = '#22c55e'; guardianMsg.textContent = '\u2713 Report marked as reviewed.';
+            } catch (e) { alert('Failed to update.'); }
+            btn.disabled = false;
+        });
+
+        // Dismiss
+        document.getElementById('guardianDismiss').addEventListener('click', async function() {
+            if (!currentGuardianReport) return;
+            if (!confirm('Dismiss this report? It will be marked as dismissed.')) return;
+            try {
+                await fetch('/api/guardian-reports', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
+                    body: JSON.stringify({ reportId: currentGuardianReport.id, status: 'dismissed', notes: guardianNotesEl.value, reviewerEmail: adminUser.email })
+                });
+                guardianDetailModal.style.display = 'none';
+                loadGuardianReports();
+            } catch (e) { alert('Failed to dismiss.'); }
+        });
+
+        // Generate PDF
+        document.getElementById('guardianGenPdf').addEventListener('click', function() {
+            if (!currentGuardianReport) return;
+            var r = currentGuardianReport;
+            var jsPDF = window.jspdf.jsPDF;
+            var doc = new jsPDF();
+            var y = 20;
+            var lh = 7; // line height
+            var margin = 20;
+            var pageW = doc.internal.pageSize.getWidth();
+
+            function addLine(text, opts) {
+                opts = opts || {};
+                if (y > 270) { doc.addPage(); y = 20; }
+                doc.setFontSize(opts.size || 10);
+                doc.setFont(undefined, opts.bold ? 'bold' : 'normal');
+                doc.setTextColor(opts.color || '#000000');
+                if (opts.wrap) {
+                    var lines = doc.splitTextToSize(text, pageW - margin * 2);
+                    doc.text(lines, margin, y);
+                    y += lines.length * (lh * 0.8);
+                } else {
+                    doc.text(text, margin, y);
+                    y += lh;
+                }
+            }
+
+            addLine('FORMAL INCIDENT REPORT', { size: 16, bold: true });
+            addLine('For Law Enforcement Forwarding', { size: 10, color: '#ef4444' });
+            y += 4;
+            addLine('Prepared by: ' + ADMIN_FULL_NAME, { bold: true });
+            addLine('Organisation: Svart Suite / Svart Security');
+            addLine('Contact: ' + ADMIN_EMAIL);
+            addLine('Security Email: ' + SECURITY_EMAIL);
+            addLine('Date Prepared: ' + new Date().toLocaleString());
+            y += 6;
+
+            doc.setDrawColor(150); doc.line(margin, y, pageW - margin, y); y += 8;
+
+            addLine('REPORT DETAILS', { size: 13, bold: true });
+            y += 2;
+            addLine('Report ID: ' + r.id);
+            addLine('Date Filed: ' + new Date(r.date).toLocaleString());
+            addLine('Source App: ' + r.app);
+            addLine('Violation Type: ' + r.violationType, { bold: true, color: '#cc0000' });
+            addLine('Submitter: ' + (r.submitterEmail || r.userId || 'Anonymous'));
+            addLine('Origin Country: ' + (r.country || 'Unknown'));
+            addLine('Origin IP: ' + (r.ip || 'Unknown'));
+            y += 6;
+
+            addLine('DESCRIPTION', { size: 13, bold: true }); y += 2;
+            addLine(r.description || '(none)', { wrap: true });
+            y += 6;
+
+            if (r.details) {
+                addLine('ADDITIONAL DETAILS', { size: 13, bold: true }); y += 2;
+                addLine(JSON.stringify(r.details, null, 2), { wrap: true, size: 8 });
+                y += 6;
+            }
+
+            addLine('REVIEW NOTES', { size: 13, bold: true }); y += 2;
+            addLine(guardianNotesEl.value || r.notes || '(No notes)', { wrap: true });
+            y += 6;
+
+            doc.setDrawColor(150); doc.line(margin, y, pageW - margin, y); y += 8;
+
+            addLine('CHAIN OF CUSTODY', { size: 13, bold: true }); y += 2;
+            addLine('1. Report received: ' + new Date(r.date).toLocaleString());
+            if (r.reviewedBy) addLine('2. Reviewed by ' + r.reviewedBy + ': ' + (r.reviewedAt ? new Date(r.reviewedAt).toLocaleString() : '-'));
+            if (r.escalatedAt) addLine('3. Escalated for law enforcement: ' + new Date(r.escalatedAt).toLocaleString());
+            addLine((r.reviewedBy ? '4' : '2') + '. PDF generated: ' + new Date().toLocaleString());
+            y += 8;
+
+            addLine('This report has been reviewed and is being forwarded to the appropriate', { wrap: true, size: 9, color: '#666666' });
+            addLine('authorities. This PDF should be attached when submitting to any tip line.', { size: 9, color: '#666666' });
+            y += 10;
+
+            addLine(ADMIN_FULL_NAME, { bold: true }); 
+            addLine('Svart Suite \u2014 Administrator');
+            addLine(ADMIN_EMAIL);
+
+            doc.save('SvartSuite-Incident-Report-' + r.id.replace(/:/g, '-') + '.pdf');
+        });
+
+        // Escalate to authorities
+        document.getElementById('guardianEscalate').addEventListener('click', async function() {
+            if (!currentGuardianReport) return;
+            if (!confirm('\u26a0\ufe0f ESCALATE TO AUTHORITIES\n\nThis will:\n1. Mark the report as escalated\n2. Email the full report to ' + SECURITY_EMAIL + ' and ' + ADMIN_EMAIL + '\n3. Include ' + ADMIN_FULL_NAME + ' as the reporting party\n\nA PDF should also be generated for the tip line submission.\n\nProceed?')) return;
+            var btn = this; btn.disabled = true; btn.textContent = 'Escalating...';
+            try {
+                var resp = await fetch('/api/guardian-reports', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
+                    body: JSON.stringify({ reportId: currentGuardianReport.id, status: 'escalated', notes: guardianNotesEl.value, reviewerEmail: adminUser.email })
+                });
+                var data = await resp.json();
+                guardianDetailModal.style.display = 'none';
+                loadGuardianReports();
+                guardianMsg.style.display = ''; guardianMsg.style.background = 'rgba(239,68,68,0.15)';
+                guardianMsg.style.color = '#ef4444';
+                guardianMsg.textContent = '\u26a0 Report escalated. Email sent to ' + SECURITY_EMAIL + ' by ' + ADMIN_FULL_NAME + '. Generate and save the PDF for tip line submission.';
+            } catch (e) {
+                guardianMsg.style.display = ''; guardianMsg.style.background = 'rgba(239,68,68,0.15)';
+                guardianMsg.style.color = '#ef4444'; guardianMsg.textContent = 'Failed to escalate.';
+            }
+            btn.disabled = false; btn.innerHTML = '&#9888; Escalate to Authorities';
+        });
     })();
     </script>
     <script src="js/script.js"></script>
