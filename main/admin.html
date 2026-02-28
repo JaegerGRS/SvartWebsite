@@ -117,6 +117,7 @@
         <div class="tab-bar">
             <button class="tab-btn active" data-tab="guardian">&#128737; Guardian Reports <span class="badge" id="guardianBadge" style="display:none;">0</span></button>
             <button class="tab-btn" data-tab="resets">&#128274; Password Resets <span class="badge" id="resetBadge" style="display:none;">0</span></button>
+            <button class="tab-btn" data-tab="reglog">&#128203; Registrations <span class="badge" id="reglogBadge" style="display:none;">0</span></button>
             <button class="tab-btn" data-tab="modreports">&#128172; Mod Reports <span class="badge" id="modreportsBadge" style="display:none;">0</span></button>
         </div>
 
@@ -139,6 +140,17 @@
                 <table class="reg-table">
                     <thead><tr><th>#</th><th>Email</th><th>Registered?</th><th>Date</th><th>Status</th><th></th></tr></thead>
                     <tbody id="resetTableBody"><tr><td colspan="6" class="no-data">Loading...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab: Registration Log -->
+        <div class="tab-panel" id="panel-reglog">
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">All registered accounts with their emails and activation keys.</p>
+            <div style="overflow-x:auto;">
+                <table class="reg-table">
+                    <thead><tr><th>#</th><th>Email</th><th>Activation Key</th><th>Display Name</th><th>Role</th><th>Date</th><th></th></tr></thead>
+                    <tbody id="regTableBody"><tr><td colspan="7" class="no-data">Loading...</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -251,7 +263,7 @@
         loginBtn.addEventListener('click', doLogin);
         secretInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
         logoutBtn.addEventListener('click', function() { adminToken = ''; panel.style.display = 'none'; loginScreen.style.display = ''; secretInput.value = ''; });
-        refreshBtn.addEventListener('click', function() { loadResetRequests(); loadGuardianReports(); loadModReports(); loadStats(); });
+        refreshBtn.addEventListener('click', function() { loadResetRequests(); loadGuardianReports(); loadRegistrations(); loadModReports(); loadStats(); });
         document.getElementById('searchBtn').addEventListener('click', doSearch);
         document.getElementById('searchEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
 
@@ -275,6 +287,7 @@
             loadStats();
             loadGuardianReports();
             loadResetRequests();
+            loadRegistrations();
             loadModReports();
         }
 
@@ -538,6 +551,31 @@
             } catch (e) { guardianMsg.style.display = ''; guardianMsg.style.background = 'rgba(239,68,68,0.15)'; guardianMsg.style.color = '#ef4444'; guardianMsg.textContent = 'Failed to escalate.'; }
             btn.disabled = false; btn.innerHTML = '&#9888; Escalate to Authorities';
         });
+
+        // ===== Registration Log =====
+        async function loadRegistrations() {
+            var tbody = document.getElementById('regTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" class="no-data">Loading...</td></tr>';
+            try {
+                var resp = await fetch(API_BASE, { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                var data = await resp.json();
+                if (!data.success) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>'; return; }
+                var regs = data.registrations || [];
+                var count = regs.length;
+                if (count > 0) { document.getElementById('reglogBadge').style.display = ''; document.getElementById('reglogBadge').textContent = count; }
+                else { document.getElementById('reglogBadge').style.display = 'none'; }
+                if (regs.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">No registrations yet.</td></tr>'; return; }
+                var sorted = regs.slice().reverse();
+                tbody.innerHTML = sorted.map(function(r, i) {
+                    var num = regs.length - i;
+                    var dateStr = r.date ? new Date(r.date).toLocaleString() : '-';
+                    var roleBadge = r.role === 'admin' ? '<span style="color:#ef4444;font-weight:600;">admin</span>'
+                        : r.role === 'mod' ? '<span style="color:#f59e0b;font-weight:600;">mod</span>'
+                        : '<span style="color:var(--text-muted);">user</span>';
+                    return '<tr><td>' + num + '</td><td class="email-cell">' + escHtml(r.email) + '</td><td class="key-cell">' + escHtml(r.key) + '</td><td>' + escHtml(r.displayName || '-') + '</td><td>' + roleBadge + '</td><td>' + dateStr + '</td><td><button class="copy-btn" onclick="copyText(\'' + escAttr(r.key) + '\')">Copy Key</button></td></tr>';
+                }).join('');
+            } catch (e) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">Network error.</td></tr>'; }
+        }
 
         // ===== Mod Reports (from mods to admin) =====
         async function loadModReports() {
