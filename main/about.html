@@ -9,6 +9,37 @@
     <link rel="stylesheet" href="css/style.css">
     <script>!function(){var t=localStorage.getItem("svart_theme")||"midnight";document.documentElement.setAttribute("data-theme",t)}()</script>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f'/><text x='50' y='70' font-size='80' font-weight='bold' text-anchor='middle' fill='%237c3aed'>&#x25C6;</text></svg>">
+    <style>
+        .about-tabs { display: flex; gap: 0; margin-bottom: 0; border-bottom: 2px solid var(--border-color); }
+        .about-tab-btn { padding: 16px 32px; background: transparent; border: none; border-bottom: 3px solid transparent; color: var(--text-muted); cursor: pointer; font-size: 1rem; font-weight: 500; transition: all 0.25s; position: relative; bottom: -2px; }
+        .about-tab-btn:hover { color: var(--text-light); background: rgba(var(--primary-rgb),0.05); }
+        .about-tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+        .about-tab-panel { display: none; padding-top: 32px; animation: aboutFadeIn 0.25s ease; }
+        .about-tab-panel.active { display: block; }
+        @keyframes aboutFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .how-step { background: rgba(20,20,30,0.7); border: 1px solid var(--border-color); border-radius: 16px; padding: 28px; margin-bottom: 20px; transition: border-color 0.3s; }
+        .how-step:hover { border-color: var(--primary); }
+        .how-step-num { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 700; font-size: 1rem; margin-right: 14px; flex-shrink: 0; }
+        .how-step h4 { display: inline; color: var(--text-light); font-size: 1.1rem; }
+        .how-step p { color: var(--text-muted); margin-top: 12px; line-height: 1.7; }
+        .guardian-card { background: rgba(20,20,30,0.7); border: 1px solid var(--border-color); border-radius: 16px; padding: 28px; margin-bottom: 20px; transition: border-color 0.3s; }
+        .guardian-card:hover { border-color: #ef4444; }
+        .guardian-card h4 { color: var(--text-light); font-size: 1.1rem; margin-bottom: 10px; }
+        .guardian-card p { color: var(--text-muted); line-height: 1.7; }
+        .guardian-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin-right: 6px; }
+        .guardian-evidence { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); border-radius: 12px; padding: 20px; margin-top: 20px; }
+        .guardian-evidence h4 { color: #f59e0b; margin-bottom: 8px; }
+        .guardian-evidence p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; }
+        .law-category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
+        .law-cat-card { background: rgba(15,15,25,0.6); border: 1px solid rgba(239,68,68,0.15); border-radius: 12px; padding: 18px; }
+        .law-cat-card h5 { color: #ef4444; font-size: 0.95rem; margin-bottom: 6px; }
+        .law-cat-card .statute { color: var(--text-muted); font-size: 0.8rem; }
+        .law-cat-card .desc { color: var(--text-muted); font-size: 0.85rem; margin-top: 6px; line-height: 1.5; }
+        @media (max-width: 768px) {
+            .about-tab-btn { padding: 12px 18px; font-size: 0.9rem; }
+            .law-category-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -75,6 +106,212 @@
                         <div class="stat-number">750</div>
                         <div class="stat-label">Free Premium AI Requests/mo</div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works / Guardian Tabs -->
+    <section style="padding:60px 0;">
+        <div class="container">
+            <div class="about-tabs">
+                <button class="about-tab-btn active" data-about-tab="howitworks">&#9881; How It Works</button>
+                <button class="about-tab-btn" data-about-tab="guardian">&#128737; NetworkGuardian</button>
+            </div>
+
+            <!-- Tab: How It Works -->
+            <div class="about-tab-panel active" id="about-panel-howitworks">
+                <h3 style="color:var(--primary);margin-bottom:24px;font-size:1.4rem;">How Svart Security Works</h3>
+                <p style="color:var(--text-muted);margin-bottom:32px;line-height:1.7;">Svart Security is a suite of privacy and security tools designed to protect your digital life. Here's how each layer works together to keep you safe.</p>
+
+                <div class="how-step">
+                    <span class="how-step-num">1</span>
+                    <h4>Create Your Account</h4>
+                    <p>Sign up with your email. A unique <strong style="color:var(--primary);">secret key</strong> (format: CB-XXXX-XXXX-XXXX-XXXX) is generated for you using HMAC-SHA256. This key is your identity — it's never your password. Your password is hashed with Argon2 (GPU-resistant) and never stored in plain text. One account per network is enforced to prevent abuse.</p>
+                </div>
+
+                <div class="how-step">
+                    <span class="how-step-num">2</span>
+                    <h4>AES-256-GCM Encryption</h4>
+                    <p>All sensitive data in the Svart suite is encrypted using <strong style="color:var(--primary);">AES-256-GCM</strong> with PBKDF2 key derivation at 250,000 iterations. This is military-grade encryption — the same standard used by governments. Your data is encrypted <em>on your device</em> before it ever leaves. We cannot read it, even if we wanted to.</p>
+                </div>
+
+                <div class="how-step">
+                    <span class="how-step-num">3</span>
+                    <h4>Svart Browser — Built-in Protection</h4>
+                    <p>Svart Browser is built on Firefox's proven engine with our security enhancements layered on top. Ad blocking, anti-fingerprinting, DNS-over-HTTPS, and HTTPS-only mode are all built in — no extensions needed. Zero extensions means zero extension vulnerabilities. Optional Tor integration routes all traffic through Tor's onion network for maximum anonymity.</p>
+                </div>
+
+                <div class="how-step">
+                    <span class="how-step-num">4</span>
+                    <h4>Svart AI — Private Intelligence</h4>
+                    <p>Your secret key generates a unique API key for your local LLM (Large Language Model). This API key is random and only activates after you log in with your local password. The server cannot see or access your API key or your conversations. Free tier gives you <strong style="color:var(--primary);">750 premium requests/month</strong> — the exact same engine paid users get, with no feature locks.</p>
+                </div>
+
+                <div class="how-step">
+                    <span class="how-step-num">5</span>
+                    <h4>Svart Pass — Local Vault</h4>
+                    <p>Your passwords, credentials, and secure notes are encrypted locally with your master password. Nothing is stored on our servers. Your vault lives on your device, under your control. When you need a credential, Svart Pass decrypts it in memory and clears it when you're done.</p>
+                </div>
+
+                <div class="how-step">
+                    <span class="how-step-num">6</span>
+                    <h4>Svart Notes — Encrypted Documents</h4>
+                    <p>Write notes, documents, and markdown — all encrypted on device with AES-256-GCM. Your notes never leave your machine unencrypted. Full-featured editor with syntax highlighting, export, and search — all running locally.</p>
+                </div>
+
+                <div class="how-step">
+                    <span class="how-step-num">7</span>
+                    <h4>Zero Telemetry</h4>
+                    <p>Every Svart tool operates on a simple principle: <strong style="color:var(--primary);">we don't track you</strong>. No telemetry, no analytics, no usage stats, no crash reports. We don't know what pages you visit, what you type, or what you search. Your browsing, your notes, your passwords — they're all yours alone.</p>
+                </div>
+
+                <div class="how-step">
+                    <span class="how-step-num">8</span>
+                    <h4>Cloudflare-Powered Infrastructure</h4>
+                    <p>Our website and authentication run on Cloudflare's global edge network. Serverless functions handle registration, login, and account management. KV storage holds account data. All connections are forced HTTPS. No origin server to attack — everything runs at the edge, close to you, with Cloudflare's DDoS protection.</p>
+                </div>
+            </div>
+
+            <!-- Tab: NetworkGuardian -->
+            <div class="about-tab-panel" id="about-panel-guardian">
+                <h3 style="color:#ef4444;margin-bottom:8px;font-size:1.4rem;">&#128737; NetworkGuardian</h3>
+                <p style="color:var(--text-muted);margin-bottom:32px;line-height:1.7;">NetworkGuardian is Svart Security's autonomous protection layer. It exists to prevent abuse of our platform while respecting your privacy. Here's exactly how it works and what it can see.</p>
+
+                <div class="guardian-card">
+                    <h4>&#128274; What the Guardian Tracks</h4>
+                    <p>The Guardian tracks <strong style="color:#f59e0b;">exactly two things</strong>, and nothing else:</p>
+                    <ul style="color:var(--text-muted);margin-top:12px;padding-left:24px;line-height:2;">
+                        <li><strong style="color:var(--text-light);">Registration network hash</strong> — When you register, your IP address is hashed with SHA-256 and a salt, producing an irreversible identifier like <code style="color:var(--primary);font-size:0.85rem;">net_a3f8b2c1e9d4...</code>. The original IP is immediately discarded. Nobody — not even the admin — can reverse this hash back to your IP.</li>
+                        <li><strong style="color:var(--text-light);">Account creation timestamp</strong> — The date and time you created your account.</li>
+                    </ul>
+                    <p style="margin-top:16px;color:#f59e0b;font-weight:600;font-size:0.9rem;">The Guardian does NOT track logins, browsing, page visits, usage patterns, or anything else. Only registration.</p>
+                </div>
+
+                <div class="guardian-card">
+                    <h4>&#128737; What the Guardian Does</h4>
+                    <p>The Guardian performs three functions:</p>
+                    <ul style="color:var(--text-muted);margin-top:12px;padding-left:24px;line-height:2;">
+                        <li><strong style="color:var(--text-light);">Duplicate account prevention</strong> — One account per network. The Guardian checks your network hash at registration to ensure you haven't already registered another account from the same network.</li>
+                        <li><strong style="color:var(--text-light);">Network blocking</strong> — If a network is determined to be abusive (e.g., mass bot registrations), the Guardian can block that network hash from registering new accounts.</li>
+                        <li><strong style="color:var(--text-light);">Illegal activity reports</strong> — If a user is reported for illegal activities, the Guardian can include the network hash and creation timestamp in a formal incident report for law enforcement.</li>
+                    </ul>
+                </div>
+
+                <div class="guardian-card">
+                    <h4>&#128683; What the Guardian Cannot Do</h4>
+                    <ul style="color:var(--text-muted);margin-top:12px;padding-left:24px;line-height:2;">
+                        <li>Cannot see your real IP address (it's hashed and discarded)</li>
+                        <li>Cannot track what you browse, search, or type</li>
+                        <li>Cannot read your encrypted data, notes, or passwords</li>
+                        <li>Cannot monitor your login activity</li>
+                        <li>Cannot identify you personally from the network hash</li>
+                        <li>Cannot share data with third parties (there's nothing to share)</li>
+                    </ul>
+                </div>
+
+                <div class="guardian-card">
+                    <h4>&#128272; Admin Access</h4>
+                    <p>Only the site administrator (admin@svartsecurity.org, with the admin role) can access Guardian enforcement controls. Moderators cannot access enforcement. The admin can:</p>
+                    <ul style="color:var(--text-muted);margin-top:12px;padding-left:24px;line-height:2;">
+                        <li>Block or unblock a network hash (they see <code style="color:var(--primary);font-size:0.85rem;">net_a3f8b2...</code>, never a real IP)</li>
+                        <li>Block abusive URLs from Svart services</li>
+                        <li>View enforcement statistics (counts only, no personal data)</li>
+                        <li>Review and escalate violation reports with specific law references</li>
+                    </ul>
+                </div>
+
+                <div class="guardian-evidence">
+                    <h4>&#9888;&#65039; Available Evidence for Reports</h4>
+                    <p>When a report is escalated to law enforcement, the <strong>only data available</strong> is:</p>
+                    <ul style="color:var(--text-muted);margin-top:8px;padding-left:24px;line-height:2;">
+                        <li>Registration network hash (SHA-256, irreversible)</li>
+                        <li>Account creation date and time</li>
+                    </ul>
+                    <p style="margin-top:12px;">That's it. No IP addresses, no browsing history, no message content, no usage data. Law enforcement would need to subpoena the ISP with the relevant timeframe, not us — because we don't have the data.</p>
+                </div>
+
+                <div style="margin-top:32px;">
+                    <h4 style="color:#ef4444;margin-bottom:16px;font-size:1.1rem;">Law Violation Categories</h4>
+                    <p style="color:var(--text-muted);margin-bottom:20px;line-height:1.7;">Reports filed through the Guardian can reference specific laws. These are the categories available for formal incident reports. <strong style="color:#f59e0b;">General piracy (media, music, film) is not included</strong> — only distribution of commercial software is covered.</p>
+
+                    <div class="law-category-grid">
+                        <div class="law-cat-card">
+                            <h5>Unauthorized Access</h5>
+                            <div class="statute">Computer Misuse Act 1990 (UK) &bull; CFAA 18 U.S.C. &sect; 1030 (US)</div>
+                            <div class="desc">Unauthorized access to computer systems, exceeding authorized access, or impairing computer operation.</div>
+                        </div>
+                        <div class="law-cat-card">
+                            <h5>Fraud</h5>
+                            <div class="statute">Fraud Act 2006 (UK) &bull; 18 U.S.C. &sect; 1343 Wire Fraud (US)</div>
+                            <div class="desc">False representation, possession of articles for fraud, wire fraud schemes.</div>
+                        </div>
+                        <div class="law-cat-card">
+                            <h5>Identity Theft</h5>
+                            <div class="statute">Fraud Act 2006 / Identity Documents Act 2010 (UK) &bull; 18 U.S.C. &sect; 1028 (US)</div>
+                            <div class="desc">Using another person's identity or creating false identity documents for fraudulent purposes.</div>
+                        </div>
+                        <div class="law-cat-card">
+                            <h5>Data Protection</h5>
+                            <div class="statute">GDPR (EU) 2016/679 &bull; Data Protection Act 2018 (UK)</div>
+                            <div class="desc">Unlawful processing, data breaches, re-identification of de-identified data.</div>
+                        </div>
+                        <div class="law-cat-card">
+                            <h5>Child Exploitation / CSAM</h5>
+                            <div class="statute">Protection of Children Act 1978 (UK) &bull; 18 U.S.C. &sect;&sect; 2251-2260A (US)</div>
+                            <div class="desc">Any involvement with child sexual abuse material. Immediate law enforcement referral required.</div>
+                        </div>
+                        <div class="law-cat-card">
+                            <h5>Harassment / Cyberstalking</h5>
+                            <div class="statute">Protection from Harassment Act 1997 (UK) &bull; 18 U.S.C. &sect; 2261A (US)</div>
+                            <div class="desc">Online harassment, stalking, or malicious communications causing distress.</div>
+                        </div>
+                        <div class="law-cat-card">
+                            <h5>Terrorism</h5>
+                            <div class="statute">Terrorism Act 2000/2006 (UK) &bull; 18 U.S.C. &sect; 2339A/B (US)</div>
+                            <div class="desc">Encouragement, preparation, or material support of terrorism. Immediate referral required.</div>
+                        </div>
+                        <div class="law-cat-card">
+                            <h5>Money Laundering</h5>
+                            <div class="statute">Proceeds of Crime Act 2002 (UK) &bull; 18 U.S.C. &sect;&sect; 1956-1957 (US)</div>
+                            <div class="desc">Concealing, converting, or transferring criminal property.</div>
+                        </div>
+                        <div class="law-cat-card">
+                            <h5>Software Piracy (Distribution Only)</h5>
+                            <div class="statute">CDPA 1988 ss.107-110 (UK) &bull; NET Act 17 U.S.C. &sect; 506 (US)</div>
+                            <div class="desc">Distributing or sharing commercial software without authorization. This covers <strong>software distribution only</strong> &mdash; not media, music, or film.</div>
+                        </div>
+                        <div class="law-cat-card">
+                            <h5>Malware &amp; DDoS</h5>
+                            <div class="statute">CMA 1990 s.3/3A (UK) &bull; 18 U.S.C. &sect; 1030(a)(5) (US)</div>
+                            <div class="desc">Creating, distributing malware/ransomware, or launching denial-of-service attacks.</div>
+                        </div>
+                        <div class="law-cat-card">
+                            <h5>Phishing</h5>
+                            <div class="statute">Fraud Act 2006 / CMA 1990 (UK) &bull; CAN-SPAM Act / CFAA (US)</div>
+                            <div class="desc">Fake websites or communications designed to steal credentials or personal information.</div>
+                        </div>
+                        <div class="law-cat-card">
+                            <h5>Threats &amp; Extortion</h5>
+                            <div class="statute">OAPA 1861 / Theft Act 1968 (UK) &bull; 18 U.S.C. &sect; 873 (US)</div>
+                            <div class="desc">Threats of violence, blackmail, ransomware extortion, or sextortion.</div>
+                        </div>
+                        <div class="law-cat-card">
+                            <h5>Hate Crime / Incitement</h5>
+                            <div class="statute">Public Order Act 1986 / Racial and Religious Hatred Act 2006 (UK)</div>
+                            <div class="desc">Stirring up racial, religious, or sexual orientation hatred online.</div>
+                        </div>
+                        <div class="law-cat-card">
+                            <h5>Trade Secret Theft</h5>
+                            <div class="statute">Trade Secrets Regulations 2018 (UK) &bull; 18 U.S.C. &sect;&sect; 1831-1839 (US)</div>
+                            <div class="desc">Unlawful acquisition, use, or disclosure of trade secrets or economic espionage.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top:32px;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25);border-radius:12px;padding:24px;">
+                    <h4 style="color:var(--primary);margin-bottom:8px;">Our Principle</h4>
+                    <p style="color:var(--text-muted);line-height:1.7;font-size:1.05rem;"><strong style="color:var(--text-light);">We protect people. We do not protect crimes.</strong> Your privacy is absolute for all lawful use. But if someone uses our platform to commit serious crimes — child exploitation, terrorism, fraud — we will cooperate with law enforcement using the limited data we have. We believe this is the right balance: maximum privacy, minimum complicity.</p>
                 </div>
             </div>
         </div>
@@ -170,5 +407,15 @@
         </div>
     </footer>
     <script src="js/script.js"></script>
+    <script>
+        document.querySelectorAll('.about-tab-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.about-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+                document.querySelectorAll('.about-tab-panel').forEach(function(p) { p.classList.remove('active'); });
+                btn.classList.add('active');
+                document.getElementById('about-panel-' + btn.dataset.aboutTab).classList.add('active');
+            });
+        });
+    </script>
 </body>
 </html>
