@@ -1,0 +1,12 @@
+# ◆ Svart Security — Code Owners
+#
+# This file enforces that ALL changes to this repository require
+# review and approval from the project owner before merging.
+#
+# GitHub will automatically request a review from the code owner(s)
+# listed below for every pull request that modifies matching files.
+#
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global rule — the owner must approve ALL changes across the entire repo
+* @JaegerGRS
