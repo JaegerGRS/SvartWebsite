@@ -181,8 +181,8 @@
             <span class="detail-value" id="userEmail">&mdash;</span>
           </div>
           <div class="account-detail-row">
-            <span class="detail-label">Secret Key</span>
-            <span class="detail-value" id="userSvartId" style="font-family:monospace;letter-spacing:1px;">&mdash;</span>
+            <span class="detail-label">Display Name</span>
+            <span class="detail-value" id="userDetailName">&mdash;</span>
           </div>
           <div class="account-detail-row">
             <span class="detail-label">Member since</span>
@@ -983,7 +983,7 @@
 
     document.getElementById('userName').textContent = displayName;
     document.getElementById('userEmail').textContent = user.email || session.email || '\u2014';
-    document.getElementById('userSvartId').textContent = svartId || '\u2014';
+    document.getElementById('userDetailName').textContent = displayName || '\u2014';
 
     // Profile panel
     document.getElementById('currentName').textContent = displayName;
