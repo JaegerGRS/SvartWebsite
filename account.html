@@ -1067,8 +1067,9 @@
     }
     var roleDetailEl = document.getElementById('userRoleDetail');
     if (roleDetailEl) {
-      roleDetailEl.textContent = isAdmin ? 'Administrator' : 'Member';
+      roleDetailEl.textContent = isAdmin ? 'Administrator' : isMod ? 'Moderator' : 'Member';
       if (isAdmin) roleDetailEl.style.color = 'var(--primary)';
+      if (isMod) roleDetailEl.style.color = '#22c55e';
     }
 
     // Calculate next reset date (1st of next month)
