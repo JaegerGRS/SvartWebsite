@@ -789,6 +789,106 @@
 /* ============ Global Styles ============ */
 html {
     scroll-behavior: smooth;
+    scrollbar-color: rgba(var(--primary-rgb), 0.35) transparent;
+    scrollbar-width: thin;
+}
+
+/* Webkit scrollbar (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(var(--primary-rgb), 0.3);
+    border-radius: 100px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--primary-rgb), 0.55);
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: rgba(var(--primary-rgb), 0.7);
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* Inner scrollable areas (tables, code blocks, modals) */
+.reg-table, pre, .heatmap-wrap, .tab-panel, textarea {
+    scrollbar-color: rgba(var(--primary-rgb), 0.25) transparent;
+    scrollbar-width: thin;
+}
+
+.reg-table::-webkit-scrollbar,
+pre::-webkit-scrollbar,
+.heatmap-wrap::-webkit-scrollbar,
+.tab-panel::-webkit-scrollbar,
+textarea::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.reg-table::-webkit-scrollbar-thumb,
+pre::-webkit-scrollbar-thumb,
+.heatmap-wrap::-webkit-scrollbar-thumb,
+.tab-panel::-webkit-scrollbar-thumb,
+textarea::-webkit-scrollbar-thumb {
+    background: rgba(var(--primary-rgb), 0.2);
+    border-radius: 100px;
+}
+
+.reg-table::-webkit-scrollbar-thumb:hover,
+pre::-webkit-scrollbar-thumb:hover,
+.heatmap-wrap::-webkit-scrollbar-thumb:hover,
+.tab-panel::-webkit-scrollbar-thumb:hover,
+textarea::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--primary-rgb), 0.45);
+}
+
+.reg-table::-webkit-scrollbar-track,
+pre::-webkit-scrollbar-track,
+.heatmap-wrap::-webkit-scrollbar-track,
+.tab-panel::-webkit-scrollbar-track,
+textarea::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Mobile: thinner scrollbar, auto-hide on touch devices */
+@media (max-width: 768px) {
+    ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: rgba(var(--primary-rgb), 0.25);
+        border: 0;
+        background-clip: unset;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(var(--primary-rgb), 0.45);
+        border: 0;
+        background-clip: unset;
+    }
+
+    html {
+        scrollbar-width: thin;
+    }
 }
 
 body {
