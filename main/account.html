@@ -809,6 +809,8 @@
 
     // ===== Server-side session validation =====
     // Check if the account still exists on the server (blocks wiped/non-existent accounts)
+    // Also handles key rotation: if the local key is outdated, re-authenticates with
+    // stored password hash to fetch the new key from the server.
     try {
       var email = (user.email || session.email || '').toLowerCase();
       var userKey = user.activationKey || svartId || '';
@@ -833,8 +835,63 @@
             user.role = checkData.account.role || user.role;
             user.displayName = checkData.account.displayName || user.displayName;
             user.isAdmin = checkData.account.role === 'admin';
-            users[svartId] = user;
+            // Sync activation key from server (handles key rotation)
+            if (checkData.account.activationKey && checkData.account.activationKey !== user.activationKey) {
+              var newKey = checkData.account.activationKey;
+              // Remove old user entry, create under new svartId
+              delete users[svartId];
+              user.activationKey = newKey;
+              svartId = newKey;
+              users[svartId] = user;
+              // Update session to use new svartId
+              session.svartId = svartId;
+              localStorage.setItem('ct_session', JSON.stringify(session));
+              if (session.persistent) localStorage.setItem('ct_persistent_session', JSON.stringify(session));
+            } else {
+              users[svartId] = user;
+            }
             localStorage.setItem('ct_users', JSON.stringify(users));
+          } else if (checkData.exists && !checkData.account) {
+            // Account exists but key didn't match (key was rotated server-side).
+            // Re-authenticate with stored password hash to fetch the new key.
+            var storedPwHash = user.password || '';
+            if (storedPwHash) {
+              var reAuthResp = await fetch('/api/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, passwordHash: storedPwHash })
+              });
+              if (reAuthResp.ok) {
+                var reAuthData = await reAuthResp.json();
+                if (reAuthData.success && reAuthData.account) {
+                  var newKey = reAuthData.account.activationKey;
+                  // Migrate local storage to new key
+                  delete users[svartId];
+                  user.activationKey = newKey;
+                  user.role = reAuthData.account.role || user.role;
+                  user.displayName = reAuthData.account.displayName || user.displayName;
+                  user.isAdmin = reAuthData.account.role === 'admin';
+                  svartId = newKey;
+                  users[svartId] = user;
+                  session.svartId = svartId;
+                  localStorage.setItem('ct_session', JSON.stringify(session));
+                  if (session.persistent) localStorage.setItem('ct_persistent_session', JSON.stringify(session));
+                  localStorage.setItem('ct_users', JSON.stringify(users));
+                } else {
+                  // Password hash also wrong — force re-login
+                  localStorage.removeItem('ct_session');
+                  localStorage.removeItem('ct_persistent_session');
+                  window.location.href = 'login.html';
+                  return;
+                }
+              }
+            } else {
+              // No stored password hash — force re-login
+              localStorage.removeItem('ct_session');
+              localStorage.removeItem('ct_persistent_session');
+              window.location.href = 'login.html';
+              return;
+            }
           }
         }
       } else {
