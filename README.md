@@ -6,7 +6,7 @@
 
 [![Website](https://img.shields.io/badge/Website-svartsecurity.org-7c3aed?style=for-the-badge&logo=cloudflare&logoColor=white)](https://svartsecurity.org)
 [![Cloudflare Pages](https://img.shields.io/badge/Hosted_on-Cloudflare_Pages-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://pages.cloudflare.com)
-[![License](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-Proprietary-ef4444?style=for-the-badge)](LICENSE)
 
 <br>
 
@@ -184,7 +184,9 @@ You can also submit suggestions through the [Community Forum](https://svartsecur
 
 ## ◆ License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is **proprietary**. All rights reserved. See [LICENSE](LICENSE) for details.
+
+The source code is publicly visible for transparency only — **no permission is granted** to use, copy, modify, or distribute any part of this repository.
 
 <br>
 
