@@ -3,12 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Svart Security Roadmap</title>
-    <meta name="description" content="See the development roadmap for Svart Security, including browser, privacy, and security features.">
+    <title>Roadmap — Svart Security</title>
+    <meta name="description" content="Solo developer roadmap for Svart Security — Svart AI and Svart Browser development timeline, March to December 2026.">
     <meta name="theme-color" content="#0a0a0f">
     <link rel="stylesheet" href="css/style.css">
     <script>!function(){var t=localStorage.getItem("svart_theme")||"midnight";document.documentElement.setAttribute("data-theme",t)}()</script>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f'/><text x='50' y='70' font-size='80' font-weight='bold' text-anchor='middle' fill='%237c3aed'>&#x25C6;</text></svg>">
+    <style>
+        .rm-hero{text-align:center;padding:80px 0 40px}
+        .rm-hero h1{font-size:2.4rem;margin-bottom:12px}
+        .rm-hero .solo-badge{display:inline-block;background:rgba(124,58,237,.12);color:var(--primary);font-size:.82rem;font-weight:600;padding:6px 16px;border-radius:20px;margin-bottom:18px;letter-spacing:.3px}
+        .rm-hero p{color:var(--text-muted);max-width:640px;margin:0 auto;line-height:1.7;font-size:1.02rem}
+
+        /* Progress bar */
+        .rm-progress-wrap{max-width:600px;margin:32px auto 0;text-align:left}
+        .rm-progress-label{display:flex;justify-content:space-between;font-size:.82rem;color:var(--text-muted);margin-bottom:6px}
+        .rm-progress-bar{height:10px;background:var(--surface);border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+        .rm-progress-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--primary),#a78bfa);transition:width .6s ease}
+
+        /* Focus cards */
+        .rm-focus{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:48px 0 56px}
+        .rm-focus-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;position:relative;overflow:hidden}
+        .rm-focus-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+        .rm-focus-card.ai::before{background:linear-gradient(90deg,#22c55e,#4ade80)}
+        .rm-focus-card.browser::before{background:linear-gradient(90deg,#7c3aed,#a78bfa)}
+        .rm-focus-card .fc-icon{font-size:2rem;margin-bottom:10px}
+        .rm-focus-card h3{font-size:1.15rem;margin-bottom:4px}
+        .rm-focus-card .fc-status{font-size:.78rem;font-weight:600;margin-bottom:12px}
+        .rm-focus-card .fc-status.active{color:#22c55e}
+        .rm-focus-card .fc-status.dev{color:#f59e0b}
+        .rm-focus-card p{color:var(--text-muted);font-size:.9rem;line-height:1.6;margin-bottom:14px}
+        .rm-focus-card ul{list-style:none;padding:0;margin:0}
+        .rm-focus-card ul li{color:var(--text-muted);font-size:.85rem;padding:4px 0 4px 20px;position:relative}
+        .rm-focus-card ul li::before{content:'\2713';position:absolute;left:0;color:var(--primary);font-weight:700;font-size:.8rem}
+
+        /* Timeline */
+        .rm-timeline{position:relative;max-width:780px;margin:0 auto;padding:20px 0 40px}
+        .rm-timeline::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--border);transform:translateX(-1px)}
+        .rm-month{position:relative;margin-bottom:0;display:flex;align-items:flex-start}
+        .rm-month:nth-child(odd){flex-direction:row-reverse}
+        .rm-month:nth-child(odd) .rm-card{margin-left:0;margin-right:calc(50% + 28px);text-align:right}
+        .rm-month:nth-child(even) .rm-card{margin-left:calc(50% + 28px);margin-right:0}
+        .rm-dot{position:absolute;left:50%;top:18px;width:16px;height:16px;border-radius:50%;border:3px solid var(--border);background:var(--bg);transform:translateX(-50%);z-index:2}
+        .rm-dot.done{background:var(--primary);border-color:var(--primary)}
+        .rm-dot.now{background:#22c55e;border-color:#22c55e;box-shadow:0 0 12px rgba(34,197,94,.5)}
+        .rm-dot.future{background:var(--surface);border-color:var(--border)}
+        .rm-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-bottom:24px;max-width:340px;width:100%}
+        .rm-card .rm-date{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--primary);margin-bottom:6px}
+        .rm-card h4{font-size:1rem;margin-bottom:6px}
+        .rm-card p{color:var(--text-muted);font-size:.85rem;line-height:1.55;margin:0}
+        .rm-card .rm-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+        .rm-card .rm-tags span{font-size:.72rem;padding:3px 10px;border-radius:8px;font-weight:600}
+        .rm-card .rm-tags .tag-ai{background:rgba(34,197,94,.1);color:#22c55e}
+        .rm-card .rm-tags .tag-browser{background:rgba(124,58,237,.1);color:#a78bfa}
+        .rm-card .rm-tags .tag-website{background:rgba(245,158,11,.1);color:#f59e0b}
+        .rm-card .rm-tags .tag-infra{background:rgba(59,130,246,.1);color:#60a5fa}
+
+        /* Current marker */
+        .rm-now-label{display:inline-block;font-size:.7rem;font-weight:700;background:#22c55e;color:#000;padding:2px 10px;border-radius:8px;margin-bottom:6px}
+
+        /* Note */
+        .rm-note{text-align:center;margin:40px 0 0;padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:14px;max-width:600px;margin-left:auto;margin-right:auto}
+        .rm-note p{color:var(--text-muted);font-size:.9rem;line-height:1.6;margin:0}
+        .rm-note strong{color:var(--text)}
+
+        @media(max-width:700px){
+            .rm-focus{grid-template-columns:1fr}
+            .rm-timeline::before{left:20px}
+            .rm-dot{left:20px}
+            .rm-month,.rm-month:nth-child(odd){flex-direction:row}
+            .rm-month:nth-child(odd) .rm-card,.rm-month:nth-child(even) .rm-card{margin-left:52px;margin-right:0;text-align:left;max-width:100%}
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -32,19 +98,207 @@
         </div>
     </nav>
     <div class="nav-overlay" id="navOverlay"></div>
-    <section class="roadmap-section">
+
+    <!-- Hero -->
+    <section class="rm-hero">
         <div class="container">
-            <h1 class="section-title">Svart Security Roadmap</h1>
-            <p class="section-subtitle">Follow our progress and see what's coming next.</p>
-            <ul class="roadmap-list">
-                <li><strong>Phase 1:</strong> Secure Browser (ad blocking, DNS privacy, no tracking)</li>
-                <li><strong>Phase 2:</strong> Password Manager (encrypted vault, generator, duress wipe)</li>
-                <li><strong>Phase 3:</strong> Secure Notes & Docs (encrypted storage, local vault)</li>
-                <li><strong>Phase 4:</strong> Encrypted Chat (self-hosted, zero-knowledge messaging)</li>
-                <li><strong>Phase 5:</strong> Privacy Checker & VPN (privacy audit, fast VPN)</li>
-                <li><strong>Phase 6:</strong> Smart Assistant (privacy-focused help, no data sharing)</li>
-            </ul>
-            <p style="margin-top:24px;color:var(--text-muted);">We update this roadmap regularly. Your feedback shapes our priorities!</p>
+            <span class="solo-badge">&#9670; Solo Developer Roadmap</span>
+            <h1>Development Roadmap</h1>
+            <p>A realistic 10-month plan for building Svart AI and Svart Browser as a solo developer. No hype, no fake deadlines &mdash; just honest milestones I&rsquo;m holding myself to.</p>
+
+            <!-- Overall progress -->
+            <div class="rm-progress-wrap">
+                <div class="rm-progress-label">
+                    <span>Overall Progress</span>
+                    <span>Month 1 of 10</span>
+                </div>
+                <div class="rm-progress-bar">
+                    <div class="rm-progress-fill" style="width:10%"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Active Focus -->
+    <section class="container">
+        <div class="rm-focus">
+            <div class="rm-focus-card ai">
+                <div class="fc-icon">&#129302;</div>
+                <h3>Svart AI</h3>
+                <div class="fc-status active">&#9679; Actively Building</div>
+                <p>AI assistant with encrypted chat, internet search, document analysis, and knowledge training. 750 free requests/month.</p>
+                <ul>
+                    <li>AES-256-GCM encrypted conversations</li>
+                    <li>Web scraping &amp; knowledge training</li>
+                    <li>Document analysis (PDF, text, code)</li>
+                    <li>Tauri desktop app (cross-platform)</li>
+                </ul>
+            </div>
+            <div class="rm-focus-card browser">
+                <div class="fc-icon">&#128274;</div>
+                <h3>Svart Browser</h3>
+                <div class="fc-status dev">&#9679; In Development</div>
+                <p>Privacy-first browser with built-in ad blocking, DNS privacy, and AES-256 encryption. No extensions needed, no tracking.</p>
+                <ul>
+                    <li>Built-in ad &amp; tracker blocking</li>
+                    <li>DNS-over-HTTPS privacy</li>
+                    <li>AES-256 encrypted local storage</li>
+                    <li>Tauri + Chromium engine</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline -->
+    <section class="container">
+        <h2 style="text-align:center;margin-bottom:8px;font-size:1.6rem">Timeline</h2>
+        <p style="text-align:center;color:var(--text-muted);margin-bottom:36px">March 2026 &mdash; December 2026</p>
+
+        <div class="rm-timeline">
+
+            <!-- March 2026 -->
+            <div class="rm-month">
+                <div class="rm-dot now"></div>
+                <div class="rm-card">
+                    <span class="rm-now-label">Now</span>
+                    <div class="rm-date">March 2026</div>
+                    <h4>Foundation &amp; Website</h4>
+                    <p>Launch svartsecurity.org. Set up Cloudflare infrastructure, API endpoints, community forum, account system. Begin Svart AI core architecture.</p>
+                    <div class="rm-tags">
+                        <span class="tag-ai">Svart AI</span>
+                        <span class="tag-website">Website</span>
+                        <span class="tag-infra">Infrastructure</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- April 2026 -->
+            <div class="rm-month">
+                <div class="rm-dot future"></div>
+                <div class="rm-card">
+                    <div class="rm-date">April 2026</div>
+                    <h4>Svart AI &mdash; Core Chat Engine</h4>
+                    <p>Build the AI chat interface with AES-256-GCM encryption. Implement conversation history, model switching, and the request quota system (750 free/month).</p>
+                    <div class="rm-tags">
+                        <span class="tag-ai">Svart AI</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- May 2026 -->
+            <div class="rm-month">
+                <div class="rm-dot future"></div>
+                <div class="rm-card">
+                    <div class="rm-date">May 2026</div>
+                    <h4>Svart AI &mdash; Web Scraping &amp; Search</h4>
+                    <p>Add internet search and web scraping capabilities. Build the agent system so the AI can fetch live data, summarise pages, and answer with real-time information.</p>
+                    <div class="rm-tags">
+                        <span class="tag-ai">Svart AI</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- June 2026 -->
+            <div class="rm-month">
+                <div class="rm-dot future"></div>
+                <div class="rm-card">
+                    <div class="rm-date">June 2026</div>
+                    <h4>Svart AI &mdash; Documents &amp; Training</h4>
+                    <p>Implement document upload and analysis (PDF, text, code). Add knowledge base training &mdash; users can feed the AI custom data for personalised answers.</p>
+                    <div class="rm-tags">
+                        <span class="tag-ai">Svart AI</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- July 2026 -->
+            <div class="rm-month">
+                <div class="rm-dot future"></div>
+                <div class="rm-card">
+                    <div class="rm-date">July 2026</div>
+                    <h4>Svart AI &mdash; Desktop App &amp; Polish</h4>
+                    <p>Package Svart AI as a Tauri desktop app for Windows, macOS, and Linux. Bug fixes, performance tuning, UI polish. Prepare for public release.</p>
+                    <div class="rm-tags">
+                        <span class="tag-ai">Svart AI</span>
+                        <span class="tag-infra">Desktop</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- August 2026 -->
+            <div class="rm-month">
+                <div class="rm-dot future"></div>
+                <div class="rm-card">
+                    <div class="rm-date">August 2026</div>
+                    <h4>&#127881; Svart AI Public Release</h4>
+                    <p>Official public release of Svart AI. Begin Svart Browser development &mdash; set up the Tauri + Chromium engine foundation and core window management.</p>
+                    <div class="rm-tags">
+                        <span class="tag-ai">Svart AI</span>
+                        <span class="tag-browser">Svart Browser</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- September 2026 -->
+            <div class="rm-month">
+                <div class="rm-dot future"></div>
+                <div class="rm-card">
+                    <div class="rm-date">September 2026</div>
+                    <h4>Svart Browser &mdash; Core Browsing</h4>
+                    <p>Build the core browsing experience: tab management, navigation, bookmarks, history. Implement the custom UI shell with Svart Security branding.</p>
+                    <div class="rm-tags">
+                        <span class="tag-browser">Svart Browser</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- October 2026 -->
+            <div class="rm-month">
+                <div class="rm-dot future"></div>
+                <div class="rm-card">
+                    <div class="rm-date">October 2026</div>
+                    <h4>Svart Browser &mdash; Ad Blocking &amp; DNS Privacy</h4>
+                    <p>Integrate the built-in ad and tracker blocker (no extensions needed). Add DNS-over-HTTPS for private DNS resolution. Implement fingerprint protection.</p>
+                    <div class="rm-tags">
+                        <span class="tag-browser">Svart Browser</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- November 2026 -->
+            <div class="rm-month">
+                <div class="rm-dot future"></div>
+                <div class="rm-card">
+                    <div class="rm-date">November 2026</div>
+                    <h4>Svart Browser &mdash; Encryption &amp; Storage</h4>
+                    <p>Add AES-256 encrypted local storage for bookmarks, history, and settings. Build the privacy dashboard so users can see what&rsquo;s being blocked in real time.</p>
+                    <div class="rm-tags">
+                        <span class="tag-browser">Svart Browser</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- December 2026 -->
+            <div class="rm-month">
+                <div class="rm-dot future"></div>
+                <div class="rm-card">
+                    <div class="rm-date">December 2026</div>
+                    <h4>&#127881; Svart Browser Public Release</h4>
+                    <p>Final testing, cross-platform builds (Windows, macOS, Linux), and the official public release of Svart Browser. Year-end review and 2027 planning.</p>
+                    <div class="rm-tags">
+                        <span class="tag-browser">Svart Browser</span>
+                        <span class="tag-infra">Release</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Note -->
+    <section class="container" style="padding-bottom:60px">
+        <div class="rm-note">
+            <p><strong>This is a solo project.</strong> Timelines may shift as I learn, iterate, and improve. I'd rather ship something solid than rush something broken. Follow progress on the <a href="community.html" style="color:var(--primary)">Community Forum</a> or check back here for updates.</p>
         </div>
     </section>
     <footer class="footer">
