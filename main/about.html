@@ -143,7 +143,8 @@
                 <div class="how-step">
                     <span class="how-step-num">1</span>
                     <h4>Create Your Account</h4>
-                    <p>Sign up with your email. A unique <strong style="color:var(--primary);">secret key</strong> (format: CB-XXXX-XXXX-XXXX-XXXX) is generated for you using HMAC-SHA256. This key is your identity — it's never your password. Your password is hashed with Argon2 (GPU-resistant) and never stored in plain text. One account per network is enforced to prevent abuse.</p>
+                    <p>Sign up with your email. A unique <strong style="color:var(--primary);">secret key</strong> (format: XXXX-XXXX-XXXX-XXXX) is generated for you using HMAC-SHA256. This key is your identity &mdash; it's never your password. You log in to the website and all apps using your <strong style="color:var(--text-light);">email and password</strong>, not your secret key. Your password is hashed with Argon2 (GPU-resistant) and never stored in plain text. One account per network is enforced to prevent abuse.</p>
+                    <p>Your secret key is always visible in your <strong style="color:var(--primary);"><a href="account-settings.html" style="color:var(--primary);">account dashboard</a></strong> (the same page where you change your username). This means your key could be compromised if someone gains access to your account. We are building an <strong style="color:var(--text-light);">email verification code system</strong> so you can recover your account and regenerate your key if it is ever stolen. There will never be a single ad in any Svart app or on the website &mdash; ever.</p>
                 </div>
 
                 <div class="how-step">
@@ -235,17 +236,23 @@
                     <h4>&#128273; Your Secret Key</h4>
                     <p>When you create an account, a unique <strong style="color:var(--primary);">secret key</strong> is generated for you using HMAC-SHA256. This key is your identity across all Svart apps.</p>
                     <div class="key-format">XXXX-XXXX-XXXX-XXXX</div>
-                    <p>Your secret key is <strong style="color:var(--text-light);">not your password</strong>. It&rsquo;s a server-side identifier that links your account to your apps. It&rsquo;s generated once, and you store it somewhere safe. If you lose it, we cannot recover it &mdash; by design.</p>
-                    <p>Each app uses your secret key to derive a unique API key for that specific app. The server validates your secret key but <strong style="color:var(--text-light);">cannot see your local data, your local password, or your API key</strong>. The server only knows you&rsquo;re a valid user — nothing more.</p>
+                    <p>Your secret key is <strong style="color:var(--text-light);">not your password</strong>. You log in with your <strong style="color:var(--text-light);">email and password</strong> &mdash; the secret key is a server-side identifier that links your account to your apps.</p>
+                    <p>Your key is always visible in your <strong style="color:var(--primary);"><a href="account-settings.html" style="color:var(--primary);">account dashboard</a></strong> &mdash; the same page where you change your username. Because it&rsquo;s stored there, your key could be compromised if someone gains access to your account. Your key can also be used to reset your account, so protecting your login is critical.</p>
+                    <p>Each app uses your secret key to derive a unique API key for that specific app. The server validates your secret key but <strong style="color:var(--text-light);">cannot see your local data, your local password, or your API key</strong>. The server only knows you&rsquo;re a valid user &mdash; nothing more.</p>
 
-                    <div class="setup-flow">
+                    <div style="margin-top:16px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:18px;">
+                        <h5 style="color:#f59e0b;margin-bottom:8px;">&#128231; Account Recovery (Coming Soon)</h5>
+                        <p style="color:var(--text-muted);font-size:0.92rem;line-height:1.7;margin:0;">We are building an <strong style="color:var(--text-light);">email verification code system</strong> so you can recover your account if it is ever hacked. If your secret key is compromised, you&rsquo;ll be able to verify your identity via your email, revoke the old key, and generate a new one &mdash; locking the attacker out.</p>
+                    </div>
+
+                    <div class="setup-flow" style="margin-top:24px;">
                         <div class="setup-flow-step">
                             <span class="flow-label">Sign Up</span>
-                            <span class="flow-desc">You register with your email. The server generates your secret key (XXXX-XXXX-XXXX-XXXX) and returns it once.</span>
+                            <span class="flow-desc">You register with your email and password. The server generates your secret key (XXXX-XXXX-XXXX-XXXX) and shows it on your dashboard.</span>
                         </div>
                         <div class="setup-flow-step">
-                            <span class="flow-label">Save It</span>
-                            <span class="flow-desc">You write it down or store it in a safe place. This is the only time you&rsquo;ll see it from the server.</span>
+                            <span class="flow-label">Dashboard</span>
+                            <span class="flow-desc">Your secret key is always available in your account settings (where you change your username). Save it somewhere safe as a backup.</span>
                         </div>
                         <div class="setup-flow-step">
                             <span class="flow-label">Enter in App</span>
@@ -302,12 +309,15 @@
                 <div style="margin-top:32px;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25);border-radius:12px;padding:24px;">
                     <h4 style="color:var(--primary);margin-bottom:12px;">Security Model Summary</h4>
                     <ul style="color:var(--text-muted);padding-left:24px;line-height:2.2;">
-                        <li><strong style="color:var(--text-light);">Secret key</strong> &mdash; generated once, used to activate apps, server-side identity only</li>
+                        <li><strong style="color:var(--text-light);">Login</strong> &mdash; you log in with your email and password, not your secret key</li>
+                        <li><strong style="color:var(--text-light);">Secret key</strong> &mdash; generated once, visible in your dashboard, used to activate apps and can be used for account reset</li>
+                        <li><strong style="color:var(--text-light);">Key compromise risk</strong> &mdash; because the key is in your dashboard, protect your account login; email code recovery is being built</li>
                         <li><strong style="color:var(--text-light);">Local password</strong> &mdash; hashed with Argon2, stored in the app&rsquo;s config file, never leaves your device</li>
                         <li><strong style="color:var(--text-light);">Duress password</strong> &mdash; hashed alongside regular password, triggers instant data destruction</li>
                         <li><strong style="color:var(--text-light);">Encryption</strong> &mdash; AES-256-GCM with PBKDF2 key derivation, everything encrypted at rest</li>
                         <li><strong style="color:var(--text-light);">Server access</strong> &mdash; the server validates your secret key, but cannot see your password, your data, or your API key</li>
                         <li><strong style="color:var(--text-light);">No cloud backups</strong> &mdash; your data lives on your device, period</li>
+                        <li><strong style="color:var(--text-light);">Zero ads</strong> &mdash; there will never be a single ad in any Svart app or on the website, on any plan, ever</li>
                     </ul>
                 </div>
             </div>
@@ -464,11 +474,11 @@
             <div class="faq-grid">
                 <div class="faq-item">
                     <h4>Is Svart Security really free?</h4>
-                    <p>All tools except Svart AI are completely free with no limits. Svart AI gives you <strong>750 free premium requests per month</strong> &mdash; the same full engine that paid users get, with no feature locks and no ads. If you need more, upgrade to &pound;4.99/month for 2,000 requests or &pound;9.99/month for unlimited. No ads on any plan, ever.</p>
+                    <p>All tools except Svart AI are completely free with no limits. Svart AI gives you <strong>750 free premium requests per month</strong> &mdash; the same full engine that paid users get, with no feature locks. If you need more, upgrade to &pound;4.99/month for 2,000 requests or &pound;9.99/month for unlimited. There will <strong>never be a single ad</strong> in any Svart app or on the website &mdash; no ads on any plan, ever. Not now, not later.</p>
                 </div>
                 <div class="faq-item">
-                    <h4>How does the secret key protect my privacy?</h4>
-                    <p>Each secret key generates a unique API key for your Local LLM. This API key is random and only becomes active after you log in to your app with your local password. Your secret key is your ID for the server only &mdash; the server cannot see or access your API key or your data. This ensures your encrypted AI is truly private and only you control it.</p>
+                    <h4>How does the secret key work?</h4>
+                    <p>Your secret key is generated when you sign up and is always visible in your <strong>account dashboard</strong> (the same page where you change your username). You log in with your <strong>email and password</strong> &mdash; the secret key is not used for login. It&rsquo;s used to activate your desktop apps and can also be used to reset your account. Because your key is stored in your dashboard, it could be compromised if someone gains access to your account &mdash; so protect your login. We are building an <strong>email verification code system</strong> so you can recover your account and regenerate your key if ever hacked.</p>
                 </div>
                 <div class="faq-item">
                     <h4>How is Svart Browser different from other browsers?</h4>
