@@ -386,7 +386,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
 
     // Update request record
     req.status = "approved";
-    req.newKeyLast4 = newKey.split("-").pop() || "????";
+    req.newKeyPreview = newKey.substring(0, 6) + "...";
     req.resolvedBy = adminEmail || role;
     req.resolvedAt = new Date().toISOString();
     await context.env.USAGE_DATA.put(`keyreset:${requestId}`, JSON.stringify(req));
@@ -411,10 +411,10 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
 
     return jsonResponse({
       success: true,
-      message: "Key reset approved. New secret key generated.",
+      message: "Key reset approved. New 64-character secret key generated.",
       email,
       newKey,
-      oldKeyLast4: oldKey.split("-").pop() || "????",
+      oldKeyPreview: oldKey.substring(0, 6) + "...",
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Internal server error";

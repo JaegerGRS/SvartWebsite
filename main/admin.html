@@ -205,10 +205,19 @@
         <!-- Tab: Key Resets -->
         <div class="tab-panel" id="panel-keyresets">
             <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Users requesting a new secret key. Each request is verified server-side (password + current key matched). Review and approve to generate a new key, or deny.</p>
+
+            <!-- Batch Re-Key All Accounts -->
+            <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:20px;margin-bottom:24px;">
+                <h3 style="color:#ef4444;margin-bottom:8px;">&#128274; Batch Re-Key All Accounts</h3>
+                <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">Generate new 64-character AES-256-GCM keys for <strong>every registered account</strong>. Old keys will stop working immediately. Users must log in again to see their new key. <strong>This cannot be undone.</strong></p>
+                <div id="rekeyMsg" style="display:none;margin-bottom:12px;padding:10px 14px;border-radius:8px;font-size:0.85rem;"></div>
+                <button class="btn btn-primary" id="batchRekeyBtn" style="background:#ef4444;border-color:#ef4444;padding:10px 24px;">&#128260; Re-Key All Accounts</button>
+            </div>
+
             <div id="keyResetMsg" style="display:none;margin-bottom:16px;padding:12px 16px;border-radius:8px;font-size:0.9rem;"></div>
             <div style="overflow-x:auto;">
                 <table class="reg-table">
-                    <thead><tr><th>#</th><th>Email</th><th>Reset Code</th><th>Last 4 (Current)</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>#</th><th>Email</th><th>Reset Code</th><th>Preview (Current)</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody id="keyResetTableBody"><tr><td colspan="7" class="no-data">Loading...</td></tr></tbody>
                 </table>
             </div>
@@ -908,6 +917,43 @@
                 else { alert(data.error || 'Failed to unblock.'); }
             } catch (e) { alert('Network error.'); }
         };
+
+        // ===== Batch Re-Key All Accounts =====
+        document.getElementById('batchRekeyBtn').addEventListener('click', async function() {
+            if (!confirm('⚠️ WARNING: This will regenerate ALL secret keys for EVERY account.\n\nOld keys will stop working immediately.\nUsers must log in again to see their new key.\n\nAre you sure?')) return;
+            if (!confirm('This is your final confirmation.\nALL accounts will receive new 64-character keys.\n\nProceed?')) return;
+            var btn = document.getElementById('batchRekeyBtn');
+            var msg = document.getElementById('rekeyMsg');
+            btn.disabled = true;
+            btn.textContent = 'Re-keying all accounts...';
+            msg.style.display = 'none';
+            try {
+                var resp = await fetch('/api/rekey', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken }
+                });
+                var data = await resp.json();
+                if (data.success) {
+                    msg.style.display = '';
+                    msg.style.background = 'rgba(34,197,94,0.15)';
+                    msg.style.color = '#22c55e';
+                    msg.innerHTML = '&#9989; ' + escHtml(data.message) + ' (' + data.migrated + ' migrated, ' + data.skipped + ' skipped)';
+                    loadRegistrations();
+                } else {
+                    msg.style.display = '';
+                    msg.style.background = 'rgba(239,68,68,0.15)';
+                    msg.style.color = '#ef4444';
+                    msg.textContent = 'Error: ' + (data.error || 'Unknown error');
+                }
+            } catch (e) {
+                msg.style.display = '';
+                msg.style.background = 'rgba(239,68,68,0.15)';
+                msg.style.color = '#ef4444';
+                msg.textContent = 'Network error. Please try again.';
+            }
+            btn.disabled = false;
+            btn.innerHTML = '&#128260; Re-Key All Accounts';
+        });
 
         // Helpers
         function escHtml(str) { var d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
