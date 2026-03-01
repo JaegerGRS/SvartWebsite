@@ -159,17 +159,6 @@
                 </div>
             </div>
 
-            <!-- Block URL -->
-            <div style="background:rgba(20,20,30,0.8);border:1px solid var(--border-color);border-radius:12px;padding:20px;margin-bottom:20px;">
-                <h3 style="color:var(--primary);margin-bottom:12px;">&#128279; Block URL</h3>
-                <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">Block a specific URL from being accessed through Svart Security services.</p>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <input type="url" id="blockUrlInput" placeholder="https://example.com/malicious" style="flex:1;min-width:250px;padding:10px 14px;background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:8px;color:var(--text-light);">
-                    <input type="text" id="blockUrlReason" placeholder="Reason (optional)" style="flex:1;min-width:150px;padding:10px 14px;background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:8px;color:var(--text-light);">
-                    <button class="btn btn-primary" id="blockUrlBtn" style="background:#ef4444;border-color:#ef4444;padding:10px 20px;">Block URL</button>
-                </div>
-            </div>
-
             <!-- Active Block List -->
             <h3 style="color:var(--primary);margin-bottom:12px;">Active Block List</h3>
             <div style="overflow-x:auto;">
@@ -881,28 +870,6 @@
                 }
             } catch (e) { msg.style.display = ''; msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = 'Network error.'; }
             this.disabled = false; this.textContent = 'Block Network';
-        });
-
-        // Block URL
-        document.getElementById('blockUrlBtn').addEventListener('click', async function() {
-            var url = document.getElementById('blockUrlInput').value.trim();
-            var reason = document.getElementById('blockUrlReason').value.trim() || 'Policy violation';
-            var msg = document.getElementById('enforcementMsg');
-            if (!url) { msg.style.display = ''; msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = 'Enter a URL to block.'; return; }
-            this.disabled = true; this.textContent = 'Blocking...';
-            try {
-                var resp = await fetch('/api/guardian', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken }, body: JSON.stringify({ action: 'block-url', url: url, reason: reason }) });
-                var data = await resp.json();
-                msg.style.display = '';
-                if (data.success) {
-                    msg.style.background = 'rgba(34,197,94,0.15)'; msg.style.color = '#22c55e'; msg.textContent = '\u2713 ' + (data.message || 'URL blocked.');
-                    document.getElementById('blockUrlInput').value = ''; document.getElementById('blockUrlReason').value = '';
-                    loadEnforcement();
-                } else {
-                    msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = data.error || 'Failed to block.';
-                }
-            } catch (e) { msg.style.display = ''; msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = 'Network error.'; }
-            this.disabled = false; this.textContent = 'Block URL';
         });
 
         // Unblock
