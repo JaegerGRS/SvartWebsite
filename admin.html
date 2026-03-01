@@ -260,7 +260,7 @@
         let adminToken = '';
         const API_BASE = '/api/registrations';
         const ADMIN_EMAIL = 'admin@svartsecurity.org';
-        const ADMIN_API_SECRET = 'svart-admin-2026';
+        const ADMIN_API_SECRET = 'hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR';
         const ADMIN_FULL_NAME = 'Jaeger George Richard Stratton';
         const SECURITY_EMAIL = 'security@svartsecurity.org';
 
@@ -516,7 +516,7 @@
                         '<div style="background:rgba(var(--primary-rgb),0.1);border:2px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:16px;">' +
                         '<div style="color:var(--text-muted);font-size:0.8rem;margin-bottom:6px;">NEW SECRET KEY</div>' +
                         '<div style="color:var(--primary);font-family:monospace;font-size:1.3rem;letter-spacing:1px;cursor:pointer;" onclick="copyText(\'' + escAttr(data.newKey) + '\')" title="Click to copy">' + escHtml(data.newKey) + '</div></div>' +
-                        '<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:6px;">Old key ending in ****-' + escHtml(data.oldKeyLast4 || '????') + ' is now invalid.</p>' +
+                        '<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:6px;">Old key: ' + escHtml(data.oldKeyPreview || '????') + ' is now invalid.</p>' +
                         '<p style="color:#f59e0b;font-size:0.85rem;margin-bottom:16px;">&#9888; Send this key to the user securely. It will not be shown again.</p>' +
                         '<button class="btn btn-primary btn-full" onclick="this.closest(\'div[style]\').remove()">Done</button></div>';
                     document.body.appendChild(overlay);

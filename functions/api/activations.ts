@@ -7,7 +7,7 @@ interface Env {
 const ACTIVATION_SECRET = "CipherBaseAI-Activation-v1-Secret";
 
 // Access control secrets
-const ADMIN_SECRET = "svart-admin-2026";
+const ADMIN_SECRET = "hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR";
 const APP_SECRET = "svart-app-verify-2026";
 
 const CORS_HEADERS: Record<string, string> = {

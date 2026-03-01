@@ -23,8 +23,8 @@ interface Env {
   USAGE_DATA: KVNamespace;
 }
 
-const ADMIN_SECRET = "svart-admin-2026";
-const MOD_SECRET = "svart-mod-2026";
+const ADMIN_SECRET = "hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR";
+const MOD_SECRET = "4Vw15CeU_bal14uMBHkEZjE1KhoXr5TbMSP9CBqmTAD6PBRMfUDF-mx-qeAR9ErH";
 const APP_SECRET = "svart-app-verify-2026";
 const GUARDIAN_SECRET = "svart-guardian-2026";
 

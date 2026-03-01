@@ -2,7 +2,7 @@ interface Env {
   USAGE_DATA: KVNamespace;
 }
 
-const ADMIN_SECRET = "svart-admin-2026";
+const ADMIN_SECRET = "hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR";
 
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
