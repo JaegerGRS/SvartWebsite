@@ -1,7 +1,7 @@
 {
-  "name": "svart-suite-website",
+  "name": "svart-security-website",
   "version": "1.0.0",
-  "description": "Professional promotional website for Svart Suite - Privacy Software",
+  "description": "Official website for Svart Security — privacy-first security tools with full encryption",
   "type": "module",
   "scripts": {
     "start": "http-server -p 8000 -g",
@@ -22,15 +22,15 @@
     "ad-blocker",
     "tor"
   ],
-  "author": "Svart Suite",
+  "author": "Svart Security",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/svartsuite/website"
+    "url": "https://github.com/JaegerGRS/SvartWebsite"
   },
-  "homepage": "https://svartsuite.com",
+  "homepage": "https://svartsecurity.org",
   "bugs": {
-    "url": "https://github.com/svartsuite/website/issues"
+    "url": "https://github.com/JaegerGRS/SvartWebsite/issues"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260226.1",
