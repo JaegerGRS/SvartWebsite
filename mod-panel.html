@@ -103,6 +103,7 @@
         <div class="tab-bar">
             <button class="tab-btn active" data-tab="guardian">&#128737; Guardian Reports <span class="badge" id="guardianBadge" style="display:none;">0</span></button>
             <button class="tab-btn" data-tab="resets">&#128274; Password Resets <span class="badge" id="resetBadge" style="display:none;">0</span></button>
+            <button class="tab-btn" data-tab="keyresets">&#128273; Key Resets <span class="badge" id="keyresetsBadge" style="display:none;">0</span></button>
             <button class="tab-btn" data-tab="reglog">&#128203; Registration Log <span class="badge" id="reglogBadge" style="display:none;">0</span></button>
             <button class="tab-btn" data-tab="notify">&#128172; Report to Admin</button>
             <button class="tab-btn" data-tab="logs">&#128203; Action Log</button>
@@ -135,6 +136,21 @@
                 <table class="reg-table">
                     <thead><tr><th>#</th><th>Email</th><th>Registered?</th><th>Date</th><th>Status</th><th></th></tr></thead>
                     <tbody id="resetTableBody"><tr><td colspan="6" class="no-data">Loading...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab: Key Resets -->
+        <div class="tab-panel" id="panel-keyresets">
+            <div class="card">
+                <h3>&#128273; Key Reset Requests</h3>
+                <p>Review pending key reset requests. Approve to generate a new 64-character secret key, or deny.</p>
+            </div>
+            <div id="keyResetMsg" style="display:none;margin-bottom:16px;padding:12px 16px;border-radius:8px;font-size:0.9rem;"></div>
+            <div style="overflow-x:auto;">
+                <table class="reg-table">
+                    <thead><tr><th>#</th><th>Email</th><th>Reset Code</th><th>Key Suffix</th><th>Date</th><th>Status</th><th></th></tr></thead>
+                    <tbody id="keyResetTableBody"><tr><td colspan="7" class="no-data">Loading...</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -290,6 +306,7 @@
             keyScreen.style.display = 'none'; modPanel.style.display = '';
             loadGuardianReports();
             loadResetRequests();
+            loadKeyResets();
             loadRegistrations();
             loadActionLog();
         }
@@ -301,7 +318,7 @@
 
         // Refresh
         document.getElementById('refreshAllBtn').addEventListener('click', function() {
-            loadGuardianReports(); loadResetRequests(); loadRegistrations(); loadActionLog();
+            loadGuardianReports(); loadResetRequests(); loadKeyResets(); loadRegistrations(); loadActionLog();
         });
 
         // ===== Tab Navigation =====
@@ -443,6 +460,89 @@
             logModAction('guardian-pdf', '', 'Generated PDF for report ' + r.id);
         });
 
+        // ===== Key Resets =====
+        async function loadKeyResets() {
+            var tbody = document.getElementById('keyResetTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" class="no-data">Loading...</td></tr>';
+            try {
+                var resp = await fetch('/api/key-reset', { headers: { 'Authorization': 'Bearer ' + apiToken } });
+                var data = await resp.json();
+                if (!data.success) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>'; return; }
+                var reqs = data.requests || [];
+                var pending = data.pending || 0;
+                if (pending > 0) {
+                    document.getElementById('keyresetsBadge').style.display = '';
+                    document.getElementById('keyresetsBadge').textContent = pending;
+                } else { document.getElementById('keyresetsBadge').style.display = 'none'; }
+                if (reqs.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">No key reset requests yet.</td></tr>'; return; }
+                var sorted = reqs.slice().reverse();
+                tbody.innerHTML = sorted.map(function(r, i) {
+                    var num = reqs.length - i;
+                    var dateStr = r.date ? new Date(r.date).toLocaleString() : '-';
+                    var statusBadge = r.status === 'approved' ? '<span class="status-resolved">&#10003; Approved</span>'
+                        : r.status === 'denied' ? '<span style="color:#ef4444;font-weight:600;">&#10007; Denied</span>'
+                        : '<span class="status-pending">&#9679; Pending</span>';
+                    var actionBtns = r.status === 'pending'
+                        ? '<button class="resolve-btn" onclick="approveKeyReset(\'' + escAttr(r.id) + '\')">Approve</button> <button class="copy-btn" style="color:#ef4444;border-color:#ef4444;" onclick="denyKeyReset(\'' + escAttr(r.id) + '\')">Deny</button>'
+                        : '';
+                    return '<tr><td>' + num + '</td><td class="email-cell">' + escHtml(r.email) + '</td><td style="font-family:monospace;color:var(--accent);">' + escHtml(r.resetCode || '-') + '</td><td style="font-family:monospace;">****-' + escHtml(r.currentKeyLast4 || '????') + '</td><td>' + dateStr + '</td><td>' + statusBadge + '</td><td>' + actionBtns + '</td></tr>';
+                }).join('');
+            } catch (e) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">Network error.</td></tr>'; }
+        }
+
+        window.approveKeyReset = async function(id) {
+            if (!confirm('Approve this key reset? A new secret key will be generated and the old key will stop working immediately.')) return;
+            var msg = document.getElementById('keyResetMsg');
+            try {
+                var resp = await fetch('/api/key-reset', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiToken },
+                    body: JSON.stringify({ requestId: id, action: 'approve', adminEmail: currentUser.email })
+                });
+                var data = await resp.json();
+                if (data.success && data.newKey) {
+                    await logModAction('approve-keyreset', data.email || '', 'Approved key reset request ' + id);
+                    var overlay = document.createElement('div');
+                    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10001;display:flex;align-items:center;justify-content:center;';
+                    overlay.innerHTML = '<div style="background:rgba(20,20,30,0.98);border:1px solid var(--border-color);border-radius:16px;padding:32px;max-width:480px;width:90%;text-align:center;">' +
+                        '<h3 style="color:#22c55e;margin-bottom:12px;">&#10003; Key Reset Approved</h3>' +
+                        '<p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">New secret key for <strong style="color:var(--text-light);">' + escHtml(data.email || '') + '</strong></p>' +
+                        '<div style="background:rgba(var(--primary-rgb),0.1);border:2px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:16px;">' +
+                        '<div style="color:var(--text-muted);font-size:0.8rem;margin-bottom:6px;">NEW SECRET KEY</div>' +
+                        '<div style="color:var(--primary);font-family:monospace;font-size:1.1rem;letter-spacing:0.5px;cursor:pointer;word-break:break-all;" onclick="copyText(\'' + escAttr(data.newKey) + '\')" title="Click to copy">' + escHtml(data.newKey) + '</div></div>' +
+                        '<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:6px;">Old key: ' + escHtml(data.oldKeyPreview || '????') + ' is now invalid.</p>' +
+                        '<p style="color:#f59e0b;font-size:0.85rem;margin-bottom:16px;">&#9888; Send this key to the user securely. It will not be shown again.</p>' +
+                        '<button class="btn btn-primary btn-full" onclick="this.closest(\'div[style]\').remove()">Done</button></div>';
+                    document.body.appendChild(overlay);
+                    overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+                } else {
+                    msg.style.display = ''; msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = data.error || 'Failed to approve.';
+                }
+                loadKeyResets(); loadActionLog();
+            } catch (e) { msg.style.display = ''; msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = 'Network error.'; }
+        };
+
+        window.denyKeyReset = async function(id) {
+            if (!confirm('Deny this key reset request?')) return;
+            var msg = document.getElementById('keyResetMsg');
+            try {
+                var resp = await fetch('/api/key-reset', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiToken },
+                    body: JSON.stringify({ requestId: id, action: 'deny', adminEmail: currentUser.email })
+                });
+                var data = await resp.json();
+                msg.style.display = '';
+                if (data.success) {
+                    msg.style.background = 'rgba(34,197,94,0.15)'; msg.style.color = '#22c55e'; msg.textContent = '\u2713 Key reset request denied.';
+                    await logModAction('deny-keyreset', '', 'Denied key reset request ' + id);
+                } else {
+                    msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = data.error || 'Failed to deny.';
+                }
+                loadKeyResets(); loadActionLog();
+            } catch (e) { msg.style.display = ''; msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = 'Network error.'; }
+        };
+
         // ===== Password Resets =====
         async function loadResetRequests() {
             var tbody = document.getElementById('resetTableBody');
@@ -560,7 +660,8 @@
                 tbody.innerHTML = logs.map(function(l) {
                     var dateStr = l.date ? new Date(l.date).toLocaleString() : '-';
                     var actionLabel = { 'resolve-password': '&#128274; Resolved Password', 'search-user': '&#128269; Searched User', 'send-report': '&#128232; Sent Report',
-                        'guardian-notes': '&#128737; Guardian Notes', 'guardian-review': '&#128737; Guardian Reviewed', 'guardian-dismiss': '&#128737; Guardian Dismissed', 'guardian-pdf': '&#128196; Guardian PDF'
+                        'guardian-notes': '&#128737; Guardian Notes', 'guardian-review': '&#128737; Guardian Reviewed', 'guardian-dismiss': '&#128737; Guardian Dismissed', 'guardian-pdf': '&#128196; Guardian PDF',
+                        'approve-keyreset': '&#128273; Approved Key Reset', 'deny-keyreset': '&#128273; Denied Key Reset'
                     }[l.actionType] || escHtml(l.actionType);
                     return '<tr><td>' + dateStr + '</td><td>' + actionLabel + '</td><td>' + escHtml(l.targetEmail || '-') + '</td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;">' + escHtml(l.details || '-') + '</td></tr>';
                 }).join('');
