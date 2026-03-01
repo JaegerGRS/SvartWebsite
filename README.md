@@ -110,42 +110,6 @@ Build        Node.js (build-main.js → main/)
 
 <br>
 
-## ◆ Getting Started
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) ≥ 14
-- A [Cloudflare](https://cloudflare.com) account (for deployment)
-
-### Local Development
-
-```bash
-# Clone the repo
-git clone https://github.com/JaegerGRS/SvartWebsite.git
-cd SvartWebsite
-
-# Install dependencies
-npm install
-
-# Start a local server
-npm start
-# → http://localhost:8000
-
-# Build for production
-npm run build
-```
-
-### Deploy
-
-The site auto-deploys to [svartsecurity.org](https://svartsecurity.org) via Cloudflare Pages when changes are pushed to `main`.
-
-```bash
-git add -A && git commit -m "your changes"
-git push origin main
-```
-
-<br>
-
 ## ◆ API Endpoints
 
 All backend endpoints live in `functions/api/` and run as Cloudflare Pages Functions with KV storage.
@@ -165,20 +129,6 @@ All backend endpoints live in `functions/api/` and run as Cloudflare Pages Funct
 | `/api/downloads` | GET/POST | Download tracking |
 | `/api/usage` | GET | Usage statistics |
 | `/api/health` | GET | Health check |
-
-<br>
-
-## ◆ Contributing
-
-Contributions, ideas, and bug reports are welcome.
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Commit your changes (`git commit -m "Add my feature"`)
-4. Push to the branch (`git push origin feature/my-feature`)
-5. Open a Pull Request
-
-You can also submit suggestions through the [Community Forum](https://svartsecurity.org/community.html) or the [Contact Page](https://svartsecurity.org/contact.html).
 
 <br>
 
