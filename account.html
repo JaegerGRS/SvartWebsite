@@ -38,7 +38,7 @@
     <div style="max-width:400px;margin:140px auto;padding:32px;background:rgba(20,20,30,0.95);border:1px solid var(--border-color);border-radius:16px;text-align:center;">
       <h2 style="color:var(--primary);margin-bottom:8px;">&#128272; Verification Required</h2>
       <p style="color:var(--text-muted);margin-bottom:20px;font-size:0.9rem;">Your account has elevated privileges. Enter your secret key to access the dashboard.</p>
-      <input type="password" id="dashKeyInput" placeholder="Your secret key (XXXX-XXXX-XXXX-XXXX)" autocomplete="off" style="width:100%;padding:12px 16px;background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:8px;color:var(--text-light);font-size:1rem;margin-bottom:12px;">
+      <input type="password" id="dashKeyInput" placeholder="Your 64-character secret key" autocomplete="off" style="width:100%;padding:12px 16px;background:rgba(var(--bg-dark-rgb),0.8);border:1px solid var(--border-color);border-radius:8px;color:var(--text-light);font-size:0.85rem;font-family:monospace;margin-bottom:12px;">
       <button class="btn btn-primary" id="dashKeyBtn" style="width:100%;padding:12px;font-size:1rem;">Verify &amp; Access Dashboard</button>
       <p id="dashKeyError" style="color:#ef4444;margin-top:12px;display:none;font-size:0.9rem;"></p>
       <a href="login.html" style="display:block;text-align:center;margin-top:16px;color:var(--text-muted);font-size:0.85rem;text-decoration:none;">&#8592; Back to Login</a>
@@ -951,8 +951,8 @@
     }
 
     // ===== Secret key (synced across all panels) =====
-    var realKey = user.activationKey || svartId || 'XXXX-XXXX-XXXX-XXXX';
-    var maskedKey = realKey.replace(/[A-Za-z0-9]/g, '\u2022');
+    var realKey = user.activationKey || svartId || '????????????????????????????????????????????????????????????????';
+    var maskedKey = realKey.replace(/./g, '\u2022');
     var keyVisible = false;
 
     function syncKeyDisplay() {

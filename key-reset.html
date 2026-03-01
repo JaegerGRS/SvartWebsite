@@ -97,7 +97,7 @@
                             <label for="resetKey">Current Secret Key</label>
                             <div class="input-wrapper">
                                 <span class="input-icon">&#128273;</span>
-                                <input id="resetKey" type="text" placeholder="XXXX-XXXX-XXXX-XXXX" required autocomplete="off" style="text-transform:uppercase;letter-spacing:1px;font-family:monospace;" />
+                                <input id="resetKey" type="text" placeholder="Your 64-character secret key" required autocomplete="off" style="letter-spacing:0.5px;font-family:monospace;font-size:0.85rem;" />
                             </div>
                         </div>
 
@@ -234,7 +234,7 @@
             e.preventDefault();
             var email = document.getElementById('resetEmail').value.trim().toLowerCase();
             var password = document.getElementById('resetPassword').value;
-            var key = document.getElementById('resetKey').value.trim().toUpperCase();
+            var key = document.getElementById('resetKey').value.trim();
             var reason = document.getElementById('resetReason').value.trim();
 
             if (!email) { showMsg(msg, 'Please enter your email address.', 'error'); return; }
@@ -242,7 +242,7 @@
             if (!password) { showMsg(msg, 'Please enter your current password.', 'error'); return; }
             if (password.length < 8) { showMsg(msg, 'Password must be at least 8 characters.', 'error'); return; }
             if (!key) { showMsg(msg, 'Please enter your current secret key.', 'error'); return; }
-            if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(key)) { showMsg(msg, 'Secret key must be in format XXXX-XXXX-XXXX-XXXX.', 'error'); return; }
+            if (key.length !== 64) { showMsg(msg, 'Secret key must be exactly 64 characters.', 'error'); return; }
 
             var btn = form.querySelector('button[type="submit"]');
             btn.disabled = true;

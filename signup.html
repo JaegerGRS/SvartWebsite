@@ -247,13 +247,14 @@
             strengthLabel.style.color = lvl.color;
         });
 
-        // Generate secret key (HMAC-SHA256 demo — mirrors the Tauri app logic)
+        // Generate 64-character AES-256-GCM secret key with special characters
         function generateActivationKey() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            const seg = (len) => Array.from({length:len}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
-            // Generate a flexible key — any format is accepted
-            // In production this would be HMAC-SHA256 server-side
-            return seg(4) + '-' + seg(4) + '-' + seg(4) + '-' + seg(4);
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*-_+=';
+            const bytes = new Uint8Array(64);
+            crypto.getRandomValues(bytes);
+            let key = '';
+            for (let i = 0; i < 64; i++) key += chars[bytes[i] % chars.length];
+            return key;
         }
 
         // Simple hash (demo only)
@@ -316,16 +317,13 @@
                 return;
             }
 
-                            // Generate secret key in format XXXX-XXXX-XXXX-XXXX
+                            // Generate 64-character AES-256-GCM secret key with special characters
                             function generateKey() {
-                                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*-_+=';
+                                const bytes = new Uint8Array(64);
+                                crypto.getRandomValues(bytes);
                                 let key = '';
-                                for (let i = 0; i < 4; i++) {
-                                    if (i > 0) key += '-';
-                                    for (let j = 0; j < 4; j++) {
-                                        key += chars.charAt(Math.floor(Math.random() * chars.length));
-                                    }
-                                }
+                                for (let i = 0; i < 64; i++) key += chars[bytes[i] % chars.length];
                                 return key;
                             }
                             const activationKey = generateKey();

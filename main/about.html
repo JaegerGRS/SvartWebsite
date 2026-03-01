@@ -143,7 +143,7 @@
                 <div class="how-step">
                     <span class="how-step-num">1</span>
                     <h4>Create Your Account</h4>
-                    <p>Sign up with your email. A unique <strong style="color:var(--primary);">secret key</strong> (format: XXXX-XXXX-XXXX-XXXX) is generated for you using HMAC-SHA256. This key is your identity &mdash; it's never your password. You log in to the website and all apps using your <strong style="color:var(--text-light);">email and password</strong>, not your secret key. Your password is hashed with Argon2 (GPU-resistant) and never stored in plain text. One account per network is enforced to prevent abuse.</p>
+                    <p>Sign up with your email. A unique <strong style="color:var(--primary);">64-character secret key</strong> is generated for you using AES-256-GCM cryptographic randomness with uppercase, lowercase, digits, and special characters. This key is your identity &mdash; it's never your password. You log in to the website and all apps using your <strong style="color:var(--text-light);">email and password</strong>, not your secret key. Your password is hashed with Argon2 (GPU-resistant) and never stored in plain text. One account per network is enforced to prevent abuse.</p>
                     <p>Your secret key is always visible in your <strong style="color:var(--primary);"><a href="account-settings.html" style="color:var(--primary);">account dashboard</a></strong> (the same page where you change your username). This means your key could be compromised if someone gains access to your account. If your key is ever stolen, you can <a href="key-reset.html" style="color:var(--primary);font-weight:600;">request a key reset</a> &mdash; provide your email, password, and current key to prove ownership, then an admin reviews and issues a new one. There will never be a single ad in any Svart app or on the website &mdash; ever.</p>
                 </div>
 
@@ -234,8 +234,8 @@
                 <!-- Secret Key -->
                 <div class="setup-detail">
                     <h4>&#128273; Your Secret Key</h4>
-                    <p>When you create an account, a unique <strong style="color:var(--primary);">secret key</strong> is generated for you using HMAC-SHA256. This key is your identity across all Svart apps.</p>
-                    <div class="key-format">XXXX-XXXX-XXXX-XXXX</div>
+                    <p>When you create an account, a unique <strong style="color:var(--primary);">64-character secret key</strong> is generated for you using AES-256-GCM cryptographic randomness. This key is your identity across all Svart apps.</p>
+                    <div class="key-format" style="font-size:0.7rem;word-break:break-all;">aBc4!xK#mN7$pQ2&amp;rS9*tU0-vW3_yZ5+eF6=gH8jL1dR@cXoI%iEwA^bDfYhJkM</div>
                     <p>Your secret key is <strong style="color:var(--text-light);">not your password</strong>. You log in with your <strong style="color:var(--text-light);">email and password</strong> &mdash; the secret key is a server-side identifier that links your account to your apps.</p>
                     <p>Your key is always visible in your <strong style="color:var(--primary);"><a href="account-settings.html" style="color:var(--primary);">account dashboard</a></strong> &mdash; the same page where you change your username. Because it&rsquo;s stored there, your key could be compromised if someone gains access to your account. Your key can also be used to reset your account, so protecting your login is critical.</p>
                     <p>Each app uses your secret key to derive a unique API key for that specific app. The server validates your secret key but <strong style="color:var(--text-light);">cannot see your local data, your local password, or your API key</strong>. The server only knows you&rsquo;re a valid user &mdash; nothing more.</p>
@@ -248,7 +248,7 @@
                     <div class="setup-flow" style="margin-top:24px;">
                         <div class="setup-flow-step">
                             <span class="flow-label">Sign Up</span>
-                            <span class="flow-desc">You register with your email and password. The server generates your secret key (XXXX-XXXX-XXXX-XXXX) and shows it on your dashboard.</span>
+                            <span class="flow-desc">You register with your email and password. The server generates your 64-character AES-256-GCM secret key and shows it on your dashboard.</span>
                         </div>
                         <div class="setup-flow-step">
                             <span class="flow-label">Dashboard</span>

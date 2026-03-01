@@ -46,14 +46,13 @@ function hashPassword(pw: string): string {
   return "h" + Math.abs(hash).toString(36);
 }
 
-// Generate a new secret key in format XXXX-XXXX-XXXX-XXXX
+// Generate a 64-character AES-256-GCM secret key with special characters
 function generateSecretKey(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const bytes = new Uint8Array(16);
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*-_+=";
+  const bytes = new Uint8Array(64);
   crypto.getRandomValues(bytes);
   let key = "";
-  for (let i = 0; i < 16; i++) {
-    if (i > 0 && i % 4 === 0) key += "-";
+  for (let i = 0; i < 64; i++) {
     key += chars[bytes[i] % chars.length];
   }
   return key;

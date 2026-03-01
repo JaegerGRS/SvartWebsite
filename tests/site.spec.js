@@ -13,7 +13,7 @@ test('Signup and login flow', async ({ page }) => {
 
 test('Username change and persistence', async ({ page }) => {
   await page.goto('http://localhost:8000/login.html');
-  await page.fill('#svartId', 'XXXX-XXXX-XXXX-XXXX'); // Use a valid key
+  await page.fill('#svartId', 'aBc4!xK#mN7$pQ2&rS9*tU0-vW3_yZ5+eF6=gH8jL1dR@cXoI%iEwA^bDfYhJkM'); // Use a valid 64-char key
   await page.fill('#password', 'testpassword123');
   await page.click('button[type="submit"]');
   await page.goto('http://localhost:8000/account-settings.html');
