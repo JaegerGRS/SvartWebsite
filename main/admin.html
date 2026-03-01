@@ -104,6 +104,7 @@
             <div class="stat-card"><div class="stat-num" id="todayUsers">-</div><div class="stat-label">Today</div></div>
             <div class="stat-card alert" id="resetStatCard" style="display:none;"><div class="stat-num" id="pendingResets">-</div><div class="stat-label">Pending Resets</div></div>
             <div class="stat-card danger" id="guardianStatCard" style="display:none;"><div class="stat-num" id="pendingGuardian">-</div><div class="stat-label">Guardian Reports</div></div>
+            <div class="stat-card alert" id="keyResetStatCard" style="display:none;"><div class="stat-num" id="pendingKeyResets">-</div><div class="stat-label">Key Resets</div></div>
         </div>
 
         <!-- Search Bar -->
@@ -119,6 +120,7 @@
             <button class="tab-btn" data-tab="enforcement">&#128272; Guardian Enforcement</button>
             <button class="tab-btn" data-tab="resets">&#128274; Password Resets <span class="badge" id="resetBadge" style="display:none;">0</span></button>
             <button class="tab-btn" data-tab="reglog">&#128203; Registrations <span class="badge" id="reglogBadge" style="display:none;">0</span></button>
+            <button class="tab-btn" data-tab="keyresets">&#128273; Key Resets <span class="badge" id="keyresetsBadge" style="display:none;">0</span></button>
             <button class="tab-btn" data-tab="modreports">&#128172; Mod Reports <span class="badge" id="modreportsBadge" style="display:none;">0</span></button>
         </div>
 
@@ -196,6 +198,18 @@
                 <table class="reg-table">
                     <thead><tr><th>#</th><th>Email</th><th>Secret Key</th><th>Display Name</th><th>Role</th><th>Date</th><th></th></tr></thead>
                     <tbody id="regTableBody"><tr><td colspan="7" class="no-data">Loading...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab: Key Resets -->
+        <div class="tab-panel" id="panel-keyresets">
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Users requesting a new secret key. Each request is verified server-side (password + current key matched). Review and approve to generate a new key, or deny.</p>
+            <div id="keyResetMsg" style="display:none;margin-bottom:16px;padding:12px 16px;border-radius:8px;font-size:0.9rem;"></div>
+            <div style="overflow-x:auto;">
+                <table class="reg-table">
+                    <thead><tr><th>#</th><th>Email</th><th>Reset Code</th><th>Last 4 (Current)</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="keyResetTableBody"><tr><td colspan="7" class="no-data">Loading...</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -308,7 +322,7 @@
         loginBtn.addEventListener('click', doLogin);
         secretInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
         logoutBtn.addEventListener('click', function() { adminToken = ''; panel.style.display = 'none'; loginScreen.style.display = ''; secretInput.value = ''; });
-        refreshBtn.addEventListener('click', function() { loadResetRequests(); loadGuardianReports(); loadRegistrations(); loadModReports(); loadStats(); loadEnforcement(); });
+        refreshBtn.addEventListener('click', function() { loadResetRequests(); loadGuardianReports(); loadRegistrations(); loadModReports(); loadKeyResets(); loadStats(); loadEnforcement(); });
         document.getElementById('searchBtn').addEventListener('click', doSearch);
         document.getElementById('searchEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
 
@@ -332,6 +346,7 @@
             loadStats();
             loadGuardianReports();
             loadResetRequests();
+            loadKeyResets();
             loadRegistrations();
             loadModReports();
             loadEnforcement();
@@ -441,6 +456,87 @@
                 }
                 loadResetRequests();
             } catch (e) { alert('Failed to resolve.'); }
+        };
+
+        // ===== Key Resets =====
+        async function loadKeyResets() {
+            var tbody = document.getElementById('keyResetTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" class="no-data">Loading...</td></tr>';
+            try {
+                var resp = await fetch('/api/key-reset', { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                var data = await resp.json();
+                if (!data.success) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">Error: ' + escHtml(data.error || 'Unknown') + '</td></tr>'; return; }
+                var reqs = data.requests || [];
+                var pending = data.pending || 0;
+                if (pending > 0) {
+                    document.getElementById('keyResetStatCard').style.display = ''; document.getElementById('pendingKeyResets').textContent = pending;
+                    document.getElementById('keyresetsBadge').style.display = ''; document.getElementById('keyresetsBadge').textContent = pending;
+                } else { document.getElementById('keyResetStatCard').style.display = 'none'; document.getElementById('keyresetsBadge').style.display = 'none'; }
+                if (reqs.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">No key reset requests yet.</td></tr>'; return; }
+                var sorted = reqs.slice().reverse();
+                tbody.innerHTML = sorted.map(function(r, i) {
+                    var num = reqs.length - i;
+                    var dateStr = r.date ? new Date(r.date).toLocaleString() : '-';
+                    var statusBadge = r.status === 'approved' ? '<span class="status-resolved">&#10003; Approved</span>'
+                        : r.status === 'denied' ? '<span style="color:#ef4444;font-weight:600;">&#10007; Denied</span>'
+                        : '<span class="status-pending">&#9679; Pending</span>';
+                    var actionBtns = r.status === 'pending'
+                        ? '<button class="resolve-btn" onclick="approveKeyReset(\'' + escAttr(r.id) + '\')">Approve</button> <button class="copy-btn" style="color:#ef4444;border-color:#ef4444;" onclick="denyKeyReset(\'' + escAttr(r.id) + '\')">Deny</button>'
+                        : '';
+                    return '<tr><td>' + num + '</td><td class="email-cell">' + escHtml(r.email) + '</td><td style="font-family:monospace;color:var(--accent);">' + escHtml(r.resetCode || '-') + '</td><td style="font-family:monospace;">****-' + escHtml(r.currentKeyLast4 || '????') + '</td><td>' + dateStr + '</td><td>' + statusBadge + '</td><td>' + actionBtns + '</td></tr>';
+                }).join('');
+            } catch (e) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">Network error.</td></tr>'; }
+        }
+
+        window.approveKeyReset = async function(id) {
+            if (!confirm('Approve this key reset? A new secret key will be generated and the old key will stop working immediately.')) return;
+            var msg = document.getElementById('keyResetMsg');
+            try {
+                var resp = await fetch('/api/key-reset', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
+                    body: JSON.stringify({ requestId: id, action: 'approve', adminEmail: adminUser.email })
+                });
+                var data = await resp.json();
+                if (data.success && data.newKey) {
+                    var overlay = document.createElement('div');
+                    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10001;display:flex;align-items:center;justify-content:center;';
+                    overlay.innerHTML = '<div style="background:rgba(20,20,30,0.98);border:1px solid var(--border-color);border-radius:16px;padding:32px;max-width:480px;width:90%;text-align:center;">' +
+                        '<h3 style="color:#22c55e;margin-bottom:12px;">&#10003; Key Reset Approved</h3>' +
+                        '<p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">New secret key for <strong style="color:var(--text-light);">' + escHtml(data.email || '') + '</strong></p>' +
+                        '<div style="background:rgba(var(--primary-rgb),0.1);border:2px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:16px;">' +
+                        '<div style="color:var(--text-muted);font-size:0.8rem;margin-bottom:6px;">NEW SECRET KEY</div>' +
+                        '<div style="color:var(--primary);font-family:monospace;font-size:1.3rem;letter-spacing:1px;cursor:pointer;" onclick="copyText(\'' + escAttr(data.newKey) + '\')" title="Click to copy">' + escHtml(data.newKey) + '</div></div>' +
+                        '<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:6px;">Old key ending in ****-' + escHtml(data.oldKeyLast4 || '????') + ' is now invalid.</p>' +
+                        '<p style="color:#f59e0b;font-size:0.85rem;margin-bottom:16px;">&#9888; Send this key to the user securely. It will not be shown again.</p>' +
+                        '<button class="btn btn-primary btn-full" onclick="this.closest(\'div[style]\').remove()">Done</button></div>';
+                    document.body.appendChild(overlay);
+                    overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+                } else {
+                    msg.style.display = ''; msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = data.error || 'Failed to approve.';
+                }
+                loadKeyResets();
+            } catch (e) { msg.style.display = ''; msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = 'Network error.'; }
+        };
+
+        window.denyKeyReset = async function(id) {
+            if (!confirm('Deny this key reset request?')) return;
+            var msg = document.getElementById('keyResetMsg');
+            try {
+                var resp = await fetch('/api/key-reset', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
+                    body: JSON.stringify({ requestId: id, action: 'deny', adminEmail: adminUser.email })
+                });
+                var data = await resp.json();
+                msg.style.display = '';
+                if (data.success) {
+                    msg.style.background = 'rgba(34,197,94,0.15)'; msg.style.color = '#22c55e'; msg.textContent = '\u2713 Key reset request denied.';
+                } else {
+                    msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = data.error || 'Failed to deny.';
+                }
+                loadKeyResets();
+            } catch (e) { msg.style.display = ''; msg.style.background = 'rgba(239,68,68,0.15)'; msg.style.color = '#ef4444'; msg.textContent = 'Network error.'; }
         };
 
         // ===== Guardian Reports =====

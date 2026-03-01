@@ -144,7 +144,7 @@
                     <span class="how-step-num">1</span>
                     <h4>Create Your Account</h4>
                     <p>Sign up with your email. A unique <strong style="color:var(--primary);">secret key</strong> (format: XXXX-XXXX-XXXX-XXXX) is generated for you using HMAC-SHA256. This key is your identity &mdash; it's never your password. You log in to the website and all apps using your <strong style="color:var(--text-light);">email and password</strong>, not your secret key. Your password is hashed with Argon2 (GPU-resistant) and never stored in plain text. One account per network is enforced to prevent abuse.</p>
-                    <p>Your secret key is always visible in your <strong style="color:var(--primary);"><a href="account-settings.html" style="color:var(--primary);">account dashboard</a></strong> (the same page where you change your username). This means your key could be compromised if someone gains access to your account. We are building an <strong style="color:var(--text-light);">email verification code system</strong> so you can recover your account and regenerate your key if it is ever stolen. There will never be a single ad in any Svart app or on the website &mdash; ever.</p>
+                    <p>Your secret key is always visible in your <strong style="color:var(--primary);"><a href="account-settings.html" style="color:var(--primary);">account dashboard</a></strong> (the same page where you change your username). This means your key could be compromised if someone gains access to your account. If your key is ever stolen, you can <a href="key-reset.html" style="color:var(--primary);font-weight:600;">request a key reset</a> &mdash; provide your email, password, and current key to prove ownership, then an admin reviews and issues a new one. There will never be a single ad in any Svart app or on the website &mdash; ever.</p>
                 </div>
 
                 <div class="how-step">
@@ -240,9 +240,9 @@
                     <p>Your key is always visible in your <strong style="color:var(--primary);"><a href="account-settings.html" style="color:var(--primary);">account dashboard</a></strong> &mdash; the same page where you change your username. Because it&rsquo;s stored there, your key could be compromised if someone gains access to your account. Your key can also be used to reset your account, so protecting your login is critical.</p>
                     <p>Each app uses your secret key to derive a unique API key for that specific app. The server validates your secret key but <strong style="color:var(--text-light);">cannot see your local data, your local password, or your API key</strong>. The server only knows you&rsquo;re a valid user &mdash; nothing more.</p>
 
-                    <div style="margin-top:16px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:18px;">
-                        <h5 style="color:#f59e0b;margin-bottom:8px;">&#128231; Account Recovery (Coming Soon)</h5>
-                        <p style="color:var(--text-muted);font-size:0.92rem;line-height:1.7;margin:0;">We are building an <strong style="color:var(--text-light);">email verification code system</strong> so you can recover your account if it is ever hacked. If your secret key is compromised, you&rsquo;ll be able to verify your identity via your email, revoke the old key, and generate a new one &mdash; locking the attacker out.</p>
+                    <div style="margin-top:16px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:10px;padding:18px;">
+                        <h5 style="color:#22c55e;margin-bottom:8px;">&#128273; Key Reset (Admin-Verified)</h5>
+                        <p style="color:var(--text-muted);font-size:0.92rem;line-height:1.7;margin:0;">If your secret key is compromised, you can <a href="key-reset.html" style="color:var(--primary);font-weight:600;">request a key reset</a>. You must provide your <strong style="color:var(--text-light);">email, current password, and current secret key</strong> to prove you own the account. A unique reset code is generated from your credentials. An admin or moderator reviews and approves the request &mdash; then a new key is issued and your old key is immediately invalidated.</p>
                     </div>
 
                     <div class="setup-flow" style="margin-top:24px;">
@@ -311,7 +311,7 @@
                     <ul style="color:var(--text-muted);padding-left:24px;line-height:2.2;">
                         <li><strong style="color:var(--text-light);">Login</strong> &mdash; you log in with your email and password, not your secret key</li>
                         <li><strong style="color:var(--text-light);">Secret key</strong> &mdash; generated once, visible in your dashboard, used to activate apps and can be used for account reset</li>
-                        <li><strong style="color:var(--text-light);">Key compromise risk</strong> &mdash; because the key is in your dashboard, protect your account login; email code recovery is being built</li>
+                        <li><strong style="color:var(--text-light);">Key compromise risk</strong> &mdash; because the key is in your dashboard, protect your account login; <a href="key-reset.html" style="color:var(--primary);">key reset</a> is available (admin-verified)</li>
                         <li><strong style="color:var(--text-light);">Local password</strong> &mdash; hashed with Argon2, stored in the app&rsquo;s config file, never leaves your device</li>
                         <li><strong style="color:var(--text-light);">Duress password</strong> &mdash; hashed alongside regular password, triggers instant data destruction</li>
                         <li><strong style="color:var(--text-light);">Encryption</strong> &mdash; AES-256-GCM with PBKDF2 key derivation, everything encrypted at rest</li>
@@ -478,7 +478,7 @@
                 </div>
                 <div class="faq-item">
                     <h4>How does the secret key work?</h4>
-                    <p>Your secret key is generated when you sign up and is always visible in your <strong>account dashboard</strong> (the same page where you change your username). You log in with your <strong>email and password</strong> &mdash; the secret key is not used for login. It&rsquo;s used to activate your desktop apps and can also be used to reset your account. Because your key is stored in your dashboard, it could be compromised if someone gains access to your account &mdash; so protect your login. We are building an <strong>email verification code system</strong> so you can recover your account and regenerate your key if ever hacked.</p>
+                    <p>Your secret key is generated when you sign up and is always visible in your <strong>account dashboard</strong> (the same page where you change your username). You log in with your <strong>email and password</strong> &mdash; the secret key is not used for login. It&rsquo;s used to activate your desktop apps and can also be used to reset your account. Because your key is stored in your dashboard, it could be compromised if someone gains access to your account &mdash; so protect your login. If your key is ever compromised, you can <a href="key-reset.html" style="color:var(--primary);font-weight:600;">request a key reset</a> &mdash; you must provide your email, password, and current key to prove ownership, then an admin reviews and issues a new key.</p>
                 </div>
                 <div class="faq-item">
                     <h4>How is Svart Browser different from other browsers?</h4>
