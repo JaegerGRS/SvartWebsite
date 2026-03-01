@@ -35,6 +35,22 @@
         .law-cat-card h5 { color: #ef4444; font-size: 0.95rem; margin-bottom: 6px; }
         .law-cat-card .statute { color: var(--text-muted); font-size: 0.8rem; }
         .law-cat-card .desc { color: var(--text-muted); font-size: 0.85rem; margin-top: 6px; line-height: 1.5; }
+        .setup-detail { background: rgba(20,20,30,0.7); border: 1px solid var(--border-color); border-radius: 16px; padding: 28px; margin-bottom: 24px; transition: border-color 0.3s; }
+        .setup-detail:hover { border-color: var(--primary); }
+        .setup-detail h4 { color: var(--text-light); font-size: 1.15rem; margin-bottom: 14px; }
+        .setup-detail p { color: var(--text-muted); line-height: 1.7; margin-bottom: 12px; }
+        .setup-detail p:last-child { margin-bottom: 0; }
+        .setup-detail .key-format { display: inline-block; background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.3); border-radius: 8px; padding: 8px 18px; font-family: monospace; font-size: 1.05rem; color: var(--primary); letter-spacing: 2px; margin: 12px 0; }
+        .setup-detail .file-path { display: inline-block; background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 6px; padding: 4px 12px; font-family: monospace; font-size: 0.85rem; color: #22c55e; }
+        .setup-detail ul { color: var(--text-muted); margin-top: 10px; padding-left: 24px; line-height: 2; }
+        .setup-detail .duress-warning { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 10px; padding: 18px; margin-top: 16px; }
+        .setup-detail .duress-warning h5 { color: #ef4444; margin-bottom: 8px; font-size: 1rem; }
+        .setup-detail .duress-warning p { color: var(--text-muted); font-size: 0.92rem; margin-bottom: 8px; }
+        .setup-flow { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+        .setup-flow-step { display: flex; align-items: flex-start; gap: 16px; padding: 16px 0; border-left: 2px solid var(--primary); padding-left: 20px; position: relative; }
+        .setup-flow-step::before { content: ''; position: absolute; left: -7px; top: 20px; width: 12px; height: 12px; border-radius: 50%; background: var(--primary); }
+        .setup-flow-step .flow-label { color: var(--primary); font-weight: 600; font-size: 0.85rem; min-width: 100px; flex-shrink: 0; }
+        .setup-flow-step .flow-desc { color: var(--text-muted); font-size: 0.92rem; line-height: 1.6; }
         @media (max-width: 768px) {
             .about-tab-btn { padding: 12px 18px; font-size: 0.9rem; }
             .law-category-grid { grid-template-columns: 1fr; }
@@ -115,6 +131,7 @@
         <div class="container">
             <div class="about-tabs">
                 <button class="about-tab-btn active" data-about-tab="howitworks">&#9881; How It Works</button>
+                <button class="about-tab-btn" data-about-tab="security">&#128272; Security &amp; Setup</button>
                 <button class="about-tab-btn" data-about-tab="guardian">&#128737; NetworkGuardian</button>
             </div>
 
@@ -169,6 +186,93 @@
                     <span class="how-step-num">8</span>
                     <h4>Cloudflare-Powered Infrastructure</h4>
                     <p>Our website and authentication run on Cloudflare's global edge network. Serverless functions handle registration, login, and account management. KV storage holds account data. All connections are forced HTTPS. No origin server to attack — everything runs at the edge, close to you, with Cloudflare's DDoS protection.</p>
+                </div>
+            </div>
+
+            <!-- Tab: Security & Setup -->
+            <div class="about-tab-panel" id="about-panel-security">
+                <h3 style="color:var(--primary);margin-bottom:8px;font-size:1.4rem;">&#128272; Security &amp; Setup</h3>
+                <p style="color:var(--text-muted);margin-bottom:32px;line-height:1.7;">Every Svart app follows the same security model. Here&rsquo;s exactly how your secret key, local passwords, and duress protection work &mdash; no secrets, no hidden processes.</p>
+
+                <!-- Secret Key -->
+                <div class="setup-detail">
+                    <h4>&#128273; Your Secret Key</h4>
+                    <p>When you create an account, a unique <strong style="color:var(--primary);">secret key</strong> is generated for you using HMAC-SHA256. This key is your identity across all Svart apps.</p>
+                    <div class="key-format">XXXX-XXXX-XXXX-XXXX</div>
+                    <p>Your secret key is <strong style="color:var(--text-light);">not your password</strong>. It&rsquo;s a server-side identifier that links your account to your apps. It&rsquo;s generated once, and you store it somewhere safe. If you lose it, we cannot recover it &mdash; by design.</p>
+                    <p>Each app uses your secret key to derive a unique API key for that specific app. The server validates your secret key but <strong style="color:var(--text-light);">cannot see your local data, your local password, or your API key</strong>. The server only knows you&rsquo;re a valid user — nothing more.</p>
+
+                    <div class="setup-flow">
+                        <div class="setup-flow-step">
+                            <span class="flow-label">Sign Up</span>
+                            <span class="flow-desc">You register with your email. The server generates your secret key (XXXX-XXXX-XXXX-XXXX) and returns it once.</span>
+                        </div>
+                        <div class="setup-flow-step">
+                            <span class="flow-label">Save It</span>
+                            <span class="flow-desc">You write it down or store it in a safe place. This is the only time you&rsquo;ll see it from the server.</span>
+                        </div>
+                        <div class="setup-flow-step">
+                            <span class="flow-label">Enter in App</span>
+                            <span class="flow-desc">When you first open any Svart app, you enter your secret key. The app validates it with the server and activates.</span>
+                        </div>
+                        <div class="setup-flow-step">
+                            <span class="flow-label">Set Local Password</span>
+                            <span class="flow-desc">After activation, you choose a local password. This password is hashed and saved locally &mdash; it never leaves your device.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Local Passwords -->
+                <div class="setup-detail">
+                    <h4>&#128274; Local Passwords &amp; App Files</h4>
+                    <p>Every Svart app stores your password <strong style="color:var(--text-light);">locally in the app&rsquo;s own data files</strong>. The password is hashed with Argon2 (GPU-resistant, 250,000+ iterations) before being written to disk. The plain-text password is never stored anywhere.</p>
+                    <p>When you open the app and type your password, the app hashes what you typed and compares it to the stored hash. If it matches, the app unlocks. If it doesn&rsquo;t, access is denied.</p>
+
+                    <p><strong style="color:var(--text-light);">Where is the password stored?</strong></p>
+                    <p>Each app keeps its own encrypted config file in its local data directory:</p>
+                    <ul>
+                        <li><strong style="color:var(--text-light);">Windows:</strong> <span class="file-path">%APPDATA%\SvartApp\config.enc</span></li>
+                        <li><strong style="color:var(--text-light);">macOS:</strong> <span class="file-path">~/Library/Application Support/SvartApp/config.enc</span></li>
+                        <li><strong style="color:var(--text-light);">Linux:</strong> <span class="file-path">~/.config/svartapp/config.enc</span></li>
+                    </ul>
+                    <p style="margin-top:16px;">The config file contains your hashed password, your encrypted data key, and your app settings &mdash; all encrypted with AES-256-GCM. The app reads this file on launch to verify your identity and decrypt your data. <strong style="color:var(--text-light);">The server never sees this file.</strong></p>
+
+                    <p><strong style="color:var(--text-light);">Why local?</strong></p>
+                    <p>Storing your password locally means your password never touches a server. There is no central password database to breach. Even if someone compromised our server, they would have zero access to your local password or your encrypted data. Your device is the vault.</p>
+                </div>
+
+                <!-- Duress Password -->
+                <div class="setup-detail">
+                    <h4>&#128680; Duress Password (Distress Mode)</h4>
+                    <p>Every Svart app supports a <strong style="color:#ef4444;">duress password</strong> &mdash; a secondary password you set that, when entered instead of your real password, <strong style="color:#ef4444;">permanently deletes all your data</strong>.</p>
+
+                    <p><strong style="color:var(--text-light);">How it works:</strong></p>
+                    <ul>
+                        <li>When setting up your app, you choose a <strong style="color:var(--text-light);">regular password</strong> (unlocks the app normally) and a <strong style="color:#ef4444;">duress password</strong> (triggers data destruction)</li>
+                        <li>Both passwords are hashed and stored in the app&rsquo;s local config file</li>
+                        <li>If you enter the <strong style="color:#ef4444;">duress password</strong> at the login screen, the app immediately and irreversibly deletes all local data &mdash; passwords, notes, conversations, keys, config files &mdash; everything</li>
+                        <li>After deletion, the app resets to a clean first-launch state as if it was just installed</li>
+                        <li>There is <strong style="color:var(--text-light);">no confirmation prompt</strong> &mdash; the destruction is instant and silent</li>
+                    </ul>
+
+                    <div class="duress-warning">
+                        <h5>&#9888;&#65039; This Is Irreversible</h5>
+                        <p>Entering the duress password <strong>permanently destroys</strong> all data stored by that app. There is no recovery, no backup, no undo. The data is overwritten and deleted from disk. This feature exists for situations where you are forced to unlock your device &mdash; entering the duress password gives the appearance of a fresh install while protecting your real data by destroying it.</p>
+                        <p style="margin-bottom:0;">The duress password is stored as a separate Argon2 hash in the same local config file. The app checks both hashes on login: one unlocks, the other destroys.</p>
+                    </div>
+                </div>
+
+                <!-- Security Summary -->
+                <div style="margin-top:32px;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25);border-radius:12px;padding:24px;">
+                    <h4 style="color:var(--primary);margin-bottom:12px;">Security Model Summary</h4>
+                    <ul style="color:var(--text-muted);padding-left:24px;line-height:2.2;">
+                        <li><strong style="color:var(--text-light);">Secret key</strong> &mdash; generated once, used to activate apps, server-side identity only</li>
+                        <li><strong style="color:var(--text-light);">Local password</strong> &mdash; hashed with Argon2, stored in the app&rsquo;s config file, never leaves your device</li>
+                        <li><strong style="color:var(--text-light);">Duress password</strong> &mdash; hashed alongside regular password, triggers instant data destruction</li>
+                        <li><strong style="color:var(--text-light);">Encryption</strong> &mdash; AES-256-GCM with PBKDF2 key derivation, everything encrypted at rest</li>
+                        <li><strong style="color:var(--text-light);">Server access</strong> &mdash; the server validates your secret key, but cannot see your password, your data, or your API key</li>
+                        <li><strong style="color:var(--text-light);">No cloud backups</strong> &mdash; your data lives on your device, period</li>
+                    </ul>
                 </div>
             </div>
 
