@@ -344,7 +344,8 @@
                 { label: 'Data Storage', val: 'Local only' }
             ],
             learnMore: 'SVART.html',
-            downloadable: true
+            downloadable: true,
+            downloadPage: 'pages/download-browser.html'
         },
         ai: {
             icon: '&#129302;', name: 'Svart AI', cat: 'AI Assistant',
@@ -366,7 +367,8 @@
                 { label: 'Connectivity', val: 'Online required' }
             ],
             learnMore: 'pricing.html',
-            downloadable: true
+            downloadable: true,
+            downloadPage: 'pages/download-ai.html'
         },
         passwords: {
             icon: '&#128273;', name: 'SVART Passwords', cat: 'Password Security',
@@ -386,7 +388,8 @@
                 { label: 'Platforms', val: 'Windows, macOS, Linux' },
                 { label: 'Data Storage', val: 'Local only' }
             ],
-            downloadable: false
+            downloadable: true,
+            downloadPage: 'pages/download-pass.html'
         },
         notes: {
             icon: '&#128221;', name: 'SVART Notes', cat: 'Encrypted Notes',
@@ -406,7 +409,8 @@
                 { label: 'Platforms', val: 'Windows, macOS, Linux' },
                 { label: 'Sync', val: 'None (local only)' }
             ],
-            downloadable: false
+            downloadable: true,
+            downloadPage: 'pages/download-notes.html'
         },
         docs: {
             icon: '&#128196;', name: 'SVART Docs', cat: 'Encrypted Documents',
@@ -426,7 +430,8 @@
                 { label: 'Platforms', val: 'Windows, macOS, Linux' },
                 { label: 'Data Storage', val: 'Local only' }
             ],
-            downloadable: false
+            downloadable: true,
+            downloadPage: 'pages/download-docs.html'
         },
         chat: {
             icon: '&#128172;', name: 'SVART Chat', cat: 'Encrypted Messaging',
@@ -446,7 +451,8 @@
                 { label: 'Architecture', val: 'Self-hosted' },
                 { label: 'Platforms', val: 'Windows, macOS, Linux' }
             ],
-            downloadable: false
+            downloadable: true,
+            downloadPage: 'pages/download-chat.html'
         },
         email: {
             icon: '&#9993;', name: 'Secure Email', cat: 'Email Privacy',
@@ -562,7 +568,12 @@
         }
 
         /* Download / login gate */
-        if (t.downloadable) {
+        if (t.downloadable && t.downloadPage) {
+            html += '<div class="tm-actions">';
+            html += '<a href="' + t.downloadPage + '" class="btn btn-primary">Download</a>';
+            if (t.learnMore) html += '<a href="' + t.learnMore + '" class="btn btn-secondary">Learn More</a>';
+            html += '</div>';
+        } else if (t.downloadable) {
             if (isLoggedIn()) {
                 html += '<div class="tm-actions">';
                 html += '<a href="account.html" class="btn btn-primary">Download from Dashboard</a>';

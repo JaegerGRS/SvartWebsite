@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download Svart Browser - Svart Security</title>
+  <meta name="description" content="Download Svart Browser for Windows, macOS, and Linux. Secure browser with built-in ad blocking, DNS privacy, and AES-256 encryption.">
+  <link rel="stylesheet" href="../css/style.css">
+  <script>!function(){var t=localStorage.getItem("svart_theme")||"midnight";document.documentElement.setAttribute("data-theme",t)}()</script>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0f'/><text x='50' y='70' font-size='80' font-weight='bold' text-anchor='middle' fill='%237c3aed'>&#x25C6;</text></svg>">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;background:#0a0a0f;color:#e2e8f0;line-height:1.6;min-height:100vh}
+    a{color:#a78bfa;text-decoration:none;transition:color .2s}a:hover{color:#c4b5fd}
+    .hero{text-align:center;padding:4rem 2rem 2.5rem}
+    .hero h1{font-size:2.8rem;font-weight:800;margin-bottom:.75rem;background:linear-gradient(135deg,#fff 0%,#a78bfa 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero p{font-size:1.15rem;color:#94a3b8;max-width:600px;margin:0 auto}
+    .hero .app-icon{font-size:3rem;margin-bottom:1rem}
+    .version-badge{display:inline-block;margin-top:1rem;padding:.35rem 1rem;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);border-radius:999px;font-size:.85rem;color:#a78bfa;font-weight:600}
+    .back-link{display:inline-flex;align-items:center;gap:.4rem;margin:2rem 2rem 0;color:#94a3b8;font-size:.9rem}
+    .back-link:hover{color:#a78bfa}
+    .downloads-section{max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem}
+    .section-title{font-size:1.5rem;font-weight:700;margin-bottom:1.5rem;color:#fff;padding-left:.75rem;border-left:3px solid #7c3aed}
+    .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.5rem;margin-bottom:3rem}
+    .download-card{background:linear-gradient(145deg,rgba(30,30,45,.6),rgba(20,20,30,.8));border:1px solid rgba(124,58,237,.15);border-radius:16px;padding:2rem;transition:all .3s;display:flex;flex-direction:column}
+    .download-card:hover{border-color:rgba(124,58,237,.4);transform:translateY(-3px);box-shadow:0 12px 40px rgba(124,58,237,.1)}
+    .card-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem}
+    .card-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0}
+    .card-icon.windows{background:rgba(0,120,212,.15)}.card-icon.macos{background:rgba(167,139,250,.12)}.card-icon.linux{background:rgba(255,165,0,.12)}
+    .card-title{font-size:1.25rem;font-weight:700;color:#fff}
+    .card-subtitle{font-size:.85rem;color:#64748b;margin-top:.15rem}
+    .card-meta{display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem}
+    .meta-tag{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .65rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:6px;font-size:.78rem;color:#94a3b8}
+    .checksum-block{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:.75rem 1rem;margin-bottom:1.25rem;flex-grow:1}
+    .checksum-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:#64748b;margin-bottom:.3rem;font-weight:600}
+    .checksum-value{font-family:'SF Mono','Fira Code','Cascadia Code',monospace;font-size:.68rem;color:#7c3aed;word-break:break-all;line-height:1.5;user-select:all}
+    .download-btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1.5rem;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:10px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;width:100%}
+    .download-btn:hover{background:linear-gradient(135deg,#8b5cf6,#7c3aed);box-shadow:0 6px 24px rgba(124,58,237,.35);color:#fff}
+    .download-btn svg{width:18px;height:18px}
+    .dev-notice{max-width:1200px;margin:0 auto;padding:0 2rem 2rem}
+    .dev-notice .notice-box{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);border-radius:12px;padding:1.25rem 1.5rem;text-align:center;color:#a78bfa;font-size:.9rem}
+    .requirements{max-width:1200px;margin:0 auto;padding:0 2rem 4rem}
+    .req-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem}
+    .req-card{background:rgba(30,30,45,.4);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:1.5rem}
+    .req-card h3{font-size:1rem;font-weight:600;color:#a78bfa;margin-bottom:.75rem}
+    .req-card ul{list-style:none}
+    .req-card li{font-size:.88rem;color:#94a3b8;padding:.3rem 0 .3rem 1.1rem;position:relative}
+    .req-card li::before{content:"\2713";position:absolute;left:0;color:#7c3aed;font-weight:700}
+    .footer{text-align:center;padding:2rem;border-top:1px solid rgba(124,58,237,.1);color:#475569;font-size:.85rem}
+    @media(max-width:768px){.hero h1{font-size:2rem}.cards-grid{grid-template-columns:1fr}.downloads-section{padding:1.5rem 1.25rem 3rem}}
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <a href="../index.html" style="display:flex;align-items:center;gap:10px;color:var(--primary);text-decoration:none;">
+          <span class="SVART-text">Svart Security</span>
+        </a>
+      </div>
+      <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navMenu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="../tools.html">Tools</a></li>
+        <li><a href="downloads.html">Downloads</a></li>
+        <li><a href="../pricing.html">Pricing</a></li>
+        <li><a href="../about.html">About</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+        <li id="navAuthItem" class="nav-auth"><a href="../login.html" class="nav-auth-btn">Login / Sign Up</a></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="nav-overlay" id="navOverlay"></div>
+
+  <a href="downloads.html" class="back-link">&larr; All Downloads</a>
+
+  <section class="hero">
+    <div class="app-icon">&#128274;</div>
+    <h1>Download Svart Browser</h1>
+    <p>Secure browser with built-in ad blocking, DNS privacy, and AES-256 encryption. Chromium-based, no extensions needed, no tracking. Privacy that works out of the box.</p>
+    <span class="version-badge" id="versionBadge">Checking latest release&hellip;</span>
+  </section>
+
+  <section class="dev-notice">
+    <div class="notice-box">&#9888; Svart Browser is currently in development. Downloads will become available when the first release is published.</div>
+  </section>
+
+  <section class="downloads-section">
+    <h2 class="section-title">Choose Your Platform</h2>
+    <div class="cards-grid">
+
+      <!-- Windows -->
+      <div class="download-card" data-platform="windows">
+        <div class="card-header">
+          <div class="card-icon windows">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="#0078D4"><path d="M0 3.449L9.75 2.1v9.45H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.45L0 20.699M10.949 12.6H24V24l-13.051-1.952"/></svg>
+          </div>
+          <div>
+            <div class="card-title">Windows</div>
+            <div class="card-subtitle">Windows 10 / 11 (64-bit)</div>
+          </div>
+        </div>
+        <div class="card-meta">
+          <span class="meta-tag version-tag">—</span>
+          <span class="meta-tag format-tag">Installer (.exe / .msi)</span>
+          <span class="meta-tag size-tag">—</span>
+        </div>
+        <div class="checksum-block">
+          <div class="checksum-label">SHA-256 Checksum</div>
+          <div class="checksum-value">Available after first release</div>
+        </div>
+        <a href="#" class="download-btn" onclick="trackDownload('windows')" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download for Windows
+        </a>
+      </div>
+
+      <!-- macOS -->
+      <div class="download-card" data-platform="macos">
+        <div class="card-header">
+          <div class="card-icon macos">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="#a78bfa"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          </div>
+          <div>
+            <div class="card-title">macOS</div>
+            <div class="card-subtitle">macOS 12+ (Universal Binary)</div>
+          </div>
+        </div>
+        <div class="card-meta">
+          <span class="meta-tag version-tag">—</span>
+          <span class="meta-tag format-tag">DMG Image</span>
+          <span class="meta-tag size-tag">—</span>
+        </div>
+        <div class="checksum-block">
+          <div class="checksum-label">SHA-256 Checksum</div>
+          <div class="checksum-value">Available after first release</div>
+        </div>
+        <a href="#" class="download-btn" onclick="trackDownload('macos')" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download for macOS
+        </a>
+      </div>
+
+      <!-- Linux -->
+      <div class="download-card" data-platform="linux">
+        <div class="card-header">
+          <div class="card-icon linux">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.36-.627.186-1.332.396-1.597 1.849-.21 1.168.568 2.324 1.82 2.748.587.199 1.193.263 1.76.182.544-.077 1.058-.277 1.468-.627.375-.322.665-.758.862-1.272.18-.476.313-.839.472-1.143.144-.263.269-.396.405-.432 2.382-.772 3.861-1.267 5.398-2.099 1.287-.697 2.436-1.588 3.239-2.989.263-.462.375-.865.375-.865h.001c.049.016.096.033.14.052.659.294 1.027.804 1.143 1.44.063.316.055.656.006 1.004a4.1 4.1 0 01-.234.878c.3-.036.68-.044.925.15.164.129.242.346.239.597a1.568 1.568 0 01-.167.627c-.282.568-1.007 1.144-2.101 1.168a3.043 3.043 0 01-.398-.014l-.027.004c-.103.201-.25.373-.435.507a1.883 1.883 0 01-1.148.326c-.623-.032-.915-.312-1.077-.551-.099-.145-.16-.3-.171-.463-.017-.193.065-.37.239-.482a.588.588 0 01.378-.085c.201.016.376.122.49.282.089.125.147.275.157.421.031-.053.053-.113.053-.177 0-.211-.153-.39-.357-.426a.668.668 0 00-.096-.006c-.155 0-.293.062-.395.176a.715.715 0 00-.177.446c.003.244.121.457.327.584.286.176.764.265 1.282.06a1.376 1.376 0 00.626-.46c-1.003-.156-1.873-.696-2.431-1.427-.503-.66-.822-1.498-.84-2.421 0-.049.003-.097.007-.146a4.2 4.2 0 01.066-.625c.064-.338.17-.647.32-.906.062-.108.13-.207.205-.296l.159-.159c-.016-.077-.032-.155-.048-.234-.242-1.112.02-2.142.622-2.984.58-.812 1.41-1.422 2.316-1.746l.007-.002c.106-.039.212-.073.32-.102.28-.077.558-.118.83-.12z"/></svg>
+          </div>
+          <div>
+            <div class="card-title">Linux</div>
+            <div class="card-subtitle">Debian (.deb), Fedora (.rpm), Arch (.pkg.tar.zst), AppImage</div>
+          </div>
+        </div>
+        <div class="card-meta">
+          <span class="meta-tag version-tag">—</span>
+          <span class="meta-tag format-tag">.deb / .rpm / .pkg.tar.zst</span>
+          <span class="meta-tag size-tag">—</span>
+        </div>
+        <div class="checksum-block">
+          <div class="checksum-label">SHA-256 Checksum</div>
+          <div class="checksum-value">Available after first release</div>
+        </div>
+        <a href="#" class="download-btn" onclick="trackDownload('linux')" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download for Linux
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="requirements">
+    <h2 class="section-title">System Requirements</h2>
+    <div class="req-grid">
+      <div class="req-card">
+        <h3>Windows</h3>
+        <ul>
+          <li>Windows 10 version 1903 or later</li>
+          <li>64-bit processor</li>
+          <li>4 GB RAM minimum</li>
+          <li>500 MB available disk space</li>
+        </ul>
+      </div>
+      <div class="req-card">
+        <h3>macOS</h3>
+        <ul>
+          <li>macOS 12 (Monterey) or later</li>
+          <li>Apple Silicon or Intel processor</li>
+          <li>4 GB RAM minimum</li>
+          <li>500 MB available disk space</li>
+        </ul>
+      </div>
+      <div class="req-card">
+        <h3>Linux</h3>
+        <ul>
+          <li>glibc 2.31 or later</li>
+          <li>64-bit processor (x86_64)</li>
+          <li>4 GB RAM minimum</li>
+          <li>400 MB available disk space</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>&copy; 2026 Svart Security. Your privacy, your tools, your control &mdash; <a href="../index.html">Home</a></p>
+  </footer>
+
+  <script src="../js/script.js"></script>
+  <script>
+    const GH_OWNER = 'JaegerGRS';
+    const GH_REPO = 'SvartBrowser';
+    const GH_API = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/releases/latest`;
+    const RELEASE_URL = `https://github.com/${GH_OWNER}/${GH_REPO}/releases/latest`;
+
+    const PLATFORM_PATTERNS = {
+      windows: [/\.exe$/i, /\.msi$/i, /windows.*\.zip$/i, /win.*x64/i],
+      macos:   [/\.dmg$/i, /macos/i, /darwin/i, /\.app\.tar\.gz$/i],
+      linux:   [/\.deb$/i, /\.rpm$/i, /\.pkg\.tar\.zst$/i, /\.AppImage$/i, /linux.*\.tar\.gz$/i]
+    };
+
+    function humanSize(bytes) {
+      if (!bytes) return '—';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    async function loadRelease() {
+      try {
+        const resp = await fetch(GH_API);
+        if (!resp.ok) throw new Error('API error');
+        const release = await resp.json();
+        const assets = release.assets || [];
+        const version = release.tag_name || '';
+
+        const badge = document.getElementById('versionBadge');
+        if (badge && version) badge.textContent = `${version} — Latest Stable Release`;
+
+        document.querySelectorAll('.version-tag').forEach(t => { if (version) t.textContent = version; });
+
+        document.querySelectorAll('.download-card').forEach(card => {
+          const plat = card.dataset.platform;
+          const patterns = PLATFORM_PATTERNS[plat] || [];
+          let matched = null;
+          for (const p of patterns) {
+            matched = assets.find(a => p.test(a.name));
+            if (matched) break;
+          }
+          const btn = card.querySelector('.download-btn');
+          const sizeTag = card.querySelector('.size-tag');
+          if (matched) {
+            if (btn) { btn.href = matched.browser_download_url; btn.setAttribute('download', ''); }
+            if (sizeTag) sizeTag.textContent = humanSize(matched.size);
+          } else {
+            if (btn) { btn.href = RELEASE_URL; btn.target = '_blank'; }
+          }
+        });
+
+        const checksumAsset = assets.find(a => /SHA256|checksum/i.test(a.name));
+        if (checksumAsset) {
+          document.querySelectorAll('.checksum-value').forEach(el => {
+            el.innerHTML = `<a href="${checksumAsset.browser_download_url}" style="color:inherit;text-decoration:underline;" target="_blank">Download SHA-256 checksums</a>`;
+          });
+        }
+      } catch (err) {
+        console.warn('No release found yet:', err);
+        const badge = document.getElementById('versionBadge');
+        if (badge) badge.textContent = 'Coming Soon';
+      }
+    }
+
+    async function trackDownload(platform) {
+      try { await fetch('/api/downloads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ app: 'svart-browser', platform }) }); } catch(e) {}
+    }
+
+    loadRelease();
+  </script>
+</body>
+</html>
