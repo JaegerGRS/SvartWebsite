@@ -3,3 +3,9 @@
 /pricing /#pricing 301
 /docs /pages/docs.html 200
 /downloads /pages/account.html 301
+/download-ai /pages/download-ai.html 200
+/download-browser /pages/download-browser.html 200
+/download-pass /pages/download-pass.html 200
+/download-notes /pages/download-notes.html 200
+/download-docs /pages/download-docs.html 200
+/download-chat /pages/download-chat.html 200
