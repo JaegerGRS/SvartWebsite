@@ -120,57 +120,57 @@
 
         <div class="download-grid">
           <div class="download-tile">
-            <div class="tile-icon">&#128274;</div>
-            <div class="tile-info">
-              <h4>Svart Browser</h4>
-              <span class="tile-version">v1.0.0 &bull; 8.96 MB</span>
-            </div>
-            <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
-          </div>
-
-          <div class="download-tile">
             <div class="tile-icon">&#129302;</div>
             <div class="tile-info">
               <h4>Svart AI</h4>
-              <span class="tile-version">v1.0.0 &bull; 8.32 MB</span>
+              <span class="tile-version" id="dlVersionAI">Latest Release</span>
             </div>
-            <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+            <a href="pages/download-ai.html" class="btn btn-primary btn-sm">Download</a>
+          </div>
+
+          <div class="download-tile">
+            <div class="tile-icon">&#128274;</div>
+            <div class="tile-info">
+              <h4>Svart Browser</h4>
+              <span class="tile-version" id="dlVersionBrowser">In Development</span>
+            </div>
+            <a href="pages/download-browser.html" class="btn btn-primary btn-sm">Download</a>
           </div>
 
           <div class="download-tile">
             <div class="tile-icon">&#128273;</div>
             <div class="tile-info">
-              <h4>SVART Passwords</h4>
-              <span class="tile-version">v1.0.0 &bull; 8.09 MB</span>
+              <h4>Svart Pass</h4>
+              <span class="tile-version" id="dlVersionPass">Planned</span>
             </div>
-            <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+            <a href="pages/download-pass.html" class="btn btn-primary btn-sm">Download</a>
           </div>
 
           <div class="download-tile">
             <div class="tile-icon">&#128221;</div>
             <div class="tile-info">
-              <h4>SVART Notes</h4>
-              <span class="tile-version">v1.0.0 &bull; 7.97 MB</span>
+              <h4>Svart Notes</h4>
+              <span class="tile-version" id="dlVersionNotes">Planned</span>
             </div>
-            <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+            <a href="pages/download-notes.html" class="btn btn-primary btn-sm">Download</a>
           </div>
 
           <div class="download-tile">
             <div class="tile-icon">&#128196;</div>
             <div class="tile-info">
-              <h4>SVART Docs</h4>
-              <span class="tile-version">v1.0.0 &bull; 8.08 MB</span>
+              <h4>Svart Docs</h4>
+              <span class="tile-version" id="dlVersionDocs">Planned</span>
             </div>
-            <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+            <a href="pages/download-docs.html" class="btn btn-primary btn-sm">Download</a>
           </div>
 
           <div class="download-tile">
             <div class="tile-icon">&#128172;</div>
             <div class="tile-info">
-              <h4>SVART Chat</h4>
-              <span class="tile-version">v1.0.0 &bull; 8.34 MB</span>
+              <h4>Svart Chat</h4>
+              <span class="tile-version" id="dlVersionChat">Planned</span>
             </div>
-            <a href="pages/downloads.html" class="btn btn-primary btn-sm">Download</a>
+            <a href="pages/download-chat.html" class="btn btn-primary btn-sm">Download</a>
           </div>
         </div>
 
@@ -448,57 +448,63 @@
 
           <div class="settings-tool-grid">
             <div class="settings-tool-tile">
-              <span class="settings-tool-icon">&#128274;</span>
-              <div class="settings-tool-info">
-                <h4>Svart Browser</h4>
-                <span>Secure browsing, ad blocking, DNS privacy</span>
-              </div>
-              <span class="settings-tool-status status-free">Free</span>
-            </div>
-
-            <div class="settings-tool-tile">
               <span class="settings-tool-icon">&#129302;</span>
               <div class="settings-tool-info">
                 <h4>Svart AI</h4>
                 <span id="toolAiPlan">750 req/mo &mdash; Free Premium</span>
               </div>
               <span class="settings-tool-status status-ai" id="toolAiStatus">AI Plan</span>
+              <a href="pages/download-ai.html" class="btn btn-primary btn-sm" style="margin-left:auto;">Download</a>
+            </div>
+
+            <div class="settings-tool-tile">
+              <span class="settings-tool-icon">&#128274;</span>
+              <div class="settings-tool-info">
+                <h4>Svart Browser</h4>
+                <span>Secure browsing, ad blocking, DNS privacy</span>
+              </div>
+              <span class="settings-tool-status status-free">Free</span>
+              <a href="pages/download-browser.html" class="btn btn-primary btn-sm" style="margin-left:auto;">Download</a>
             </div>
 
             <div class="settings-tool-tile">
               <span class="settings-tool-icon">&#128273;</span>
               <div class="settings-tool-info">
-                <h4>SVART Passwords</h4>
+                <h4>Svart Pass</h4>
                 <span>AES-256-GCM encrypted vault</span>
               </div>
               <span class="settings-tool-status status-free">Free</span>
+              <a href="pages/download-pass.html" class="btn btn-primary btn-sm" style="margin-left:auto;">Download</a>
             </div>
 
             <div class="settings-tool-tile">
               <span class="settings-tool-icon">&#128221;</span>
               <div class="settings-tool-info">
-                <h4>SVART Notes</h4>
+                <h4>Svart Notes</h4>
                 <span>Encrypted note-taking</span>
               </div>
               <span class="settings-tool-status status-free">Free</span>
+              <a href="pages/download-notes.html" class="btn btn-primary btn-sm" style="margin-left:auto;">Download</a>
             </div>
 
             <div class="settings-tool-tile">
               <span class="settings-tool-icon">&#128196;</span>
               <div class="settings-tool-info">
-                <h4>SVART Docs</h4>
+                <h4>Svart Docs</h4>
                 <span>Encrypted document editor</span>
               </div>
               <span class="settings-tool-status status-free">Free</span>
+              <a href="pages/download-docs.html" class="btn btn-primary btn-sm" style="margin-left:auto;">Download</a>
             </div>
 
             <div class="settings-tool-tile">
               <span class="settings-tool-icon">&#128172;</span>
               <div class="settings-tool-info">
-                <h4>SVART Chat</h4>
+                <h4>Svart Chat</h4>
                 <span>End-to-end encrypted messaging</span>
               </div>
               <span class="settings-tool-status status-free">Free</span>
+              <a href="pages/download-chat.html" class="btn btn-primary btn-sm" style="margin-left:auto;">Download</a>
             </div>
 
             <div class="settings-tool-tile">
