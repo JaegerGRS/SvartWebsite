@@ -44,9 +44,39 @@ interface ReleaseManifest {
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Headers": "Content-Type, X-Svart-Key",
   "Cache-Control": "no-cache, no-store, must-revalidate",
 };
+
+/**
+ * Validate the activation key from the X-Svart-Key header.
+ * Checks key indexes in KV to confirm it belongs to a real account.
+ * Returns the email if valid, or null if unauthorized.
+ */
+async function validateKey(
+  kv: KVNamespace,
+  key: string
+): Promise<string | null> {
+  if (!key || key.length < 16) return null;
+
+  // Check reg:key:<key> index (written by signup, key-reset, rekey)
+  const regLookup = await kv.get(`reg:key:${key}`);
+  if (regLookup) {
+    try {
+      const parsed = JSON.parse(regLookup);
+      if (parsed.email) return parsed.email;
+    } catch {
+      // Plain string — treat as email
+      if (regLookup.includes("@")) return regLookup.trim().toLowerCase();
+    }
+  }
+
+  // Check keyindex:<key> (written on activation)
+  const directIndex = await kv.get(`keyindex:${key}`);
+  if (directIndex) return directIndex.trim().toLowerCase();
+
+  return null;
+}
 
 /** Compare semver strings: returns >0 if a > b, 0 if equal, <0 if a < b */
 function compareSemver(a: string, b: string): number {
@@ -64,6 +94,19 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const target = url.searchParams.get("target") || "windows";
   const arch = url.searchParams.get("arch") || "x86_64";
   const currentVersion = url.searchParams.get("current_version") || "0.0.0";
+
+  // ── Key Authentication ──────────────────────────────────────
+  const svartKey = context.request.headers.get("X-Svart-Key") || "";
+  const owner = await validateKey(context.env.USAGE_DATA, svartKey);
+  if (!owner) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized — valid activation key required" }),
+      {
+        status: 401,
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      }
+    );
+  }
 
   try {
     // Read latest release manifest from KV
