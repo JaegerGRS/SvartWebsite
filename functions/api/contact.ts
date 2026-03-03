@@ -82,64 +82,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       { expirationTtl: 60 * 60 * 24 * 90 } // 90 days
     );
 
-    // Send via MailChannels
-    try {
-      await fetch("https://api.mailchannels.net/tx/v1/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          personalizations: [
-            { to: [{ email: CONTACT_EMAIL, name: "Svart Security Contact" }] },
-          ],
-          from: {
-            email: "noreply@svartsecurity.org",
-            name: "Svart Security Contact Form",
-          },
-          reply_to: { email: email },
-          subject: `[Contact Form] Message from ${email}`,
-          content: [
-            {
-              type: "text/plain",
-              value: [
-                "New Contact Form Submission",
-                "===========================",
-                "",
-                `From:        ${email}`,
-                `Secret Key:  ${secretKey || "Not provided"}`,
-                `Date:        ${date}`,
-                "",
-                "Message:",
-                "--------",
-                message,
-                "",
-                "---",
-                "Svart Security Contact Form",
-              ].join("\n"),
-            },
-            {
-              type: "text/html",
-              value: `
-                <div style="font-family:monospace;background:#0a0a0f;color:#e0e0e0;padding:24px;border-radius:12px;max-width:600px;">
-                  <h2 style="color:#7c6aef;margin-top:0;">New Contact Form Message</h2>
-                  <table style="width:100%;border-collapse:collapse;">
-                    <tr><td style="padding:6px 12px;color:#888;width:120px;">From</td><td style="padding:6px 12px;color:#fff;">${email}</td></tr>
-                    <tr><td style="padding:6px 12px;color:#888;">Secret Key</td><td style="padding:6px 12px;color:#7c6aef;font-weight:bold;">${secretKey || "Not provided"}</td></tr>
-                    <tr><td style="padding:6px 12px;color:#888;">Date</td><td style="padding:6px 12px;color:#fff;">${date}</td></tr>
-                  </table>
-                  <hr style="border:none;border-top:1px solid #333;margin:16px 0;">
-                  <h3 style="color:#7c6aef;">Message</h3>
-                  <div style="background:#111;border:1px solid #333;border-radius:8px;padding:16px;margin:12px 0;white-space:pre-wrap;color:#ddd;">${message.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
-                  <hr style="border:none;border-top:1px solid #333;margin:16px 0;">
-                  <p style="color:#666;font-size:0.85em;margin:0;">Svart Security Contact Form</p>
-                </div>
-              `,
-            },
-          ],
-        }),
-      });
-    } catch {
-      // Non-blocking — message is saved to KV
-    }
+    // Message is stored in KV — admin can view from dashboard
+    // (MailChannels email removed — service discontinued 2024)
 
     return jsonResponse({ success: true, message: "Message sent. We'll get back to you soon." });
   } catch (err: any) {

@@ -10,6 +10,26 @@ const ADMIN_EMAIL = "admin@svartsecurity.org";
 const SECURITY_EMAIL = "security@svartsecurity.org";
 const ADMIN_FULL_NAME = "Jaeger George Richard Stratton";
 
+// LEA encryption key — must match guardian.ts
+const LEA_KEY_HEX = "c7a3f1e09b2d4c6a8f5e1d3b7a9c0e2f4d6b8a1c3e5f7092b4d6a8c0e2f4a6b8";
+
+async function getLeaKey(): Promise<CryptoKey> {
+  const keyBytes = new Uint8Array(32);
+  for (let i = 0; i < 32; i++) {
+    keyBytes[i] = parseInt(LEA_KEY_HEX.substr(i * 2, 2), 16);
+  }
+  return crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+}
+
+async function decryptForLEA(encrypted: string): Promise<string> {
+  const key = await getLeaKey();
+  const combined = new Uint8Array(atob(encrypted).split("").map(c => c.charCodeAt(0)));
+  const iv = combined.slice(0, 12);
+  const ciphertext = combined.slice(12);
+  const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
+  return new TextDecoder().decode(plaintext);
+}
+
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
@@ -171,53 +191,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (log.length > 2000) log = log.slice(-2000);
     await context.env.USAGE_DATA.put("guardian:log", JSON.stringify(log));
 
-    // Email admin about new report
-    try {
-      await fetch("https://api.mailchannels.net/tx/v1/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          personalizations: [
-            { to: [{ email: ADMIN_EMAIL, name: "Svart Admin" }] },
-          ],
-          from: {
-            email: "noreply@svartsecurity.org",
-            name: "NetworkGuardian Alert",
-          },
-          subject: `[GUARDIAN] New ${violationType} Report — ${app || "Unknown App"}`,
-          content: [
-            {
-              type: "text/plain",
-              value: [
-                "NetworkGuardian Violation Report",
-                "================================",
-                "",
-                `Report ID:      ${reportId}`,
-                `App:            ${app || "Unknown"}`,
-                `Type:           ${violationType}`,
-                `Submitter:      ${submitterEmail || userId || "Anonymous"}`,
-                `Date:           ${report.date}`,
-                "",
-                lawReferences.length > 0 ? "Law Categories:\n" + lawReferences.map((l: any) => `  - ${l.name} (${l.jurisdiction}) — ${l.statute}`).join("\n") + "\n" : "",
-                "Description:",
-                "------------",
-                description,
-                "",
-                details ? `Additional Details: ${JSON.stringify(details)}` : "",
-                "",
-                "Available Evidence: Registration network hash + account creation date/time only.",
-                "",
-                "---",
-                "Review this report in the Admin Panel → Guardian Reports tab.",
-                "NetworkGuardian — Svart Security",
-              ].join("\n"),
-            },
-          ],
-        }),
-      });
-    } catch {
-      // Non-blocking
-    }
+    // Report stored in KV — admin reviews from Guardian Reports panel
+    // (MailChannels email removed — service discontinued 2024)
 
     return jsonResponse({ success: true, id: reportId, message: "Report submitted successfully." });
   } catch (err: any) {
@@ -337,6 +312,55 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
 
       const escalationDate = new Date().toISOString();
 
+      // ── LEA IP Recovery ──
+      // Look up all network hashes linked to the reported user's account.
+      // If an encrypted IP exists, attempt decryption for the formal LEA report.
+      let leaNetworkId = "";
+      let leaEncryptedIP = "";
+      let leaDecryptedIP = "";
+      let leaIpNote = "No encrypted IP available for this subject.";
+
+      // Try to find network hash from userId (email) via account data
+      if (report.userId) {
+        try {
+          // Search for keyindex to find the account
+          const accountRaw = await context.env.USAGE_DATA.get(`account:${report.userId}`);
+          if (accountRaw) {
+            const account = JSON.parse(accountRaw);
+            if (account.networkId) {
+              leaNetworkId = account.networkId;
+            }
+          }
+        } catch {}
+
+        // If we have a network ID, try to get the encrypted IP
+        if (leaNetworkId) {
+          try {
+            const encrypted = await context.env.USAGE_DATA.get(`guardian:enc:${leaNetworkId}`);
+            if (encrypted) {
+              leaEncryptedIP = encrypted;
+              leaDecryptedIP = await decryptForLEA(encrypted);
+              leaIpNote = `Network ID: ${leaNetworkId}\nRecovered IP: ${leaDecryptedIP}\nEncryption: AES-256-GCM (decrypted under LEA authorization)`;
+            } else {
+              leaIpNote = `Network ID: ${leaNetworkId}\nEncrypted IP: Not available (registration may predate LEA encryption)`;
+            }
+          } catch {
+            leaIpNote = `Network ID: ${leaNetworkId}\nEncrypted IP: Decryption failed`;
+          }
+        }
+      }
+
+      // Store LEA data in the report
+      report.leaData = {
+        networkId: leaNetworkId || null,
+        decryptedIP: leaDecryptedIP || null,
+        recoveredAt: leaDecryptedIP ? escalationDate : null,
+        note: leaIpNote,
+      };
+      await context.env.USAGE_DATA.put(reportId, JSON.stringify(report), {
+        expirationTtl: 60 * 60 * 24 * 365,
+      });
+
       // Resolve law references from the report
       const reportLawRefs = (report.lawReferences || []) as Array<{id: string; name: string; jurisdiction: string; statute: string; evidenceNote: string}>;
       const lawSection = reportLawRefs.length > 0
@@ -365,6 +389,10 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         `Submitter:        ${report.submitterEmail || report.userId || "Anonymous"}`,
         "",
         lawSection,
+        "--- LAW ENFORCEMENT — NETWORK IDENTIFICATION ---",
+        "",
+        leaIpNote,
+        "",
         "--- AVAILABLE EVIDENCE ---",
         "",
         report.availableEvidence || "Registration network hash (SHA-256, irreversible) and account creation date/time only.",
@@ -421,6 +449,15 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
             <tr><td style="padding:6px 12px;color:#888;">Submitter</td><td style="padding:6px 12px;color:#fff;">${report.submitterEmail || report.userId || "Anonymous"}</td></tr>
           </table>
           ${lawHtmlSection}
+          <h3 style="color:#ef4444;">Law Enforcement — Network Identification</h3>
+          <div style="background:#1a0a0a;border:2px solid #ef4444;border-radius:8px;padding:16px;margin:12px 0;">
+            <table style="width:100%;border-collapse:collapse;">
+              <tr><td style="padding:6px 12px;color:#888;width:180px;">Network ID</td><td style="padding:6px 12px;color:#fff;font-family:monospace;">${leaNetworkId || "N/A"}</td></tr>
+              <tr><td style="padding:6px 12px;color:#888;">Recovered IP</td><td style="padding:6px 12px;color:#ef4444;font-weight:bold;font-family:monospace;">${leaDecryptedIP || "Not available"}</td></tr>
+              <tr><td style="padding:6px 12px;color:#888;">Encryption</td><td style="padding:6px 12px;color:#aaa;font-size:0.85em;">AES-256-GCM — decrypted under LEA authorization</td></tr>
+            </table>
+            <p style="color:#f59e0b;font-size:0.8em;margin:12px 0 0;">This IP address was recovered from encrypted storage for law enforcement purposes only. Unauthorized disclosure is prohibited.</p>
+          </div>
           <h3 style="color:#7c6aef;">Available Evidence</h3>
           <div style="background:#111;border:1px solid #333;border-radius:8px;padding:16px;margin:12px 0;color:#f59e0b;font-size:0.9em;">${report.availableEvidence || "Registration network hash (SHA-256, irreversible) and account creation date/time only. No IP addresses, browsing history, or other tracking data is available."}</div>
           <h3 style="color:#7c6aef;">Description</h3>
@@ -441,39 +478,22 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         </div>
       `;
 
-      // Send to both admin and security email
-      try {
-        await fetch("https://api.mailchannels.net/tx/v1/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            personalizations: [
-              {
-                to: [
-                  { email: SECURITY_EMAIL, name: "Svart Security" },
-                  { email: ADMIN_EMAIL, name: ADMIN_FULL_NAME },
-                ],
-              },
-            ],
-            from: {
-              email: SECURITY_EMAIL,
-              name: `${ADMIN_FULL_NAME} — Svart Security`,
-            },
-            subject: `[ESCALATED] Incident Report ${report.id} — ${report.violationType} — For Law Enforcement`,
-            content: [
-              { type: "text/plain", value: emailBody },
-              { type: "text/html", value: htmlBody },
-            ],
-          }),
-        });
-      } catch {
-        // Non-blocking
-      }
+      // Escalation stored in KV report — admin exports for law enforcement
+      // (MailChannels email removed — service discontinued 2024)
 
       return jsonResponse({
         success: true,
-        message: "Report escalated. Email sent to " + SECURITY_EMAIL + " and " + ADMIN_EMAIL,
+        message: "Report escalated. Formal incident report generated with LEA network identification.",
         escalatedAt: escalationDate,
+        leaData: {
+          networkId: leaNetworkId || null,
+          ipRecovered: !!leaDecryptedIP,
+          note: leaIpNote,
+        },
+        formalReport: {
+          plaintext: emailBody,
+          html: htmlBody,
+        },
       });
     }
 

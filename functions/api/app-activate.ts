@@ -82,40 +82,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         }
       }
 
-      // Last resort: scan all accounts to find which one owns this key.
-      // This handles accounts created before key indexing was added.
-      // Slow but reliable — after first success, indexes are written for future fast lookups.
+      // If neither index has this key, the account cannot be found.
+      // All accounts created after Jan 2026 are indexed. Use /api/rekey to index older accounts.
       if (!email) {
-        let cursor: string | undefined;
-        let found = false;
-        scanLoop: while (true) {
-          const list = await context.env.USAGE_DATA.list({
-            prefix: "account:",
-            limit: 100,
-            ...(cursor ? { cursor } : {}),
-          });
-          for (const k of list.keys) {
-            try {
-              const raw = await context.env.USAGE_DATA.get(k.name);
-              if (!raw) continue;
-              const acct = JSON.parse(raw);
-              if (acct.activationKey === key) {
-                email = (acct.email || k.name.replace("account:", "")).trim().toLowerCase();
-                found = true;
-                break scanLoop;
-              }
-            } catch { /* skip malformed */ }
-          }
-          if (list.list_complete) break;
-          cursor = list.cursor;
-        }
-        if (!found) {
-          return jsonResponse({
-            success: false,
-            exists: false,
-            error: "No account found for this key. Make sure you copied the correct key from your account dashboard.",
-          });
-        }
+        return jsonResponse({
+          success: false,
+          exists: false,
+          error: "No account found for this key. Make sure you copied the correct key from your account dashboard.",
+        });
       }
     }
 

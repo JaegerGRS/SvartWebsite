@@ -27,66 +27,15 @@ function checkKV(env: Env): boolean {
   return !!(env && env.USAGE_DATA);
 }
 
-// Send email notification to admin via MailChannels (free for Cloudflare Workers)
-async function notifyAdmin(record: {
+// Admin notification stub (MailChannels discontinued 2024)
+// New signups are stored in reg:log — admin views from dashboard
+async function notifyAdmin(_record: {
   email: string;
   activationKey: string;
   displayName: string;
   registeredAt: string;
 }): Promise<void> {
-  try {
-    await fetch("https://api.mailchannels.net/tx/v1/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        personalizations: [
-          {
-            to: [{ email: ADMIN_EMAIL, name: "Svart Admin" }],
-          },
-        ],
-        from: {
-          email: "noreply@svartsecurity.org",
-          name: "Svart Security",
-        },
-        subject: `New Signup: ${record.email}`,
-        content: [
-          {
-            type: "text/plain",
-            value: [
-              "New Svart Security Registration",
-              "=============================",
-              "",
-              `Email:          ${record.email}`,
-              `Secret Key: ${record.activationKey}`,
-              `Display Name:   ${record.displayName || "Not set"}`,
-              `Registered:     ${record.registeredAt}`,
-              "",
-              "---",
-              "Svart Security Admin Notification",
-            ].join("\n"),
-          },
-          {
-            type: "text/html",
-            value: `
-              <div style="font-family:monospace;background:#0a0a0f;color:#e0e0e0;padding:24px;border-radius:12px;max-width:500px;">
-                <h2 style="color:#7c6aef;margin-top:0;">New Svart Security Registration</h2>
-                <table style="width:100%;border-collapse:collapse;">
-                  <tr><td style="padding:6px 12px;color:#888;">Email</td><td style="padding:6px 12px;color:#fff;">${record.email}</td></tr>
-                  <tr><td style="padding:6px 12px;color:#888;">Secret Key</td><td style="padding:6px 12px;color:#7c6aef;font-weight:bold;">${record.activationKey}</td></tr>
-                  <tr><td style="padding:6px 12px;color:#888;">Display Name</td><td style="padding:6px 12px;color:#fff;">${record.displayName || "Not set"}</td></tr>
-                  <tr><td style="padding:6px 12px;color:#888;">Registered</td><td style="padding:6px 12px;color:#fff;">${record.registeredAt}</td></tr>
-                </table>
-                <hr style="border:none;border-top:1px solid #333;margin:16px 0;">
-                <p style="color:#666;font-size:0.85em;margin:0;">Svart Security Admin Notification</p>
-              </div>
-            `,
-          },
-        ],
-      }),
-    });
-  } catch {
-    // Email notification is best-effort — don't fail the registration
-  }
+  // No-op — all registrations are logged to KV reg:log for admin panel
 }
 
 // CORS preflight
@@ -305,53 +254,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         )
         .join("");
 
-      try {
-        await fetch("https://api.mailchannels.net/tx/v1/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            personalizations: [
-              { to: [{ email: ADMIN_EMAIL, name: "Svart Admin" }] },
-            ],
-            from: {
-              email: "noreply@svartsecurity.org",
-              name: "Svart Security",
-            },
-            subject: `Today's Signups (${todayRegs.length}) — ${today}`,
-            content: [
-              {
-                type: "text/plain",
-                value: `Today's Svart Security Registrations (${todayRegs.length})\n${"=".repeat(50)}\n\n${rows}\n\n---\nSvart Security Admin Report`,
-              },
-              {
-                type: "text/html",
-                value: `
-                  <div style="font-family:monospace;background:#0a0a0f;color:#e0e0e0;padding:24px;border-radius:12px;">
-                    <h2 style="color:#7c6aef;margin-top:0;">Today's Registrations (${todayRegs.length})</h2>
-                    <table style="width:100%;border-collapse:collapse;">
-                      <tr style="border-bottom:2px solid #7c6aef;"><th style="padding:8px 10px;text-align:left;color:#888;">Email</th><th style="padding:8px 10px;text-align:left;color:#888;">Key</th><th style="padding:8px 10px;text-align:left;color:#888;">Name</th><th style="padding:8px 10px;text-align:left;color:#888;">Date</th></tr>
-                      ${htmlRows}
-                    </table>
-                    <hr style="border:none;border-top:1px solid #333;margin:16px 0;">
-                    <p style="color:#666;font-size:0.85em;margin:0;">Svart Security Admin Report — ${today}</p>
-                  </div>
-                `,
-              },
-            ],
-          }),
-        });
-      } catch {
-        return jsonResponse({
-          success: false,
-          error: "Failed to send email",
-          count: todayRegs.length,
-        });
-      }
-
+      // MailChannels discontinued — admin views registrations from dashboard
+      // Return the data directly as JSON for the admin panel to display
       return jsonResponse({
         success: true,
-        message: `Sent ${todayRegs.length} registration(s) to ${ADMIN_EMAIL}`,
+        message: `${todayRegs.length} registration(s) today — view in admin dashboard`,
         count: todayRegs.length,
+        registrations: fullRecords,
       });
     }
 

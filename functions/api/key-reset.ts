@@ -176,46 +176,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (log.length > 200) log = log.slice(-200);
     await context.env.USAGE_DATA.put("keyreset:log", JSON.stringify(log));
 
-    // Email admin about the request
-    try {
-      await fetch("https://api.mailchannels.net/tx/v1/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          personalizations: [
-            { to: [{ email: ADMIN_EMAIL, name: "Svart Admin" }] },
-          ],
-          from: {
-            email: "noreply@svartsecurity.org",
-            name: "Svart Key Reset",
-          },
-          subject: `[KEY RESET] ${email} — Code: ${resetCode}`,
-          content: [
-            {
-              type: "text/plain",
-              value: [
-                "Secret Key Reset Request",
-                "========================",
-                "",
-                `Email:        ${email}`,
-                `Reset Code:   ${resetCode}`,
-                `Current Key:  ****-****-****-${request.currentKeyLast4}`,
-                `Reason:       ${request.reason}`,
-                `Verified:     Yes (password + key matched)`,
-                `Date:         ${request.requestedAt}`,
-                "",
-                "To approve this request, go to your Admin Panel > Key Resets tab.",
-                "",
-                "---",
-                "Svart Security Key Reset System",
-              ].join("\n"),
-            },
-          ],
-        }),
-      });
-    } catch {
-      // Non-blocking
-    }
+    // Reset request stored in KV — admin approves from dashboard
+    // (MailChannels email removed — service discontinued 2024)
 
     return jsonResponse({
       success: true,
