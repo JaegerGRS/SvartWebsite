@@ -192,6 +192,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       JSON.stringify(accountData)
     );
 
+    // Write key->email direct index for key-only app login
+    await context.env.USAGE_DATA.put(`keyindex:${activationKey}`, email);
+
     // Add to the master registration log (ordered list)
     const logRaw = await context.env.USAGE_DATA.get("reg:log");
     let log: Array<{ email: string; key: string; date: string }> = [];

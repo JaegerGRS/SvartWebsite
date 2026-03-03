@@ -123,6 +123,10 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         registeredAt: account.createdAt || entry.date || new Date().toISOString(),
       }));
 
+      // Update key->email direct index for key-only app login
+      await context.env.USAGE_DATA.delete(`keyindex:${oldKey}`);
+      await context.env.USAGE_DATA.put(`keyindex:${newKey}`, email);
+
       // Update the log entry
       entry.key = newKey;
 

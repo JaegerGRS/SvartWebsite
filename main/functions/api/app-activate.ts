@@ -1,10 +1,11 @@
 /**
  * /api/app-activate — Desktop App Activation Endpoint
  *
- * Purpose-built for SvartAI and other desktop apps to verify email + secret key.
+ * Purpose-built for SvartAI and other desktop apps to verify a secret key.
+ * Supports key-only login (looks up account via key index) or email+key.
  * Uses POST to avoid URL-encoding issues with special characters in keys.
  *
- * POST Body: { email: string, key: string }
+ * POST Body: { key: string, email?: string }
  * Returns:
  *   Success: { success: true, account: { email, displayName, activationKey, role, createdAt, svartId } }
  *   Wrong key: { success: false, error: "...", exists: true }
@@ -33,7 +34,7 @@ export const onRequestOptions: PagesFunction<Env> = async () => {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 };
 
-// POST — Verify email + secret key for desktop app activation
+// POST — Verify secret key for desktop app activation
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     if (!context.env?.USAGE_DATA) {
@@ -48,17 +49,74 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       email = (body.email || "").trim().toLowerCase();
       key = (body.key || "").trim();
     } catch {
-      return jsonResponse({ success: false, error: "Invalid request body — expected JSON with email and key" }, 400);
+      return jsonResponse({ success: false, error: "Invalid request body — expected JSON with key" }, 400);
     }
 
-    if (!email) {
-      return jsonResponse({ success: false, error: "Email is required" }, 400);
-    }
     if (!key) {
       return jsonResponse({ success: false, error: "Secret key is required" }, 400);
     }
     if (key.length < 16) {
       return jsonResponse({ success: false, error: "Secret key is too short — paste the full 64-character key from your account" }, 400);
+    }
+
+    // If no email provided, resolve it from the key index
+    if (!email) {
+      // Try reg:key:<key> — written by registrations, key-reset, and rekey endpoints
+      const keyLookup = await context.env.USAGE_DATA.get(`reg:key:${key}`);
+      if (keyLookup) {
+        try {
+          // Could be JSON {email:...} or plain email string
+          const parsed = JSON.parse(keyLookup);
+          email = (parsed.email || "").trim().toLowerCase();
+        } catch {
+          // Plain string — treat as email directly
+          email = keyLookup.trim().toLowerCase();
+        }
+      }
+
+      // If still no email, try the key->email index we write on activation
+      if (!email) {
+        const directIndex = await context.env.USAGE_DATA.get(`keyindex:${key}`);
+        if (directIndex) {
+          email = directIndex.trim().toLowerCase();
+        }
+      }
+
+      // Last resort: scan all accounts to find which one owns this key.
+      // This handles accounts created before key indexing was added.
+      // Slow but reliable — after first success, indexes are written for future fast lookups.
+      if (!email) {
+        let cursor: string | undefined;
+        let found = false;
+        scanLoop: while (true) {
+          const list = await context.env.USAGE_DATA.list({
+            prefix: "account:",
+            limit: 100,
+            ...(cursor ? { cursor } : {}),
+          });
+          for (const k of list.keys) {
+            try {
+              const raw = await context.env.USAGE_DATA.get(k.name);
+              if (!raw) continue;
+              const acct = JSON.parse(raw);
+              if (acct.activationKey === key) {
+                email = (acct.email || k.name.replace("account:", "")).trim().toLowerCase();
+                found = true;
+                break scanLoop;
+              }
+            } catch { /* skip malformed */ }
+          }
+          if (list.list_complete) break;
+          cursor = list.cursor;
+        }
+        if (!found) {
+          return jsonResponse({
+            success: false,
+            exists: false,
+            error: "No account found for this key. Make sure you copied the correct key from your account dashboard.",
+          });
+        }
+      }
     }
 
     // Look up account by email
@@ -67,7 +125,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return jsonResponse({
         success: false,
         exists: false,
-        error: "No account found with that email. Sign up at svartsecurity.org first.",
+        error: "No account found. Sign up at svartsecurity.org first.",
       });
     }
 
@@ -93,6 +151,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         error: "Invalid secret key. Make sure you copied the full 64-character key from your account dashboard.",
       });
     }
+
+    // Write/update the key->email index for faster future lookups
+    context.waitUntil(
+      context.env.USAGE_DATA.put(`keyindex:${key}`, email).catch(() => {})
+    );
+
+    // Also ensure reg:key index exists
+    context.waitUntil(
+      context.env.USAGE_DATA.put(`reg:key:${key}`, JSON.stringify({ email, activationKey: key })).catch(() => {})
+    );
 
     // Key matches — return full account for activation
     return jsonResponse({

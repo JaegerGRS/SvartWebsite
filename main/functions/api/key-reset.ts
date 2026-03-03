@@ -384,6 +384,10 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     await context.env.USAGE_DATA.delete(`reg:key:${oldKey}`);
     await context.env.USAGE_DATA.put(`reg:key:${newKey}`, email);
 
+    // Update key->email direct index for key-only app login
+    await context.env.USAGE_DATA.delete(`keyindex:${oldKey}`);
+    await context.env.USAGE_DATA.put(`keyindex:${newKey}`, email);
+
     // Update request record
     req.status = "approved";
     req.newKeyPreview = newKey.substring(0, 6) + "...";
