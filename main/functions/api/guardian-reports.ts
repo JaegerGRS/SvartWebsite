@@ -1,18 +1,14 @@
-interface Env {
-  USAGE_DATA: KVNamespace;
-}
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, isAuthorized as _isAuthorized, ADMIN_EMAIL, LEA_KEY_HEX } from "./_shared";
 
-const ADMIN_SECRET = "hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR";
-const MOD_SECRET = "4Vw15CeU_bal14uMBHkEZjE1KhoXr5TbMSP9CBqmTAD6PBRMfUDF-mx-qeAR9ErH";
-const APP_SECRET = "svart-app-verify-2026";
-const GUARDIAN_SECRET = "svart-guardian-2026";
-const ADMIN_EMAIL = "admin@svartsecurity.org";
 const SECURITY_EMAIL = "security@svartsecurity.org";
 const ADMIN_FULL_NAME = "Jaeger George Richard Stratton";
 
-// LEA encryption key — must match guardian.ts
-const LEA_KEY_HEX = "c7a3f1e09b2d4c6a8f5e1d3b7a9c0e2f4d6b8a1c3e5f7092b4d6a8c0e2f4a6b8";
+// Guardian reports accepts admin, mod, guardian, and app tokens
+function isAuthorized(request: Request) {
+  return _isAuthorized(request, ["admin", "mod", "guardian", "app"]);
+}
 
+// LEA encryption key — must match guardian.ts
 async function getLeaKey(): Promise<CryptoKey> {
   const keyBytes = new Uint8Array(32);
   for (let i = 0; i < 32; i++) {
@@ -30,36 +26,9 @@ async function decryptForLEA(encrypted: string): Promise<string> {
   return new TextDecoder().decode(plaintext);
 }
 
-const CORS_HEADERS: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
-  });
-}
-
-function errorResponse(error: string, status = 500): Response {
-  return jsonResponse({ success: false, error }, status);
-}
-
-function checkKV(env: Env): boolean {
-  return !!(env && env.USAGE_DATA);
-}
-
-function isAuthorized(request: Request): { authorized: boolean; role: string } {
-  const auth = request.headers.get("Authorization") || "";
-  const token = auth.replace("Bearer ", "");
-  if (token === ADMIN_SECRET) return { authorized: true, role: "admin" };
-  if (token === MOD_SECRET) return { authorized: true, role: "mod" };
-  if (token === GUARDIAN_SECRET) return { authorized: true, role: "guardian" };
-  if (token === APP_SECRET) return { authorized: true, role: "app" };
-  return { authorized: false, role: "" };
-}
+const CORS_HEADERS = makeCors("GET, POST, PUT, OPTIONS");
+const jsonResponse = makeJsonResponse(CORS_HEADERS);
+const errorResponse = makeErrorResponse(jsonResponse);
 
 // ============================
 // LAW VIOLATION CATEGORIES
@@ -110,9 +79,7 @@ const LAW_CATEGORIES: Record<string, {
   "OTHER":             { id: "OTHER",             name: "Other Violation",                            jurisdiction: "Various",  statute: "To be determined upon review",                        description: "A violation not covered by other categories.",                                                                                              evidenceNote: "Registration network hash, account creation timestamp." }
 };
 
-export const onRequestOptions: PagesFunction<Env> = async () => {
-  return new Response(null, { status: 204, headers: CORS_HEADERS });
-};
+export const onRequestOptions: PagesFunction<Env> = async () => optionsResponse(CORS_HEADERS);
 
 // POST — Submit a new guardian report (from Svart apps or NetworkGuardian)
 // Requires valid app, guardian, admin, or mod token

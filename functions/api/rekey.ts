@@ -1,25 +1,8 @@
-interface Env {
-  USAGE_DATA: KVNamespace;
-}
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, ADMIN_SECRET } from "./_shared";
 
-const ADMIN_SECRET = "hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR";
-
-const CORS_HEADERS: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "PUT, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
-  });
-}
-
-function errorResponse(error: string, status = 500): Response {
-  return jsonResponse({ success: false, error }, status);
-}
+const CORS_HEADERS = makeCors("PUT, OPTIONS");
+const jsonResponse = makeJsonResponse(CORS_HEADERS);
+const errorResponse = makeErrorResponse(jsonResponse);
 
 // Generate a 64-character AES-256-GCM secret key with special characters
 function generateSecretKey(): string {
@@ -34,9 +17,7 @@ function generateSecretKey(): string {
 }
 
 // CORS preflight
-export const onRequestOptions: PagesFunction<Env> = async () => {
-  return new Response(null, { status: 204, headers: CORS_HEADERS });
-};
+export const onRequestOptions: PagesFunction<Env> = async () => optionsResponse(CORS_HEADERS);
 
 // PUT — Admin-only: batch re-key ALL accounts to new 64-character keys
 // Requires Authorization: Bearer <ADMIN_SECRET>

@@ -11,9 +11,10 @@
  *   Also checks KV reads + available API endpoints
  */
 
-interface Env {
-  USAGE_DATA: KVNamespace;
-}
+import { type Env, makeCors, makeJsonResponse } from "./_shared";
+
+const CORS_HEADERS = makeCors("GET, OPTIONS");
+const jsonResponse = makeJsonResponse(CORS_HEADERS);
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const url = new URL(context.request.url);
@@ -52,25 +53,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }
   }
 
-  return new Response(JSON.stringify(result), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Cache-Control": "no-cache",
-    },
-  });
+  return jsonResponse(result);
 };
 
 export const onRequestOptions: PagesFunction<Env> = async () => {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    },
-  });
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
 };

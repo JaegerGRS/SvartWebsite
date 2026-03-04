@@ -1,38 +1,15 @@
 // functions/api/community.ts — Community forum API (KV-backed)
 // Supports: GET posts, GET single post, POST new post, POST reply, POST vote
 
-interface Env {
-  USAGE_DATA: KVNamespace;
-}
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, APP_SECRET, GUARDIAN_SECRET, ADMIN_SECRET, isAuthorized } from "./_shared";
 
-const APP_SECRET = "svart-app-verify-2026";
-const GUARDIAN_SECRET = "svart-guardian-2026";
-const ADMIN_SECRET = "hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR";
+const CORS_HEADERS = makeCors("GET, POST, OPTIONS");
+const jsonResponse = makeJsonResponse(CORS_HEADERS);
+const errorResponse = makeErrorResponse(jsonResponse);
 
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-function isSystemAuthorized(request: Request): { authorized: boolean; role: string } {
-  const auth = request.headers.get("Authorization") || "";
-  const token = auth.replace("Bearer ", "");
-  if (token === ADMIN_SECRET) return { authorized: true, role: "admin" };
-  if (token === GUARDIAN_SECRET) return { authorized: true, role: "guardian" };
-  if (token === APP_SECRET) return { authorized: true, role: "app" };
-  return { authorized: false, role: "" };
-}
-
-function jsonResponse(data: any, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
-  });
-}
-
-function errorResponse(msg: string, status = 400) {
-  return jsonResponse({ success: false, error: msg }, status);
+// Wrapper: only admin/guardian/app can make system-level community posts
+function isSystemAuthorized(request: Request) {
+  return isAuthorized(request, ["admin", "guardian", "app"]);
 }
 
 // Generate a short unique ID

@@ -30,52 +30,15 @@
  *   guardian:log                    → [reportId, ...] (report index)
  */
 
-interface Env {
-  USAGE_DATA: KVNamespace;
-}
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, isAuthorized as _isAuthorized, LEA_KEY_HEX } from "./_shared";
 
-const ADMIN_SECRET = "hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR";
-const MOD_SECRET = "4Vw15CeU_bal14uMBHkEZjE1KhoXr5TbMSP9CBqmTAD6PBRMfUDF-mx-qeAR9ErH";
-const GUARDIAN_SECRET = "svart-guardian-2026";
-const APP_SECRET = "svart-app-verify-2026";
+const CORS_HEADERS = makeCors("GET, POST, PUT, DELETE, OPTIONS");
+const jsonResponse = makeJsonResponse(CORS_HEADERS);
+const errorResponse = makeErrorResponse(jsonResponse);
 
-// ============================
-// LEA ENCRYPTION KEY (AES-256-GCM)
-// Used to encrypt raw IPs so law enforcement can recover them via court order.
-// The net_* hash is irreversible (for daily ops). The encrypted IP is decryptable
-// by admin only, for formal law enforcement reports.
-// ============================
-const LEA_KEY_HEX = "c7a3f1e09b2d4c6a8f5e1d3b7a9c0e2f4d6b8a1c3e5f7092b4d6a8c0e2f4a6b8";
-
-const CORS_HEADERS: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
-  });
-}
-
-function errorResponse(error: string, status = 500): Response {
-  return jsonResponse({ success: false, error }, status);
-}
-
-function checkKV(env: Env): boolean {
-  return !!(env && env.USAGE_DATA);
-}
-
-function isAuthorized(request: Request): { authorized: boolean; role: string } {
-  const auth = request.headers.get("Authorization") || "";
-  const token = auth.replace("Bearer ", "");
-  if (token === ADMIN_SECRET) return { authorized: true, role: "admin" };
-  if (token === MOD_SECRET) return { authorized: true, role: "mod" };
-  if (token === GUARDIAN_SECRET) return { authorized: true, role: "guardian" };
-  if (token === APP_SECRET) return { authorized: true, role: "app" };
-  return { authorized: false, role: "" };
+// Guardian accepts admin, mod, guardian, and app tokens
+function isAuthorized(request: Request) {
+  return _isAuthorized(request, ["admin", "mod", "guardian", "app"]);
 }
 
 // ============================
@@ -486,9 +449,7 @@ async function hashUrl(url: string): Promise<string> {
 // ============================
 // CORS preflight
 // ============================
-export const onRequestOptions: PagesFunction<Env> = async () => {
-  return new Response(null, { status: 204, headers: CORS_HEADERS });
-};
+export const onRequestOptions: PagesFunction<Env> = async () => optionsResponse(CORS_HEADERS);
 
 // ============================
 // POST — Internal enforcement checks (called by auth.ts and registrations.ts)

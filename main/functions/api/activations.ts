@@ -1,35 +1,11 @@
-interface Env {
-  USAGE_DATA: KVNamespace;
-}
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, ADMIN_SECRET, APP_SECRET } from "./_shared";
 
 // Same HMAC secret as the Rust backend - used to generate valid CB-XXXX-XXXX-XXXX numbers
-// In production, this should be an environment variable
 const ACTIVATION_SECRET = "CipherBaseAI-Activation-v1-Secret";
 
-// Access control secrets
-const ADMIN_SECRET = "hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR";
-const APP_SECRET = "svart-app-verify-2026";
-
-const CORS_HEADERS: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
-  });
-}
-
-function errorResponse(error: string, status = 500): Response {
-  return jsonResponse({ success: false, error }, status);
-}
-
-function checkKV(env: Env): boolean {
-  return !!(env && env.USAGE_DATA);
-}
+const CORS_HEADERS = makeCors("GET, POST, OPTIONS");
+const jsonResponse = makeJsonResponse(CORS_HEADERS);
+const errorResponse = makeErrorResponse(jsonResponse);
 
 // HMAC-SHA256 using Web Crypto
 async function hmacSha256(secret: string, message: string): Promise<string> {

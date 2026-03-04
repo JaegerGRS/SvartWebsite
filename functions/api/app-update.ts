@@ -25,9 +25,7 @@
  *   204 No Content if already on latest or no release published
  */
 
-interface Env {
-  USAGE_DATA: KVNamespace;
-}
+import { type Env } from "./_shared";
 
 interface PlatformEntry {
   url: string;

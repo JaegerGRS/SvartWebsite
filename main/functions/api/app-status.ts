@@ -11,31 +11,13 @@
  * GET /api/app-status?key=<key>  — Check if key is valid (0 writes)
  */
 
-interface Env {
-  USAGE_DATA: KVNamespace;
-}
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse } from "./_shared";
 
-const CORS_HEADERS: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
+const CORS_HEADERS = makeCors("GET, POST, OPTIONS");
+const jsonResponse = makeJsonResponse(CORS_HEADERS);
+const errorResponse = makeErrorResponse(jsonResponse);
 
-function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
-  });
-}
-
-function errorResponse(error: string, status = 500): Response {
-  return jsonResponse({ success: false, error }, status);
-}
-
-// CORS preflight
-export const onRequestOptions: PagesFunction<Env> = async () => {
-  return new Response(null, { status: 204, headers: CORS_HEADERS });
-};
+export const onRequestOptions: PagesFunction<Env> = async () => optionsResponse(CORS_HEADERS);
 
 // POST — Validate key and return account status (read-only, 0 KV writes)
 export const onRequestPost: PagesFunction<Env> = async (context) => {

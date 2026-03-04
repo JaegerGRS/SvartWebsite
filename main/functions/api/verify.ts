@@ -19,52 +19,14 @@
  *   Same as POST but via query params (for simple GET requests from apps)
  */
 
-interface Env {
-  USAGE_DATA: KVNamespace;
-}
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, type CallerRole, getCallerRole } from "./_shared";
 
-const ADMIN_SECRET = "hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR";
-const MOD_SECRET = "4Vw15CeU_bal14uMBHkEZjE1KhoXr5TbMSP9CBqmTAD6PBRMfUDF-mx-qeAR9ErH";
-const APP_SECRET = "svart-app-verify-2026";
-const GUARDIAN_SECRET = "svart-guardian-2026";
-
-const CORS_HEADERS: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
-  });
-}
-
-function errorResponse(error: string, status = 500): Response {
-  return jsonResponse({ success: false, error }, status);
-}
-
-function checkKV(env: Env): boolean {
-  return !!(env && env.USAGE_DATA);
-}
-
-type CallerRole = "admin" | "mod" | "app" | "guardian" | "none";
-
-function getCallerRole(request: Request): CallerRole {
-  const auth = request.headers.get("Authorization") || "";
-  const token = auth.replace("Bearer ", "").trim();
-  if (token === ADMIN_SECRET) return "admin";
-  if (token === MOD_SECRET) return "mod";
-  if (token === GUARDIAN_SECRET) return "guardian";
-  if (token === APP_SECRET) return "app";
-  return "none";
-}
+const CORS_HEADERS = makeCors("GET, POST, OPTIONS");
+const jsonResponse = makeJsonResponse(CORS_HEADERS);
+const errorResponse = makeErrorResponse(jsonResponse);
 
 // CORS preflight
-export const onRequestOptions: PagesFunction<Env> = async () => {
-  return new Response(null, { status: 204, headers: CORS_HEADERS });
-};
+export const onRequestOptions: PagesFunction<Env> = async () => optionsResponse(CORS_HEADERS);
 
 // POST — Verify a secret key
 export const onRequestPost: PagesFunction<Env> = async (context) => {

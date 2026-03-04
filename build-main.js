@@ -15,7 +15,7 @@ const htmlFiles = [
   'website-security.html', 'eula.html', 'tools-template.html', 'admin.html',
   'forgot-password.html', 'mod-panel.html', 'checkout.html',
   'registration-log.html', 'role-management.html', 'how-it-works.html',
-  'community.html'
+  'community.html', 'github.html', 'key-reset.html'
 ];
 for (const f of htmlFiles) {
   if (existsSync(f)) cpSync(f, `main/${f}`);

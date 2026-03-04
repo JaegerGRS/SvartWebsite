@@ -1,43 +1,11 @@
-interface Env {
-  USAGE_DATA: KVNamespace;
-}
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, hashPassword } from "./_shared";
 
-const CORS_HEADERS: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
-  });
-}
-
-function errorResponse(error: string, status = 500): Response {
-  return jsonResponse({ success: false, error }, status);
-}
-
-function checkKV(env: Env): boolean {
-  return !!(env && env.USAGE_DATA);
-}
-
-// Same hash function used client-side
-function hashPassword(pw: string): string {
-  let hash = 0;
-  for (let i = 0; i < pw.length; i++) {
-    const c = pw.charCodeAt(i);
-    hash = ((hash << 5) - hash) + c;
-    hash |= 0;
-  }
-  return 'h' + Math.abs(hash).toString(36);
-}
+const CORS_HEADERS = makeCors("GET, POST, PUT, DELETE, OPTIONS");
+const jsonResponse = makeJsonResponse(CORS_HEADERS);
+const errorResponse = makeErrorResponse(jsonResponse);
 
 // CORS preflight
-export const onRequestOptions: PagesFunction<Env> = async () => {
-  return new Response(null, { status: 204, headers: CORS_HEADERS });
-};
+export const onRequestOptions: PagesFunction<Env> = async () => optionsResponse(CORS_HEADERS);
 
 // POST — Login: verify credentials server-side
 // Body: { email, passwordHash }

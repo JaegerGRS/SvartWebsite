@@ -1,30 +1,8 @@
-interface Env {
-  USAGE_DATA: KVNamespace;
-}
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, hashPassword } from "./_shared";
 
-const ADMIN_SECRET = "hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR";
-const MOD_SECRET = "4Vw15CeU_bal14uMBHkEZjE1KhoXr5TbMSP9CBqmTAD6PBRMfUDF-mx-qeAR9ErH";
-
-const CORS_HEADERS: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
-  });
-}
-
-function errorResponse(error: string, status = 500): Response {
-  return jsonResponse({ success: false, error }, status);
-}
-
-function checkKV(env: Env): boolean {
-  return !!(env && env.USAGE_DATA);
-}
+const CORS_HEADERS = makeCors("GET, POST, OPTIONS");
+const jsonResponse = makeJsonResponse(CORS_HEADERS);
+const errorResponse = makeErrorResponse(jsonResponse);
 
 // Generate a random temporary password (12 chars, alphanumeric + special)
 function generateTempPassword(): string {
@@ -38,20 +16,7 @@ function generateTempPassword(): string {
   return pw;
 }
 
-// Same hash function used client-side (must match login.html / signup.html)
-function hashPassword(pw: string): string {
-  let hash = 0;
-  for (let i = 0; i < pw.length; i++) {
-    const c = pw.charCodeAt(i);
-    hash = ((hash << 5) - hash) + c;
-    hash |= 0;
-  }
-  return 'h' + Math.abs(hash).toString(36);
-}
-
-export const onRequestOptions: PagesFunction<Env> = async () => {
-  return new Response(null, { status: 204, headers: CORS_HEADERS });
-};
+export const onRequestOptions: PagesFunction<Env> = async () => optionsResponse(CORS_HEADERS);
 
 // POST — User submits a password reset request (email only)
 // This logs the request so the admin can help recover the account
