@@ -1,14 +1,10 @@
 /**
- * /api/app-status — Desktop app status endpoint (read-only, no KV writes)
+ * /api/app-status — Desktop app status endpoint
  *
- * Cloudflare Free Tier friendly: KV reads only, zero writes.
- * Desktop apps manage their own service status locally.
- * This endpoint just validates the key and returns account info.
+ * POST /api/app-status  — Validate key, store heartbeat, return account status
+ *   Body: { activationKey, email?, app?, version?, services? }
  *
- * POST /api/app-status  — Validate key & return account status (0 writes)
- *   Body: { activationKey, app?, version? }
- *
- * GET /api/app-status?key=<key>  — Check if key is valid (0 writes)
+ * GET /api/app-status?key=<key>&email=<email>  — Check key & return connected apps
  */
 
 import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse } from "./_shared";
@@ -19,7 +15,7 @@ const errorResponse = makeErrorResponse(jsonResponse);
 
 export const onRequestOptions: PagesFunction<Env> = async () => optionsResponse(CORS_HEADERS);
 
-// POST — Validate key and return account status (read-only, 0 KV writes)
+// POST — Validate key, store heartbeat, return account status
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     if (!context.env?.USAGE_DATA) {
@@ -30,6 +26,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     let emailHint = "";
     let app = "";
     let version = "";
+    let services: Record<string, unknown> = {};
 
     try {
       const body = (await context.request.json()) as {
@@ -38,11 +35,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         email?: string;
         app?: string;
         version?: string;
+        services?: Record<string, unknown>;
       };
       activationKey = (body.activationKey || body.key || "").trim();
       emailHint = (body.email || "").trim().toLowerCase();
       app = (body.app || "unknown").trim();
       version = (body.version || "0.0.0").trim();
+      services = body.services || {};
     } catch {
       return errorResponse("Invalid request body", 400);
     }
@@ -98,6 +97,26 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       );
     }
 
+    // Store connected-app heartbeat (non-blocking write)
+    if (app && app !== "unknown") {
+      const heartbeatEntry = {
+        app,
+        version,
+        lastSeen: new Date().toISOString(),
+        services,
+      };
+      context.waitUntil(
+        (async () => {
+          try {
+            const existing = await context.env.USAGE_DATA.get(`connected-apps:${email}`);
+            const apps: Record<string, unknown> = existing ? JSON.parse(existing) : {};
+            apps[app] = heartbeatEntry;
+            await context.env.USAGE_DATA.put(`connected-apps:${email}`, JSON.stringify(apps));
+          } catch { /* ignore write failures */ }
+        })()
+      );
+    }
+
     return jsonResponse({
       success: true,
       valid: true,
@@ -116,7 +135,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 };
 
-// GET — Simple key validation or health check (read-only, 0 KV writes)
+// GET — Key validation + connected apps lookup
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     if (!context.env?.USAGE_DATA) {
@@ -125,12 +144,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     const url = new URL(context.request.url);
     const key = (url.searchParams.get("key") || "").trim();
+    const emailHint = (url.searchParams.get("email") || "").trim().toLowerCase();
 
     if (!key) {
       return jsonResponse({ ok: true, service: "app-status", message: "Provide ?key= to check status" });
     }
 
-    // Read-only key lookup
+    // Resolve key → email
     let email = "";
     const regKey = await context.env.USAGE_DATA.get(`reg:key:${key}`);
     if (regKey) {
@@ -139,6 +159,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     if (!email) {
       const idx = await context.env.USAGE_DATA.get(`keyindex:${key}`);
       if (idx) email = idx;
+    }
+    // Fallback: use email hint from query (for accounts created before key indexing)
+    if (!email && emailHint) {
+      email = emailHint;
     }
     email = (email || "").trim().toLowerCase();
 
@@ -152,14 +176,29 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }
 
     const account = JSON.parse(accountRaw);
+    const valid = account.activationKey === key;
+
+    // Read connected apps
+    let connectedApps: unknown[] = [];
+    if (valid) {
+      try {
+        const appsRaw = await context.env.USAGE_DATA.get(`connected-apps:${email}`);
+        if (appsRaw) {
+          const appsMap = JSON.parse(appsRaw) as Record<string, unknown>;
+          connectedApps = Object.values(appsMap);
+        }
+      } catch { /* ignore parse errors */ }
+    }
+
     return jsonResponse({
       success: true,
-      valid: account.activationKey === key,
+      valid,
       account: {
         email: account.email,
         displayName: account.displayName || "",
         role: account.role || "user",
       },
+      connectedApps,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Internal server error";
