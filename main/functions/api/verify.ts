@@ -35,7 +35,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return errorResponse("Server storage not configured.", 503);
     }
 
-    const caller = getCallerRole(context.request);
+    const caller = getCallerRole(context.request, context.env);
     if (caller === "none") {
       return errorResponse("Unauthorized. Valid app or guardian token required.", 401);
     }
@@ -72,7 +72,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       return errorResponse("Server storage not configured.", 503);
     }
 
-    const caller = getCallerRole(context.request);
+    const caller = getCallerRole(context.request, context.env);
     if (caller === "none") {
       return errorResponse("Unauthorized. Valid app or guardian token required.", 401);
     }

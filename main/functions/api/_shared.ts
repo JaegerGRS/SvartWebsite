@@ -4,19 +4,18 @@
 // File prefixed with _ → Cloudflare Pages does NOT create a route for it.
 
 // ── Environment ──
+// Secrets are read from Cloudflare environment variables at runtime.
+// Set them in the Cloudflare Dashboard: Pages → Settings → Environment variables
 
 export interface Env {
   USAGE_DATA: KVNamespace;
+  ADMIN_SECRET: string;
+  MOD_SECRET: string;
+  GUARDIAN_SECRET: string;
+  APP_SECRET: string;
+  ADMIN_EMAIL: string;
+  LEA_KEY_HEX: string;
 }
-
-// ── Secrets (single source of truth) ──
-
-export const ADMIN_SECRET = "hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR";
-export const MOD_SECRET = "4Vw15CeU_bal14uMBHkEZjE1KhoXr5TbMSP9CBqmTAD6PBRMfUDF-mx-qeAR9ErH";
-export const GUARDIAN_SECRET = "svart-guardian-2026";
-export const APP_SECRET = "svart-app-verify-2026";
-export const ADMIN_EMAIL = "admin@svartsecurity.org";
-export const LEA_KEY_HEX = "c7a3f1e09b2d4c6a8f5e1d3b7a9c0e2f4d6b8a1c3e5f7092b4d6a8c0e2f4a6b8";
 
 // ── CORS Factory ──
 
@@ -63,18 +62,18 @@ export function checkKV(env: Env): boolean {
 
 export type CallerRole = "admin" | "mod" | "guardian" | "app" | "none";
 
-export function getCallerRole(request: Request): CallerRole {
+export function getCallerRole(request: Request, env: Env): CallerRole {
   const auth = request.headers.get("Authorization") || "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
-  if (token === ADMIN_SECRET) return "admin";
-  if (token === MOD_SECRET) return "mod";
-  if (token === GUARDIAN_SECRET) return "guardian";
-  if (token === APP_SECRET) return "app";
+  if (env.ADMIN_SECRET && token === env.ADMIN_SECRET) return "admin";
+  if (env.MOD_SECRET && token === env.MOD_SECRET) return "mod";
+  if (env.GUARDIAN_SECRET && token === env.GUARDIAN_SECRET) return "guardian";
+  if (env.APP_SECRET && token === env.APP_SECRET) return "app";
   return "none";
 }
 
-export function isAuthorized(request: Request, allowedRoles: CallerRole[] = ["admin", "mod"]): { authorized: boolean; role: CallerRole } {
-  const role = getCallerRole(request);
+export function isAuthorized(request: Request, env: Env, allowedRoles: CallerRole[] = ["admin", "mod"]): { authorized: boolean; role: CallerRole } {
+  const role = getCallerRole(request, env);
   return { authorized: role !== "none" && allowedRoles.includes(role), role };
 }
 

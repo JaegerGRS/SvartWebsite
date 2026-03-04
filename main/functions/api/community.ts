@@ -1,15 +1,15 @@
 // functions/api/community.ts — Community forum API (KV-backed)
 // Supports: GET posts, GET single post, POST new post, POST reply, POST vote
 
-import { type Env, makeCors, makeJsonResponse, makeErrorResponse, APP_SECRET, GUARDIAN_SECRET, ADMIN_SECRET, isAuthorized } from "./_shared";
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, isAuthorized } from "./_shared";
 
 const CORS_HEADERS = makeCors("GET, POST, OPTIONS");
 const jsonResponse = makeJsonResponse(CORS_HEADERS);
 const errorResponse = makeErrorResponse(jsonResponse);
 
 // Wrapper: only admin/guardian/app can make system-level community posts
-function isSystemAuthorized(request: Request) {
-  return isAuthorized(request, ["admin", "guardian", "app"]);
+function isSystemAuthorized(request: Request, env: Env) {
+  return isAuthorized(request, env, ["admin", "guardian", "app"]);
 }
 
 // Generate a short unique ID
@@ -175,7 +175,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const category = body.category || "discussion";
 
     // System (guardian/admin) auto-posts use "Network Guardian" as author
-    const { authorized: sysAuth, role: sysRole } = isSystemAuthorized(context.request);
+    const { authorized: sysAuth, role: sysRole } = isSystemAuthorized(context.request, context.env);
     const effectiveUsername = (sysAuth && category === "security") ? "Network Guardian" : username;
 
     if (!effectiveUsername) return errorResponse("You must be logged in to post.");
@@ -185,7 +185,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const validCategories = ["bug", "feature", "discussion", "question", "security"];
     // Only system tokens (guardian/admin) can post in the 'security' category
     if (category === "security") {
-      const { authorized } = isSystemAuthorized(context.request);
+      const { authorized } = isSystemAuthorized(context.request, context.env);
       if (!authorized) {
         return errorResponse("Only the Guardian system can post security bulletins.");
       }

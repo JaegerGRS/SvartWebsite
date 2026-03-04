@@ -79,8 +79,9 @@
     <div id="adminLoginScreen" style="display:none;">
         <div class="page-login">
             <h2>&#128272; Admin Verification</h2>
-            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your secret key to access the admin panel.</p>
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your secret key and admin API token to access the admin panel.</p>
             <input type="password" id="adminSecret" placeholder="Your 64-character secret key" autocomplete="off">
+            <input type="password" id="adminApiToken" placeholder="Admin API token" autocomplete="off" style="margin-top:8px;">
             <button class="btn btn-primary btn-full" id="adminLoginBtn">Verify &amp; Access</button>
             <p id="adminLoginError" style="color:#ef4444;margin-top:12px;display:none;font-size:0.9rem;"></p>
             <a href="account.html" style="display:block;text-align:center;margin-top:16px;color:var(--text-muted);font-size:0.85rem;text-decoration:none;">&#8592; Back to Dashboard</a>
@@ -256,7 +257,6 @@
         let adminToken = '';
         const API_BASE = '/api/registrations';
         const ADMIN_EMAIL = 'admin@svartsecurity.org';
-        const ADMIN_API_SECRET = 'hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR';
         const ADMIN_FULL_NAME = 'Jaeger George Richard Stratton';
         const SECURITY_EMAIL = 'security@svartsecurity.org';
 
@@ -265,6 +265,7 @@
         const loginScreen = document.getElementById('adminLoginScreen');
         const panel = document.getElementById('adminPanel');
         const secretInput = document.getElementById('adminSecret');
+        const apiTokenInput = document.getElementById('adminApiToken');
         const loginBtn = document.getElementById('adminLoginBtn');
         const loginError = document.getElementById('adminLoginError');
         const logoutBtn = document.getElementById('adminLogoutBtn');
@@ -340,8 +341,14 @@
                 secretInput.value = '';
                 return;
             }
+            var enteredApiToken = (apiTokenInput ? apiTokenInput.value.trim() : '');
+            if (!enteredApiToken) {
+                loginError.textContent = 'Admin API token is required.';
+                loginError.style.display = '';
+                return;
+            }
             loginError.style.display = 'none';
-            adminToken = ADMIN_API_SECRET;
+            adminToken = enteredApiToken;
             showPanel();
         }
 

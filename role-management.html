@@ -60,8 +60,9 @@
     <div id="keyScreen" style="display:none;">
         <div class="page-login">
             <h2>&#128272; Admin Verification</h2>
-            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your secret key to access role management.</p>
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your secret key and admin API token to access role management.</p>
             <input type="password" id="keyInput" placeholder="Your 64-character secret key" autocomplete="off">
+            <input type="password" id="apiTokenInput" placeholder="Admin API token" autocomplete="off" style="margin-top:8px;">
             <button class="btn btn-primary btn-full" id="keyVerifyBtn">Verify &amp; Access</button>
             <p id="keyError" style="color:#ef4444;margin-top:12px;display:none;font-size:0.9rem;"></p>
             <a href="admin.html" style="display:block;text-align:center;margin-top:16px;color:var(--text-muted);font-size:0.85rem;text-decoration:none;">&#8592; Back to Admin Panel</a>
@@ -121,7 +122,6 @@
 
     <script>
     (async function() {
-        const ADMIN_API_SECRET = 'hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR';
         const ADMIN_EMAIL = 'admin@svartsecurity.org';
         const API_BASE = '/api/registrations';
         let adminToken = '';
@@ -187,8 +187,14 @@
                 keyInput.value = '';
                 return;
             }
+            var enteredApiToken = (document.getElementById('apiTokenInput') ? document.getElementById('apiTokenInput').value.trim() : '');
+            if (!enteredApiToken) {
+                keyError.textContent = 'Admin API token is required.';
+                keyError.style.display = '';
+                return;
+            }
             keyError.style.display = 'none';
-            adminToken = ADMIN_API_SECRET;
+            adminToken = enteredApiToken;
             showPage();
         }
 
@@ -291,7 +297,7 @@
                 var resp = await fetch('/api/auth', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email, adminSecret: ADMIN_API_SECRET, updates: { role: newRole } })
+                    body: JSON.stringify({ email: email, adminSecret: adminToken, updates: { role: newRole } })
                 });
                 var data = await resp.json();
                 if (data.success) {

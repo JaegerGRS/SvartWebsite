@@ -117,7 +117,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     // All other GET operations require admin or mod auth
     const auth = context.request.headers.get("Authorization");
     const token = auth ? auth.replace("Bearer ", "") : "";
-    if (token !== ADMIN_SECRET && token !== MOD_SECRET) {
+    if (token !== context.env.ADMIN_SECRET && token !== context.env.MOD_SECRET) {
       return errorResponse("Unauthorized", 401);
     }
 

@@ -63,8 +63,9 @@
     <div id="keyScreen" style="display:none;">
         <div class="page-login">
             <h2>&#128272; Verification Required</h2>
-            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your secret key to access registration logs.</p>
+            <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.9rem;">Enter your secret key and API token to access registration logs.</p>
             <input type="password" id="keyInput" placeholder="Your 64-character secret key" autocomplete="off">
+            <input type="password" id="apiTokenInput" placeholder="API token" autocomplete="off" style="margin-top:8px;">
             <button class="btn btn-primary btn-full" id="keyVerifyBtn">Verify &amp; Access</button>
             <p id="keyError" style="color:#ef4444;margin-top:12px;display:none;font-size:0.9rem;"></p>
             <a href="account.html" style="display:block;text-align:center;margin-top:16px;color:var(--text-muted);font-size:0.85rem;text-decoration:none;">&#8592; Back to Dashboard</a>
@@ -133,8 +134,6 @@
 
     <script>
     (async function() {
-        const ADMIN_API_SECRET = 'hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR';
-        const MOD_API_SECRET = '4Vw15CeU_bal14uMBHkEZjE1KhoXr5TbMSP9CBqmTAD6PBRMfUDF-mx-qeAR9ErH';
         const ADMIN_EMAIL = 'admin@svartsecurity.org';
         const API_BASE = '/api/registrations';
         let apiToken = '';
@@ -214,8 +213,14 @@
                 keyInput.value = '';
                 return;
             }
+            var enteredApiToken = (document.getElementById('apiTokenInput') ? document.getElementById('apiTokenInput').value.trim() : '');
+            if (!enteredApiToken) {
+                keyError.textContent = 'API token is required.';
+                keyError.style.display = '';
+                return;
+            }
             keyError.style.display = 'none';
-            apiToken = isAdmin ? ADMIN_API_SECRET : MOD_API_SECRET;
+            apiToken = enteredApiToken;
             showPage();
         }
 

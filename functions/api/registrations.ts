@@ -1,4 +1,4 @@
-import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, ADMIN_SECRET, MOD_SECRET, ADMIN_EMAIL } from "./_shared";
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV } from "./_shared";
 
 const CORS_HEADERS = makeCors("GET, POST, DELETE, OPTIONS");
 const jsonResponse = makeJsonResponse(CORS_HEADERS);
@@ -68,7 +68,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       try {
         const guardianResp = await fetch(new URL("/api/guardian", context.request.url).toString(), {
           method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${ADMIN_SECRET}` },
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${context.env.ADMIN_SECRET}` },
           body: JSON.stringify({ action: "check-registration", ip: clientIp }),
         });
         const guardianData = await guardianResp.json() as { allowed?: boolean; reason?: string };
@@ -144,7 +144,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       context.waitUntil(
         fetch(new URL("/api/guardian", context.request.url).toString(), {
           method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${ADMIN_SECRET}` },
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${context.env.ADMIN_SECRET}` },
           body: JSON.stringify({ action: "record-registration", ip: clientIp, email }),
         }).catch(() => {})
       );
@@ -163,8 +163,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const auth = context.request.headers.get("Authorization");
     const token = auth ? auth.replace("Bearer ", "") : "";
-    const isAdmin = token === ADMIN_SECRET;
-    const isMod = token === MOD_SECRET;
+    const isAdmin = token === context.env.ADMIN_SECRET;
+    const isMod = token === context.env.MOD_SECRET;
     if (!isAdmin && !isMod) {
       return errorResponse("Unauthorized", 401);
     }
@@ -322,7 +322,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
   try {
     const auth = context.request.headers.get("Authorization");
-    if (!auth || auth !== `Bearer ${ADMIN_SECRET}`) {
+    if (!auth || auth !== `Bearer ${context.env.ADMIN_SECRET}`) {
       return errorResponse("Unauthorized", 401);
     }
 

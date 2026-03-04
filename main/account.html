@@ -1358,7 +1358,6 @@
     });
 
     // ===== Connected Apps =====
-    var APP_SECRET = 'svart-app-verify-2026';
     var appNames = {
       'SvartAI': { icon: '&#129302;', label: 'Svart AI' },
       'SvartBrowser': { icon: '&#128274;', label: 'Svart Browser' },
@@ -1384,7 +1383,7 @@
         var acctEmail = (user.email || session.email || '').toLowerCase();
         var acctKey = user.activationKey || svartId || '';
         var resp = await fetch('/api/app-status?email=' + encodeURIComponent(acctEmail) + '&key=' + encodeURIComponent(acctKey), {
-          headers: { 'Authorization': 'Bearer ' + APP_SECRET }
+          headers: { }
         });
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         var data = await resp.json();

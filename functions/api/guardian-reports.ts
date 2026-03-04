@@ -1,24 +1,24 @@
-import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, isAuthorized as _isAuthorized, ADMIN_EMAIL, LEA_KEY_HEX } from "./_shared";
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, isAuthorized as _isAuthorized } from "./_shared";
 
 const SECURITY_EMAIL = "security@svartsecurity.org";
 const ADMIN_FULL_NAME = "Jaeger George Richard Stratton";
 
 // Guardian reports accepts admin, mod, guardian, and app tokens
-function isAuthorized(request: Request) {
-  return _isAuthorized(request, ["admin", "mod", "guardian", "app"]);
+function isAuthorized(request: Request, env: Env) {
+  return _isAuthorized(request, env, ["admin", "mod", "guardian", "app"]);
 }
 
 // LEA encryption key — must match guardian.ts
-async function getLeaKey(): Promise<CryptoKey> {
+async function getLeaKey(env: Env): Promise<CryptoKey> {
   const keyBytes = new Uint8Array(32);
   for (let i = 0; i < 32; i++) {
-    keyBytes[i] = parseInt(LEA_KEY_HEX.substr(i * 2, 2), 16);
+    keyBytes[i] = parseInt(env.LEA_KEY_HEX.substr(i * 2, 2), 16);
   }
   return crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
 }
 
-async function decryptForLEA(encrypted: string): Promise<string> {
-  const key = await getLeaKey();
+async function decryptForLEA(encrypted: string, env: Env): Promise<string> {
+  const key = await getLeaKey(env);
   const combined = new Uint8Array(atob(encrypted).split("").map(c => c.charCodeAt(0)));
   const iv = combined.slice(0, 12);
   const ciphertext = combined.slice(12);
@@ -91,7 +91,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     // Require a valid token to submit reports
-    const { authorized, role } = isAuthorized(context.request);
+    const { authorized, role } = isAuthorized(context.request, context.env);
     if (!authorized) {
       return errorResponse("Unauthorized. Valid app or guardian token required.", 401);
     }
@@ -200,7 +200,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       return errorResponse("Server storage not configured.", 503);
     }
 
-    const { authorized, role } = isAuthorized(context.request);
+    const { authorized, role } = isAuthorized(context.request, context.env);
     if (!authorized || (role !== "admin" && role !== "mod")) {
       return errorResponse("Unauthorized. Admin or Mod access only.", 401);
     }
@@ -250,7 +250,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       return errorResponse("Server storage not configured.", 503);
     }
 
-    const { authorized, role } = isAuthorized(context.request);
+    const { authorized, role } = isAuthorized(context.request, context.env);
     if (!authorized || (role !== "admin" && role !== "mod")) {
       return errorResponse("Unauthorized. Admin or Mod access only.", 401);
     }
@@ -331,7 +331,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
             const encrypted = await context.env.USAGE_DATA.get(`guardian:enc:${leaNetworkId}`);
             if (encrypted) {
               leaEncryptedIP = encrypted;
-              leaDecryptedIP = await decryptForLEA(encrypted);
+              leaDecryptedIP = await decryptForLEA(encrypted, context.env);
               leaIpNote = `Network ID: ${leaNetworkId}\nRecovered IP: ${leaDecryptedIP}\nEncryption: AES-256-GCM (decrypted under LEA authorization)`;
             } else {
               leaIpNote = `Network ID: ${leaNetworkId}\nEncrypted IP: Not available (registration may predate LEA encryption)`;
@@ -368,7 +368,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         "",
         `Prepared by:     ${ADMIN_FULL_NAME}`,
         `Organisation:    Svart Security`,
-        `Contact:         ${ADMIN_EMAIL}`,
+        `Contact:         ${context.env.ADMIN_EMAIL}`,
         `Security Email:  ${SECURITY_EMAIL}`,
         `Date Prepared:   ${escalationDate}`,
         "",
@@ -416,7 +416,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         "---",
         `${ADMIN_FULL_NAME}`,
         "Svart Security — Administrator",
-        `${ADMIN_EMAIL}`,
+        `${context.env.ADMIN_EMAIL}`,
       ].join("\n");
 
       const htmlBody = `
@@ -427,7 +427,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
           <table style="width:100%;border-collapse:collapse;margin:16px 0;">
             <tr><td style="padding:6px 12px;color:#888;width:180px;">Prepared by</td><td style="padding:6px 12px;color:#fff;font-weight:bold;">${ADMIN_FULL_NAME}</td></tr>
             <tr><td style="padding:6px 12px;color:#888;">Organisation</td><td style="padding:6px 12px;color:#fff;">Svart Security</td></tr>
-            <tr><td style="padding:6px 12px;color:#888;">Contact</td><td style="padding:6px 12px;color:#7c6aef;">${ADMIN_EMAIL}</td></tr>
+            <tr><td style="padding:6px 12px;color:#888;">Contact</td><td style="padding:6px 12px;color:#7c6aef;">${context.env.ADMIN_EMAIL}</td></tr>
             <tr><td style="padding:6px 12px;color:#888;">Security Email</td><td style="padding:6px 12px;color:#7c6aef;">${SECURITY_EMAIL}</td></tr>
             <tr><td style="padding:6px 12px;color:#888;">Date Prepared</td><td style="padding:6px 12px;color:#fff;">${escalationDate}</td></tr>
           </table>
@@ -466,7 +466,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
           </ol>
           <hr style="border:none;border-top:1px solid #333;margin:24px 0;">
           <p style="color:#f59e0b;font-size:0.85em;">This report has been reviewed and is being forwarded to the appropriate authorities. A PDF copy should be attached when submitting to any tip line or law enforcement portal.</p>
-          <p style="color:#888;margin-top:24px;font-size:0.85em;">${ADMIN_FULL_NAME}<br>Svart Security — Administrator<br>${ADMIN_EMAIL}</p>
+          <p style="color:#888;margin-top:24px;font-size:0.85em;">${ADMIN_FULL_NAME}<br>Svart Security — Administrator<br>${context.env.ADMIN_EMAIL}</p>
         </div>
       `;
 

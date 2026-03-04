@@ -1,4 +1,4 @@
-import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, ADMIN_SECRET } from "./_shared";
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse } from "./_shared";
 
 const CORS_HEADERS = makeCors("PUT, OPTIONS");
 const jsonResponse = makeJsonResponse(CORS_HEADERS);
@@ -26,7 +26,7 @@ export const onRequestOptions: PagesFunction<Env> = async () => optionsResponse(
 export const onRequestPut: PagesFunction<Env> = async (context) => {
   try {
     const auth = context.request.headers.get("Authorization") || "";
-    if (auth !== `Bearer ${ADMIN_SECRET}`) {
+    if (auth !== `Bearer ${context.env.ADMIN_SECRET}`) {
       return errorResponse("Unauthorized — admin only", 401);
     }
 

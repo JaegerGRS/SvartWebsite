@@ -1006,7 +1006,7 @@
             try {
                 const resp = await fetch('/api/guardian', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer svart-app-verify-2026' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'app-status', app: 'SvartWebsite', version: '1.0.0' })
                 });
                 const data = await resp.json();

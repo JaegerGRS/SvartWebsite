@@ -1,4 +1,4 @@
-import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, ADMIN_SECRET, APP_SECRET } from "./_shared";
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV } from "./_shared";
 
 // Same HMAC secret as the Rust backend - used to generate valid CB-XXXX-XXXX-XXXX numbers
 const ACTIVATION_SECRET = "CipherBaseAI-Activation-v1-Secret";
@@ -50,7 +50,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const auth = context.request.headers.get("Authorization") || "";
     const token = auth.replace("Bearer ", "").trim();
-    if (token !== ADMIN_SECRET) {
+    if (token !== context.env.ADMIN_SECRET) {
       return errorResponse("Unauthorized. Admin access only.", 401);
     }
 
@@ -94,7 +94,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const auth = context.request.headers.get("Authorization") || "";
     const token = auth.replace("Bearer ", "").trim();
-    if (token !== ADMIN_SECRET) {
+    if (token !== context.env.ADMIN_SECRET) {
       return errorResponse("Unauthorized. Admin access only.", 401);
     }
 
@@ -147,7 +147,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   try {
     const auth = context.request.headers.get("Authorization") || "";
     const token = auth.replace("Bearer ", "").trim();
-    if (token !== APP_SECRET && token !== ADMIN_SECRET) {
+    if (token !== context.env.APP_SECRET && token !== context.env.ADMIN_SECRET) {
       return errorResponse("Unauthorized. Valid app token required.", 401);
     }
 

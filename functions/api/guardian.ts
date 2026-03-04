@@ -30,15 +30,15 @@
  *   guardian:log                    → [reportId, ...] (report index)
  */
 
-import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, isAuthorized as _isAuthorized, LEA_KEY_HEX } from "./_shared";
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, isAuthorized as _isAuthorized } from "./_shared";
 
 const CORS_HEADERS = makeCors("GET, POST, PUT, DELETE, OPTIONS");
 const jsonResponse = makeJsonResponse(CORS_HEADERS);
 const errorResponse = makeErrorResponse(jsonResponse);
 
 // Guardian accepts admin, mod, guardian, and app tokens
-function isAuthorized(request: Request) {
-  return _isAuthorized(request, ["admin", "mod", "guardian", "app"]);
+function isAuthorized(request: Request, env: Env) {
+  return _isAuthorized(request, env, ["admin", "mod", "guardian", "app"]);
 }
 
 // ============================
@@ -46,16 +46,16 @@ function isAuthorized(request: Request) {
 // Encrypts raw IPs so they can be recovered for law enforcement.
 // Only admin can trigger decryption (for escalated reports with court orders).
 // ============================
-async function getLeaKey(): Promise<CryptoKey> {
+async function getLeaKey(env: Env): Promise<CryptoKey> {
   const keyBytes = new Uint8Array(32);
   for (let i = 0; i < 32; i++) {
-    keyBytes[i] = parseInt(LEA_KEY_HEX.substr(i * 2, 2), 16);
+    keyBytes[i] = parseInt(env.LEA_KEY_HEX.substr(i * 2, 2), 16);
   }
   return crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
 }
 
-async function encryptForLEA(plaintext: string): Promise<string> {
-  const key = await getLeaKey();
+async function encryptForLEA(plaintext: string, env: Env): Promise<string> {
+  const key = await getLeaKey(env);
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const data = new TextEncoder().encode(plaintext);
   const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, data);
@@ -65,8 +65,8 @@ async function encryptForLEA(plaintext: string): Promise<string> {
   return btoa(String.fromCharCode(...combined));
 }
 
-async function decryptForLEA(encrypted: string): Promise<string> {
-  const key = await getLeaKey();
+async function decryptForLEA(encrypted: string, env: Env): Promise<string> {
+  const key = await getLeaKey(env);
   const combined = new Uint8Array(atob(encrypted).split("").map(c => c.charCodeAt(0)));
   const iv = combined.slice(0, 12);
   const ciphertext = combined.slice(12);
@@ -546,7 +546,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       // This is the ONLY place a raw IP is stored — encrypted, never plaintext.
       // Admin can decrypt only when escalating a formal report to authorities.
       try {
-        const encryptedIP = await encryptForLEA(ip);
+        const encryptedIP = await encryptForLEA(ip, context.env);
         await context.env.USAGE_DATA.put(`guardian:enc:${netHash}`, encryptedIP, {
           expirationTtl: 60 * 60 * 24 * 365 * 2, // 2 years — matches data retention policy
         });
@@ -565,7 +565,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Returns all available law violation categories for reports
     // ───────────────────────────────────────────
     if (action === "get-law-categories") {
-      const { authorized, role } = isAuthorized(context.request);
+      const { authorized, role } = isAuthorized(context.request, context.env);
       if (!authorized || role !== "admin") {
         return errorResponse("Unauthorized. Admin only.", 401);
       }
@@ -577,7 +577,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Admin blocks a network hash (they only see the hash, never the IP)
     // ───────────────────────────────────────────
     if (action === "block-network") {
-      const { authorized, role } = isAuthorized(context.request);
+      const { authorized, role } = isAuthorized(context.request, context.env);
       if (!authorized || role !== "admin") {
         return errorResponse("Unauthorized. Admin only.", 401);
       }
@@ -605,7 +605,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // ADMIN: unblock-network
     // ───────────────────────────────────────────
     if (action === "unblock-network") {
-      const { authorized, role } = isAuthorized(context.request);
+      const { authorized, role } = isAuthorized(context.request, context.env);
       if (!authorized || role !== "admin") {
         return errorResponse("Unauthorized. Admin only.", 401);
       }
@@ -623,7 +623,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // ADMIN ONLY: block-url
     // ───────────────────────────────────────────
     if (action === "block-url") {
-      const { authorized, role } = isAuthorized(context.request);
+      const { authorized, role } = isAuthorized(context.request, context.env);
       if (!authorized || role !== "admin") {
         return errorResponse("Unauthorized. Admin only.", 401);
       }
@@ -649,7 +649,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // ADMIN: unblock-url
     // ───────────────────────────────────────────
     if (action === "unblock-url") {
-      const { authorized, role } = isAuthorized(context.request);
+      const { authorized, role } = isAuthorized(context.request, context.env);
       if (!authorized || role !== "admin") {
         return errorResponse("Unauthorized. Admin only.", 401);
       }
@@ -687,8 +687,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // READ-ONLY — zero KV writes.
     // ───────────────────────────────────────────
     if (action === "app-status") {
-      const { authorized } = isAuthorized(context.request);
-      if (!authorized) return errorResponse("Unauthorized. Valid app token required.", 401);
+      // Public read-only endpoint — no auth required.
+      // Returns Guardian stats, threat feed, version info for apps and website.
 
       const appName = (body.app || "").trim();
       const appVersion = (body.version || "").trim();
@@ -755,7 +755,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Stores directly in KV with guardian report format.
     // ───────────────────────────────────────────
     if (action === "app-report") {
-      const { authorized, role } = isAuthorized(context.request);
+      const { authorized, role } = isAuthorized(context.request, context.env);
       if (!authorized) return errorResponse("Unauthorized. Valid app token required.", 401);
 
       const app = (body.app || "Unknown").trim();
@@ -845,7 +845,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Requires admin token. Should only be used with a valid court order.
     // ───────────────────────────────────────────
     if (action === "decrypt-for-lea") {
-      const { authorized, role } = isAuthorized(context.request);
+      const { authorized, role } = isAuthorized(context.request, context.env);
       if (!authorized || role !== "admin") {
         return errorResponse("Unauthorized. Admin only — requires court order authorization.", 401);
       }
@@ -871,7 +871,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       }
 
       try {
-        const decryptedIP = await decryptForLEA(encrypted);
+        const decryptedIP = await decryptForLEA(encrypted, context.env);
 
         // Log this decryption in the audit trail (stored in guardian stats)
         let stats: any = {};
@@ -909,7 +909,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Admin sets the threat feed / security advisories that apps receive.
     // ───────────────────────────────────────────
     if (action === "set-feed") {
-      const { authorized, role } = isAuthorized(context.request);
+      const { authorized, role } = isAuthorized(context.request, context.env);
       if (!authorized || role !== "admin") {
         return errorResponse("Unauthorized. Admin only.", 401);
       }
@@ -960,7 +960,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Apps check this to know if updates are available.
     // ───────────────────────────────────────────
     if (action === "set-versions") {
-      const { authorized, role } = isAuthorized(context.request);
+      const { authorized, role } = isAuthorized(context.request, context.env);
       if (!authorized || role !== "admin") {
         return errorResponse("Unauthorized. Admin only.", 401);
       }
@@ -989,7 +989,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       return errorResponse("Server storage not configured.", 503);
     }
 
-    const { authorized, role } = isAuthorized(context.request);
+    const { authorized, role } = isAuthorized(context.request, context.env);
     if (!authorized || role !== "admin") {
       return errorResponse("Unauthorized. Admin access only.", 401);
     }

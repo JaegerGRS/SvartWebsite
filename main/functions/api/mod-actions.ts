@@ -1,4 +1,4 @@
-import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, ADMIN_EMAIL, isAuthorized } from "./_shared";
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, isAuthorized } from "./_shared";
 
 const CORS_HEADERS = makeCors("GET, POST, OPTIONS");
 const jsonResponse = makeJsonResponse(CORS_HEADERS);
@@ -13,7 +13,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return errorResponse("Server storage not configured.", 503);
     }
 
-    const { authorized, role } = isAuthorized(context.request);
+    const { authorized, role } = isAuthorized(context.request, context.env);
     if (!authorized) {
       return errorResponse("Unauthorized", 401);
     }
@@ -122,7 +122,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       return errorResponse("Server storage not configured.", 503);
     }
 
-    const { authorized, role } = isAuthorized(context.request);
+    const { authorized, role } = isAuthorized(context.request, context.env);
     if (!authorized) {
       return errorResponse("Unauthorized", 401);
     }

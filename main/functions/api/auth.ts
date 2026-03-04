@@ -183,8 +183,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     const account = JSON.parse(accountRaw);
 
     // Admin role management: admin can update any account's role via adminSecret
-    const ADMIN_API_SECRET = "hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR";
-    if (adminSecret === ADMIN_API_SECRET) {
+    if (context.env.ADMIN_SECRET && adminSecret === context.env.ADMIN_SECRET) {
       // Admin-only: allow role changes
       if (updates.role && ['user', 'mod', 'admin'].includes(updates.role)) {
         account.role = updates.role;
