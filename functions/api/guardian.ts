@@ -848,6 +848,32 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       if (log.length > 2000) log = log.slice(-2000);
       await context.env.USAGE_DATA.put("guardian:log", JSON.stringify(log));
 
+      // ── Auto-publish sanitized report to Community page ──
+      // Publishes a notice that a report was filed (no user IDs or sensitive data)
+      try {
+        const typeLabel = violationType.charAt(0).toUpperCase() + violationType.slice(1);
+        const communityPostId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        const communityPost = {
+          id: communityPostId,
+          title: `🛡️ [Guardian Report] ${typeLabel} violation reported`,
+          body: `A ${typeLabel.toLowerCase()} violation has been reported to the Network Guardian.\n\nType: ${typeLabel}\nApp: ${app}\nStatus: Under review\n\nThe Svart security team will review this report. If the threat is confirmed, protections will be deployed automatically to all users.\n\nNote: No personal information about the reporter or the reported party is shared publicly. All reports are handled confidentially.`,
+          category: "security",
+          author: "Network Guardian",
+          votes: 0,
+          replies: [],
+          createdAt: Date.now(),
+        };
+        await context.env.USAGE_DATA.put(`community:post:${communityPostId}`, JSON.stringify(communityPost));
+        let cidx: string[] = [];
+        try {
+          const raw = await context.env.USAGE_DATA.get("community:posts:index");
+          if (raw) cidx = JSON.parse(raw);
+        } catch {}
+        cidx.push(communityPostId);
+        if (cidx.length > 2000) cidx = cidx.slice(-2000);
+        await context.env.USAGE_DATA.put("community:posts:index", JSON.stringify(cidx));
+      } catch {}
+
       return jsonResponse({ success: true, id: reportId, message: "Report submitted to NetworkGuardian." });
     }
 
@@ -933,6 +959,37 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         lastUpdated: new Date().toISOString(),
       };
       await context.env.USAGE_DATA.put("guardian:feed", JSON.stringify(feed));
+
+      // ── Auto-publish new advisories to the Community page ──
+      // Each advisory becomes a 'security' post visible to all users
+      for (const adv of advisories) {
+        if (!adv.message) continue;
+        try {
+          const postId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+          const severity = (adv.severity || "info").toUpperCase();
+          const communityPost = {
+            id: postId,
+            title: `🛡️ [Guardian ${severity}] ${adv.message.slice(0, 100)}`,
+            body: `Security Advisory from Network Guardian\n\nSeverity: ${severity}\nDate: ${adv.date || new Date().toISOString()}\n\n${adv.message}\n\nThis advisory was published automatically by the Svart Network Guardian to keep all users informed of active threats and protections.`,
+            category: "security",
+            author: "Network Guardian",
+            votes: 0,
+            replies: [],
+            createdAt: Date.now(),
+          };
+          await context.env.USAGE_DATA.put(`community:post:${postId}`, JSON.stringify(communityPost));
+          // Add to community index
+          let idx: string[] = [];
+          try {
+            const raw = await context.env.USAGE_DATA.get("community:posts:index");
+            if (raw) idx = JSON.parse(raw);
+          } catch {}
+          idx.push(postId);
+          if (idx.length > 2000) idx = idx.slice(-2000);
+          await context.env.USAGE_DATA.put("community:posts:index", JSON.stringify(idx));
+        } catch {}
+      }
+
       return jsonResponse({ success: true, message: "Threat feed updated.", feed });
     }
 

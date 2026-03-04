@@ -236,9 +236,16 @@
                     <button class="btn btn-primary" id="guardianSaveNotes" style="padding:10px 20px;">Save Notes</button>
                     <button class="btn btn-primary" id="guardianMarkReviewed" style="padding:10px 20px;background:#22c55e;border-color:#22c55e;">&#10003; Mark Reviewed</button>
                     <button class="btn btn-primary" id="guardianGenPdf" style="padding:10px 20px;background:#3b82f6;border-color:#3b82f6;">&#128196; Generate PDF</button>
+                    <button class="btn btn-primary" id="guardianDecryptLEA" style="padding:10px 20px;background:#9333ea;border-color:#9333ea;">&#128274; Decrypt IP for LEA</button>
                     <button class="btn btn-primary" id="guardianEscalate" style="padding:10px 20px;background:#ef4444;border-color:#ef4444;">&#9888; Escalate to Authorities</button>
                     <button class="btn btn-secondary" id="guardianDismiss" style="padding:10px 20px;">Dismiss</button>
                     <button class="btn btn-secondary" id="guardianCloseModal" style="padding:10px 20px;margin-left:auto;">Close</button>
+                </div>
+                <!-- LEA Decryption Result -->
+                <div id="guardianLEAResult" style="display:none;margin-top:16px;padding:16px;background:rgba(147,51,234,0.1);border:2px solid #9333ea;border-radius:12px;">
+                    <h4 style="color:#9333ea;margin:0 0 8px;">&#128274; LEA Network Identification</h4>
+                    <div id="guardianLEAContent" style="font-family:monospace;font-size:0.9rem;color:#e0e0e0;"></div>
+                    <p style="color:#f59e0b;font-size:0.75rem;margin:12px 0 0;">This IP was recovered from encrypted storage under LEA authorization. Unauthorized disclosure is prohibited.</p>
                 </div>
             </div>
         </div>
@@ -505,7 +512,7 @@
                         '<div style="background:rgba(var(--primary-rgb),0.1);border:2px solid var(--primary);border-radius:10px;padding:16px;margin-bottom:16px;">' +
                         '<div style="color:var(--text-muted);font-size:0.8rem;margin-bottom:6px;">NEW SECRET KEY</div>' +
                         '<div style="color:var(--primary);font-family:monospace;font-size:1.3rem;letter-spacing:1px;cursor:pointer;" onclick="copyText(\'' + escAttr(data.newKey) + '\')" title="Click to copy">' + escHtml(data.newKey) + '</div></div>' +
-                        '<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:6px;">Old key ending in ****-' + escHtml(data.oldKeyLast4 || '????') + ' is now invalid.</p>' +
+                        '<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:6px;">Old key: ' + escHtml(data.oldKeyPreview || '????') + ' is now invalid.</p>' +
                         '<p style="color:#f59e0b;font-size:0.85rem;margin-bottom:16px;">&#9888; Send this key to the user securely. It will not be shown again.</p>' +
                         '<button class="btn btn-primary btn-full" onclick="this.closest(\'div[style]\').remove()">Done</button></div>';
                     document.body.appendChild(overlay);
@@ -605,6 +612,18 @@
                         '<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:16px;color:#f59e0b;font-size:0.9rem;">' +
                         escHtml(report.availableEvidence || 'Registration network hash (SHA-256, irreversible) and account creation date/time only. No IP addresses, browsing history, or other tracking data is available.') +
                         '</div>';
+                    // LEA data section (shown when report has been escalated and IP recovered)
+                    var leaDataHtml = '';
+                    if (report.leaData && report.leaData.networkId) {
+                        leaDataHtml = '<h3 style="color:#9333ea;margin:20px 0 8px;">&#128274; LEA Network Identification</h3>' +
+                            '<div style="background:rgba(147,51,234,0.08);border:2px solid #9333ea;border-radius:8px;padding:16px;">' +
+                            '<table style="width:100%;">' +
+                            '<tr><td style="padding:4px 8px;color:#888;">Network ID:</td><td style="padding:4px 8px;color:#fff;font-family:monospace;">' + escHtml(report.leaData.networkId) + '</td></tr>' +
+                            (report.leaData.decryptedIP ? '<tr><td style="padding:4px 8px;color:#888;">Recovered IP:</td><td style="padding:4px 8px;color:#ef4444;font-weight:bold;font-family:monospace;font-size:1.1em;">' + escHtml(report.leaData.decryptedIP) + '</td></tr>' : '') +
+                            (report.leaData.recoveredAt ? '<tr><td style="padding:4px 8px;color:#888;">Recovered At:</td><td style="padding:4px 8px;color:#fff;">' + new Date(report.leaData.recoveredAt).toLocaleString() + '</td></tr>' : '') +
+                            '</table>' +
+                            '<p style="color:#f59e0b;font-size:0.75rem;margin:8px 0 0;">IP recovered from AES-256-GCM encrypted storage for LEA purposes only.</p></div>';
+                    }
                     guardianDetailContent.innerHTML = '<table style="width:100%;border-collapse:collapse;">' +
                         '<tr><td style="padding:8px 12px;color:var(--text-muted);width:160px;">Report ID</td><td style="padding:8px 12px;color:var(--text-light);font-family:monospace;font-size:0.85rem;">' + escHtml(report.id) + '</td></tr>' +
                         '<tr><td style="padding:8px 12px;color:var(--text-muted);">Date Filed</td><td style="padding:8px 12px;color:var(--text-light);">' + new Date(report.date).toLocaleString() + '</td></tr>' +
@@ -617,6 +636,7 @@
                         '</table>' +
                         lawCatsHtml +
                         lawHtml +
+                        leaDataHtml +
                         evidenceHtml +
                         '<h3 style="color:var(--primary);margin:20px 0 8px;">Description</h3>' +
                         '<div style="background:rgba(var(--bg-dark-rgb),0.5);border:1px solid var(--border-color);border-radius:8px;padding:16px;white-space:pre-wrap;color:var(--text-light);font-size:0.9rem;">' + escHtml(report.description) + '</div>' +
@@ -723,15 +743,66 @@
 
         document.getElementById('guardianEscalate').addEventListener('click', async function() {
             if (!currentGuardianReport) return;
-            if (!confirm('\u26a0\ufe0f ESCALATE TO AUTHORITIES\n\nThis will:\n1. Mark the report as escalated\n2. Email the full report to ' + SECURITY_EMAIL + ' and ' + ADMIN_EMAIL + '\n3. Include ' + ADMIN_FULL_NAME + ' as the reporting party\n\nProceed?')) return;
+            if (!confirm('\u26a0\ufe0f ESCALATE TO AUTHORITIES\n\nThis will:\n1. Mark the report as escalated\n2. Generate a formal incident report with LEA network identification\n3. Attempt to recover encrypted IP for law enforcement\n4. Include ' + ADMIN_FULL_NAME + ' as the reporting party\n\nProceed?')) return;
             var btn = this; btn.disabled = true; btn.textContent = 'Escalating...';
             try {
-                await fetch('/api/guardian-reports', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken }, body: JSON.stringify({ reportId: currentGuardianReport.id, status: 'escalated', notes: guardianNotesEl.value, reviewerEmail: adminUser.email }) });
+                var resp = await fetch('/api/guardian-reports', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken }, body: JSON.stringify({ reportId: currentGuardianReport.id, status: 'escalated', notes: guardianNotesEl.value, reviewerEmail: adminUser.email }) });
+                var result = await resp.json();
                 guardianDetailModal.style.display = 'none'; loadGuardianReports();
                 guardianMsg.style.display = ''; guardianMsg.style.background = 'rgba(239,68,68,0.15)'; guardianMsg.style.color = '#ef4444';
-                guardianMsg.textContent = '\u26a0 Report escalated. Email sent to ' + SECURITY_EMAIL + '. Generate the PDF for tip line.';
+                var leaNote = (result.leaData && result.leaData.ipRecovered) ? ' IP recovered for LEA.' : ' No encrypted IP available.';
+                guardianMsg.textContent = '\u26a0 Report escalated.' + leaNote + ' Generate the PDF for tip line.';
             } catch (e) { guardianMsg.style.display = ''; guardianMsg.style.background = 'rgba(239,68,68,0.15)'; guardianMsg.style.color = '#ef4444'; guardianMsg.textContent = 'Failed to escalate.'; }
             btn.disabled = false; btn.innerHTML = '&#9888; Escalate to Authorities';
+        });
+
+        // ── Decrypt IP for LEA ──
+        document.getElementById('guardianDecryptLEA').addEventListener('click', async function() {
+            if (!currentGuardianReport) return;
+            var caseRef = prompt('Enter a case reference number for the audit trail (required):');
+            if (!caseRef) return;
+            if (!confirm('\u26a0\ufe0f DECRYPT NETWORK IP\n\nThis will recover the real IP address from encrypted storage.\nThis action is logged in the audit trail.\n\nCase Reference: ' + caseRef + '\n\nProceed?')) return;
+            var btn = this; btn.disabled = true; btn.textContent = 'Decrypting...';
+            var leaResultDiv = document.getElementById('guardianLEAResult');
+            var leaContentDiv = document.getElementById('guardianLEAContent');
+            try {
+                // Find the network ID from the report details or try via userId
+                var networkId = '';
+                if (currentGuardianReport.leaData && currentGuardianReport.leaData.networkId) {
+                    networkId = currentGuardianReport.leaData.networkId;
+                }
+                if (!networkId && currentGuardianReport.userId) {
+                    // Try to get network info from guardian
+                    try {
+                        var infoResp = await fetch('/api/guardian?view=network&id=' + encodeURIComponent(currentGuardianReport.userId), { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                        var info = await infoResp.json();
+                        if (info.networkId) networkId = info.networkId;
+                    } catch {}
+                }
+                if (!networkId) {
+                    leaContentDiv.innerHTML = '<span style="color:#ef4444;">No network ID found for this report subject. The IP cannot be recovered.</span>';
+                    leaResultDiv.style.display = '';
+                    btn.disabled = false; btn.innerHTML = '&#128274; Decrypt IP for LEA';
+                    return;
+                }
+                var resp = await fetch('/api/guardian', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken }, body: JSON.stringify({ action: 'decrypt-for-lea', networkId: networkId, caseReference: caseRef, authorizedBy: adminUser.email || 'Admin' }) });
+                var result = await resp.json();
+                if (result.success && result.decryptedIP) {
+                    leaContentDiv.innerHTML = '<table style="width:100%;">' +
+                        '<tr><td style="padding:4px 8px;color:#888;">Network ID:</td><td style="padding:4px 8px;color:#fff;">' + escHtml(result.networkId) + '</td></tr>' +
+                        '<tr><td style="padding:4px 8px;color:#888;">Recovered IP:</td><td style="padding:4px 8px;color:#ef4444;font-weight:bold;font-size:1.1em;">' + escHtml(result.decryptedIP) + '</td></tr>' +
+                        '<tr><td style="padding:4px 8px;color:#888;">Case Reference:</td><td style="padding:4px 8px;color:#fff;">' + escHtml(result.caseReference) + '</td></tr>' +
+                        '<tr><td style="padding:4px 8px;color:#888;">Decrypted At:</td><td style="padding:4px 8px;color:#fff;">' + new Date(result.decryptedAt).toLocaleString() + '</td></tr>' +
+                        '</table>';
+                } else {
+                    leaContentDiv.innerHTML = '<span style="color:#f59e0b;">' + escHtml(result.error || 'No encrypted IP found for this network.') + '</span>';
+                }
+                leaResultDiv.style.display = '';
+            } catch (e) {
+                leaContentDiv.innerHTML = '<span style="color:#ef4444;">Decryption request failed.</span>';
+                leaResultDiv.style.display = '';
+            }
+            btn.disabled = false; btn.innerHTML = '&#128274; Decrypt IP for LEA';
         });
 
         // ===== Registration Log =====

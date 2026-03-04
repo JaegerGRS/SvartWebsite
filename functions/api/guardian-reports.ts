@@ -191,6 +191,31 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (log.length > 2000) log = log.slice(-2000);
     await context.env.USAGE_DATA.put("guardian:log", JSON.stringify(log));
 
+    // ── Auto-publish sanitized report notice to Community page ──
+    try {
+      const typeLabel = violationType.charAt(0).toUpperCase() + violationType.slice(1);
+      const communityPostId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      const communityPost = {
+        id: communityPostId,
+        title: `🛡️ [Guardian Report] ${typeLabel} violation reported`,
+        body: `A ${typeLabel.toLowerCase()} violation has been reported to the Network Guardian.\n\nType: ${typeLabel}\nApp: ${app || "Svart Security"}\nStatus: Under review\n\nThe Svart security team will review this report. If the threat is confirmed, protections will be deployed automatically to all users.\n\nNote: No personal information about the reporter or the reported party is shared publicly. All reports are handled confidentially.`,
+        category: "security",
+        author: "Network Guardian",
+        votes: 0,
+        replies: [],
+        createdAt: Date.now(),
+      };
+      await context.env.USAGE_DATA.put(`community:post:${communityPostId}`, JSON.stringify(communityPost));
+      let cidx: string[] = [];
+      try {
+        const raw = await context.env.USAGE_DATA.get("community:posts:index");
+        if (raw) cidx = JSON.parse(raw);
+      } catch {}
+      cidx.push(communityPostId);
+      if (cidx.length > 2000) cidx = cidx.slice(-2000);
+      await context.env.USAGE_DATA.put("community:posts:index", JSON.stringify(cidx));
+    } catch {}
+
     // Report stored in KV — admin reviews from Guardian Reports panel
     // (MailChannels email removed — service discontinued 2024)
 

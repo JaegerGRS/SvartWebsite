@@ -5,11 +5,24 @@ interface Env {
   USAGE_DATA: KVNamespace;
 }
 
+const APP_SECRET = "svart-app-verify-2026";
+const GUARDIAN_SECRET = "svart-guardian-2026";
+const ADMIN_SECRET = "hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR";
+
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
+
+function isSystemAuthorized(request: Request): { authorized: boolean; role: string } {
+  const auth = request.headers.get("Authorization") || "";
+  const token = auth.replace("Bearer ", "");
+  if (token === ADMIN_SECRET) return { authorized: true, role: "admin" };
+  if (token === GUARDIAN_SECRET) return { authorized: true, role: "guardian" };
+  if (token === APP_SECRET) return { authorized: true, role: "app" };
+  return { authorized: false, role: "" };
+}
 
 function jsonResponse(data: any, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -45,7 +58,7 @@ interface CommunityPost {
   id: string;
   title: string;
   body: string;
-  category: "bug" | "feature" | "discussion" | "question" | "announcement";
+  category: "bug" | "feature" | "discussion" | "question" | "announcement" | "security";
   author: string;
   votes: number;
   replies: Reply[];
@@ -184,19 +197,32 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const postBody = sanitize(body.body || "", 5000);
     const category = body.category || "discussion";
 
-    if (!username) return errorResponse("You must be logged in to post.");
+    // System (guardian/admin) auto-posts use "Network Guardian" as author
+    const { authorized: sysAuth, role: sysRole } = isSystemAuthorized(context.request);
+    const effectiveUsername = (sysAuth && category === "security") ? "Network Guardian" : username;
+
+    if (!effectiveUsername) return errorResponse("You must be logged in to post.");
     if (title.length < 3) return errorResponse("Title must be at least 3 characters.");
     if (postBody.length < 10) return errorResponse("Details must be at least 10 characters.");
 
-    const validCategories = ["bug", "feature", "discussion", "question"];
+    const validCategories = ["bug", "feature", "discussion", "question", "security"];
+    // Only system tokens (guardian/admin) can post in the 'security' category
+    if (category === "security") {
+      const { authorized } = isSystemAuthorized(context.request);
+      if (!authorized) {
+        return errorResponse("Only the Guardian system can post security bulletins.");
+      }
+    }
     if (!validCategories.includes(category)) {
       return errorResponse("Invalid category.");
     }
 
-    // Rate limit
-    const allowed = await checkPostRateLimit(context.env, username);
-    if (!allowed) {
-      return errorResponse("Rate limit reached. Please wait before posting again.");
+    // Rate limit — skip for system auto-posts
+    if (!sysAuth) {
+      const allowed = await checkPostRateLimit(context.env, effectiveUsername);
+      if (!allowed) {
+        return errorResponse("Rate limit reached. Please wait before posting again.");
+      }
     }
 
     const newPost: CommunityPost = {
@@ -204,7 +230,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       title,
       body: postBody,
       category,
-      author: username,
+      author: effectiveUsername,
       votes: 0,
       replies: [],
       createdAt: Date.now(),

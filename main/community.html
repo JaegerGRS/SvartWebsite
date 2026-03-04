@@ -187,6 +187,7 @@
         .tag-discussion { background: rgba(99,102,241,0.15); color: #818cf8; }
         .tag-question { background: rgba(234,179,8,0.15); color: #facc15; }
         .tag-announcement { background: rgba(168,85,247,0.15); color: #c084fc; }
+        .tag-security { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
         .post-meta .reply-count {
             display: flex;
             align-items: center;
@@ -507,6 +508,22 @@
         <button class="filter-btn" data-filter="discussion">&#128172; Discussion <span class="filter-count" id="countDiscussion">0</span></button>
         <button class="filter-btn" data-filter="question">&#10067; Questions <span class="filter-count" id="countQuestion">0</span></button>
         <button class="filter-btn" data-filter="announcement">&#128227; Announcements <span class="filter-count" id="countAnnouncement">0</span></button>
+        <button class="filter-btn" data-filter="security">&#128737; Security <span class="filter-count" id="countSecurity">0</span></button>
+    </div>
+
+    <!-- Guardian Security Banner -->
+    <div style="max-width:900px;margin:0 auto 20px;padding:0 20px">
+      <div style="background:linear-gradient(135deg,rgba(239,68,68,0.08),rgba(147,51,234,0.08));border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:18px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <span style="font-size:28px">🛡️</span>
+        <div style="flex:1;min-width:200px">
+          <div style="font-weight:700;color:var(--text-light);font-size:1rem">Network Guardian — Security Feed</div>
+          <div style="color:var(--text-muted);font-size:0.85rem;margin-top:2px">Threat advisories, blocked sites, and violation reports are published here automatically to protect all users.</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <span id="guardianLiveStatus" style="padding:5px 14px;border-radius:16px;font-size:0.8rem;font-weight:600;background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.25)">● Guardian Active</span>
+          <span id="guardianBlockCount" style="padding:5px 14px;border-radius:16px;font-size:0.8rem;font-weight:600;background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.25);display:none">0 sites blocked</span>
+        </div>
+      </div>
     </div>
 
     <!-- Toolbar -->
@@ -655,7 +672,7 @@
         }
 
         function updateFilterCounts() {
-            const counts = { all: allPosts.length, bug: 0, feature: 0, discussion: 0, question: 0, announcement: 0 };
+            const counts = { all: allPosts.length, bug: 0, feature: 0, discussion: 0, question: 0, announcement: 0, security: 0 };
             allPosts.forEach(p => { if (counts[p.category] !== undefined) counts[p.category]++; });
             document.getElementById('countAll').textContent = counts.all;
             document.getElementById('countBug').textContent = counts.bug;
@@ -663,6 +680,7 @@
             document.getElementById('countDiscussion').textContent = counts.discussion;
             document.getElementById('countQuestion').textContent = counts.question;
             document.getElementById('countAnnouncement').textContent = counts.announcement;
+            document.getElementById('countSecurity').textContent = counts.security;
         }
 
         function getFilteredPosts() {
@@ -679,7 +697,7 @@
                 return;
             }
 
-            const tagLabels = { bug: 'Bug Report', feature: 'Feature Request', discussion: 'Discussion', question: 'Question', announcement: 'Announcement' };
+            const tagLabels = { bug: 'Bug Report', feature: 'Feature Request', discussion: 'Discussion', question: 'Question', announcement: 'Announcement', security: '\uD83D\uDEE1 Security' };
             const userVotes = JSON.parse(localStorage.getItem('community_votes') || '{}');
 
             postListEl.innerHTML = posts.map(p => {
@@ -733,7 +751,7 @@
             const idx = allPosts.findIndex(p => p.id === id);
             if (idx >= 0) allPosts[idx] = post;
 
-            const tagLabels = { bug: 'Bug Report', feature: 'Feature Request', discussion: 'Discussion', question: 'Question', announcement: 'Announcement' };
+            const tagLabels = { bug: 'Bug Report', feature: 'Feature Request', discussion: 'Discussion', question: 'Question', announcement: 'Announcement', security: '\uD83D\uDEE1 Security' };
             const tag = post.category || 'discussion';
             const replies = post.replies || [];
 
@@ -981,8 +999,50 @@
             return months + 'mo ago';
         }
 
+        // ========== Guardian Live Status ==========
+        async function fetchGuardianStatus() {
+            const statusEl = document.getElementById('guardianLiveStatus');
+            const blockEl = document.getElementById('guardianBlockCount');
+            try {
+                const resp = await fetch('/api/guardian', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer svart-app-verify-2026' },
+                    body: JSON.stringify({ action: 'app-status', app: 'SvartWebsite', version: '1.0.0' })
+                });
+                const data = await resp.json();
+                if (data.success && data.guardian) {
+                    const g = data.guardian;
+                    if (statusEl) {
+                        if (g.status === 'active') {
+                            statusEl.textContent = '● Guardian Active';
+                            statusEl.style.background = 'rgba(34,197,94,0.15)';
+                            statusEl.style.color = '#4ade80';
+                            statusEl.style.borderColor = 'rgba(34,197,94,0.25)';
+                        } else {
+                            statusEl.textContent = '○ Guardian Offline';
+                            statusEl.style.background = 'rgba(239,68,68,0.15)';
+                            statusEl.style.color = '#f87171';
+                            statusEl.style.borderColor = 'rgba(239,68,68,0.25)';
+                        }
+                    }
+                    if (blockEl && g.activeBlocks > 0) {
+                        blockEl.textContent = g.activeBlocks + ' site' + (g.activeBlocks !== 1 ? 's' : '') + ' blocked';
+                        blockEl.style.display = 'inline-block';
+                    }
+                }
+            } catch(e) {
+                if (statusEl) {
+                    statusEl.textContent = '○ Checking...';
+                    statusEl.style.background = 'rgba(245,158,11,0.15)';
+                    statusEl.style.color = '#f59e0b';
+                    statusEl.style.borderColor = 'rgba(245,158,11,0.25)';
+                }
+            }
+        }
+
         // ========== Init ==========
         loadPosts();
+        fetchGuardianStatus();
     })();
     </script>
 </body>

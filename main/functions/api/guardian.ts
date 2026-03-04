@@ -20,10 +20,14 @@
  * 
  * KV Keys used:
  *   guardian:nethash:{hash}         → { accounts: [email], firstSeen }
+ *   guardian:enc:{hash}             → AES-256-GCM encrypted IP (recoverable for LEA)
  *   guardian:blocked:net:{hash}     → { reason, blockedAt, blockedBy }
  *   guardian:blocked:url:{urlhash}  → { url, reason, blockedAt, blockedBy }
  *   guardian:blocked:list           → [{ type: 'net'|'url', hash, reason, blockedAt }]
- *   guardian:stats                  → { totalBlocked, totalFlagged, totalRegistrations }
+ *   guardian:stats                  → { totalBlocked, totalFlagged, totalRegistrations, leaDecryptions }
+ *   guardian:feed                   → { advisories: [...], lastUpdated }
+ *   guardian:versions               → { AppName: { latest, minRequired, downloadUrl } }
+ *   guardian:log                    → [reportId, ...] (report index)
  */
 
 interface Env {
@@ -33,6 +37,15 @@ interface Env {
 const ADMIN_SECRET = "hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR";
 const MOD_SECRET = "4Vw15CeU_bal14uMBHkEZjE1KhoXr5TbMSP9CBqmTAD6PBRMfUDF-mx-qeAR9ErH";
 const GUARDIAN_SECRET = "svart-guardian-2026";
+const APP_SECRET = "svart-app-verify-2026";
+
+// ============================
+// LEA ENCRYPTION KEY (AES-256-GCM)
+// Used to encrypt raw IPs so law enforcement can recover them via court order.
+// The net_* hash is irreversible (for daily ops). The encrypted IP is decryptable
+// by admin only, for formal law enforcement reports.
+// ============================
+const LEA_KEY_HEX = "c7a3f1e09b2d4c6a8f5e1d3b7a9c0e2f4d6b8a1c3e5f7092b4d6a8c0e2f4a6b8";
 
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -61,7 +74,41 @@ function isAuthorized(request: Request): { authorized: boolean; role: string } {
   if (token === ADMIN_SECRET) return { authorized: true, role: "admin" };
   if (token === MOD_SECRET) return { authorized: true, role: "mod" };
   if (token === GUARDIAN_SECRET) return { authorized: true, role: "guardian" };
+  if (token === APP_SECRET) return { authorized: true, role: "app" };
   return { authorized: false, role: "" };
+}
+
+// ============================
+// LEA ENCRYPTION — AES-256-GCM
+// Encrypts raw IPs so they can be recovered for law enforcement.
+// Only admin can trigger decryption (for escalated reports with court orders).
+// ============================
+async function getLeaKey(): Promise<CryptoKey> {
+  const keyBytes = new Uint8Array(32);
+  for (let i = 0; i < 32; i++) {
+    keyBytes[i] = parseInt(LEA_KEY_HEX.substr(i * 2, 2), 16);
+  }
+  return crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+}
+
+async function encryptForLEA(plaintext: string): Promise<string> {
+  const key = await getLeaKey();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const data = new TextEncoder().encode(plaintext);
+  const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, data);
+  const combined = new Uint8Array(iv.length + new Uint8Array(ciphertext).length);
+  combined.set(iv);
+  combined.set(new Uint8Array(ciphertext), iv.length);
+  return btoa(String.fromCharCode(...combined));
+}
+
+async function decryptForLEA(encrypted: string): Promise<string> {
+  const key = await getLeaKey();
+  const combined = new Uint8Array(atob(encrypted).split("").map(c => c.charCodeAt(0)));
+  const iv = combined.slice(0, 12);
+  const ciphertext = combined.slice(12);
+  const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
+  return new TextDecoder().decode(plaintext);
 }
 
 // ============================
@@ -534,6 +581,18 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
       await context.env.USAGE_DATA.put(`guardian:nethash:${netHash}`, JSON.stringify(netData));
 
+      // Encrypt the raw IP for law enforcement recovery (AES-256-GCM)
+      // This is the ONLY place a raw IP is stored — encrypted, never plaintext.
+      // Admin can decrypt only when escalating a formal report to authorities.
+      try {
+        const encryptedIP = await encryptForLEA(ip);
+        await context.env.USAGE_DATA.put(`guardian:enc:${netHash}`, encryptedIP, {
+          expirationTtl: 60 * 60 * 24 * 365 * 2, // 2 years — matches data retention policy
+        });
+      } catch (e) {
+        // Encryption failure should not block registration
+      }
+
       // Update stats
       await updateStats(context.env, "registration");
 
@@ -658,6 +717,296 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         return jsonResponse({ blocked: true, reason: blocked.reason, blockedAt: blocked.blockedAt });
       }
       return jsonResponse({ blocked: false });
+    }
+
+    // ───────────────────────────────────────────
+    // APP: app-status
+    // Called by all Svart desktop apps on startup / periodically.
+    // Returns Guardian status, threat feed, version info, security advisories.
+    // READ-ONLY — zero KV writes.
+    // ───────────────────────────────────────────
+    if (action === "app-status") {
+      const { authorized } = isAuthorized(context.request);
+      if (!authorized) return errorResponse("Unauthorized. Valid app token required.", 401);
+
+      const appName = (body.app || "").trim();
+      const appVersion = (body.version || "").trim();
+
+      // Read guardian stats
+      let stats: any = { totalBlocked: 0, totalRegistrations: 0 };
+      try {
+        const raw = await context.env.USAGE_DATA.get("guardian:stats");
+        if (raw) stats = JSON.parse(raw);
+      } catch {}
+
+      // Read block list count
+      let activeBlocks = 0;
+      try {
+        const raw = await context.env.USAGE_DATA.get("guardian:blocked:list");
+        if (raw) activeBlocks = JSON.parse(raw).length;
+      } catch {}
+
+      // Read threat feed (admin-set advisories)
+      let feed: any = { advisories: [], lastUpdated: null };
+      try {
+        const raw = await context.env.USAGE_DATA.get("guardian:feed");
+        if (raw) feed = JSON.parse(raw);
+      } catch {}
+
+      // Read version manifest
+      let versions: any = {};
+      let updateAvailable = false;
+      let latestVersion = appVersion;
+      try {
+        const raw = await context.env.USAGE_DATA.get("guardian:versions");
+        if (raw) {
+          versions = JSON.parse(raw);
+          if (appName && versions[appName]) {
+            latestVersion = versions[appName].latest || appVersion;
+            updateAvailable = latestVersion !== appVersion && appVersion !== "";
+          }
+        }
+      } catch {}
+
+      return jsonResponse({
+        success: true,
+        guardian: {
+          status: "active",
+          activeBlocks,
+          totalRegistrations: stats.totalRegistrations || 0,
+          lastUpdated: stats.lastUpdated || null,
+        },
+        feed: {
+          advisories: feed.advisories || [],
+          lastUpdated: feed.lastUpdated || null,
+        },
+        update: {
+          available: updateAvailable,
+          latest: latestVersion,
+          downloadUrl: versions[appName]?.downloadUrl || null,
+        },
+      });
+    }
+
+    // ───────────────────────────────────────────
+    // APP: app-report
+    // Convenience endpoint for apps to submit violation reports.
+    // Stores directly in KV with guardian report format.
+    // ───────────────────────────────────────────
+    if (action === "app-report") {
+      const { authorized, role } = isAuthorized(context.request);
+      if (!authorized) return errorResponse("Unauthorized. Valid app token required.", 401);
+
+      const app = (body.app || "Unknown").trim();
+      const userId = (body.userId || "").trim();
+      const violationType = (body.violationType || "Other").trim();
+      const description = (body.description || "").trim();
+      const details = body.details || null;
+      const lawCategoryIds: string[] = Array.isArray(body.lawCategoryIds)
+        ? body.lawCategoryIds.filter((id: string) => typeof id === "string" && LAW_CATEGORIES[id])
+        : [];
+
+      if (!description) return errorResponse("Description is required", 400);
+
+      const lawReferences = lawCategoryIds.map((id: string) => {
+        const cat = LAW_CATEGORIES[id];
+        return { id: cat.id, name: cat.name, jurisdiction: cat.jurisdiction, statute: cat.statute, evidenceNote: cat.evidenceNote };
+      });
+
+      const reportId = `guardian:${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const report = {
+        id: reportId,
+        app,
+        userId,
+        submitterEmail: "",
+        submitterRole: role,
+        violationType,
+        lawCategoryIds,
+        lawReferences,
+        description,
+        details,
+        date: new Date().toISOString(),
+        status: "pending",
+        reviewedBy: null as string | null,
+        reviewedAt: null as string | null,
+        notes: "" as string,
+        escalatedAt: null as string | null,
+        availableEvidence: "Registration network hash (SHA-256, irreversible), AES-256-GCM encrypted IP (recoverable by admin for LEA), and account creation date/time.",
+      };
+
+      await context.env.USAGE_DATA.put(reportId, JSON.stringify(report), {
+        expirationTtl: 60 * 60 * 24 * 365,
+      });
+
+      // Append to report log
+      let log: string[] = [];
+      try {
+        const existing = await context.env.USAGE_DATA.get("guardian:log");
+        if (existing) log = JSON.parse(existing);
+      } catch {}
+      log.push(reportId);
+      if (log.length > 2000) log = log.slice(-2000);
+      await context.env.USAGE_DATA.put("guardian:log", JSON.stringify(log));
+
+      // ── Auto-publish sanitized report to Community page ──
+      // Publishes a notice that a report was filed (no user IDs or sensitive data)
+      try {
+        const typeLabel = violationType.charAt(0).toUpperCase() + violationType.slice(1);
+        const communityPostId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        const communityPost = {
+          id: communityPostId,
+          title: `🛡️ [Guardian Report] ${typeLabel} violation reported`,
+          body: `A ${typeLabel.toLowerCase()} violation has been reported to the Network Guardian.\n\nType: ${typeLabel}\nApp: ${app}\nStatus: Under review\n\nThe Svart security team will review this report. If the threat is confirmed, protections will be deployed automatically to all users.\n\nNote: No personal information about the reporter or the reported party is shared publicly. All reports are handled confidentially.`,
+          category: "security",
+          author: "Network Guardian",
+          votes: 0,
+          replies: [],
+          createdAt: Date.now(),
+        };
+        await context.env.USAGE_DATA.put(`community:post:${communityPostId}`, JSON.stringify(communityPost));
+        let cidx: string[] = [];
+        try {
+          const raw = await context.env.USAGE_DATA.get("community:posts:index");
+          if (raw) cidx = JSON.parse(raw);
+        } catch {}
+        cidx.push(communityPostId);
+        if (cidx.length > 2000) cidx = cidx.slice(-2000);
+        await context.env.USAGE_DATA.put("community:posts:index", JSON.stringify(cidx));
+      } catch {}
+
+      return jsonResponse({ success: true, id: reportId, message: "Report submitted to NetworkGuardian." });
+    }
+
+    // ───────────────────────────────────────────
+    // ADMIN ONLY: decrypt-for-lea
+    // Decrypts a network hash's encrypted IP for formal law enforcement reports.
+    // This is the ONLY way to recover a real IP address from the system.
+    // Requires admin token. Should only be used with a valid court order.
+    // ───────────────────────────────────────────
+    if (action === "decrypt-for-lea") {
+      const { authorized, role } = isAuthorized(context.request);
+      if (!authorized || role !== "admin") {
+        return errorResponse("Unauthorized. Admin only — requires court order authorization.", 401);
+      }
+
+      const networkId = (body.networkId || "").trim();
+      const caseReference = (body.caseReference || "").trim();
+      const authorizedBy = (body.authorizedBy || "").trim();
+
+      if (!networkId || !networkId.startsWith("net_")) {
+        return errorResponse("Invalid network ID. Must start with net_", 400);
+      }
+      if (!caseReference) {
+        return errorResponse("Case reference is required for audit trail.", 400);
+      }
+
+      // Retrieve encrypted IP
+      const encrypted = await context.env.USAGE_DATA.get(`guardian:enc:${networkId}`);
+      if (!encrypted) {
+        return jsonResponse({
+          success: false,
+          error: "No encrypted IP found for this network hash. The record may have expired or the registration predates LEA encryption.",
+        }, 404);
+      }
+
+      try {
+        const decryptedIP = await decryptForLEA(encrypted);
+
+        // Log this decryption in the audit trail (stored in guardian stats)
+        let stats: any = {};
+        try {
+          const raw = await context.env.USAGE_DATA.get("guardian:stats");
+          if (raw) stats = JSON.parse(raw);
+        } catch {}
+        if (!stats.leaDecryptions) stats.leaDecryptions = [];
+        stats.leaDecryptions.push({
+          networkId,
+          caseReference,
+          authorizedBy,
+          decryptedAt: new Date().toISOString(),
+        });
+        // Cap audit log
+        if (stats.leaDecryptions.length > 500) stats.leaDecryptions = stats.leaDecryptions.slice(-500);
+        await context.env.USAGE_DATA.put("guardian:stats", JSON.stringify(stats));
+
+        return jsonResponse({
+          success: true,
+          networkId,
+          decryptedIP,
+          caseReference,
+          authorizedBy,
+          decryptedAt: new Date().toISOString(),
+          warning: "This IP was decrypted under LEA authorization. This action is logged in the audit trail.",
+        });
+      } catch (err: any) {
+        return errorResponse("Decryption failed — data may be corrupted: " + (err.message || ""), 500);
+      }
+    }
+
+    // ───────────────────────────────────────────
+    // ADMIN: set-feed
+    // Admin sets the threat feed / security advisories that apps receive.
+    // ───────────────────────────────────────────
+    if (action === "set-feed") {
+      const { authorized, role } = isAuthorized(context.request);
+      if (!authorized || role !== "admin") {
+        return errorResponse("Unauthorized. Admin only.", 401);
+      }
+
+      const advisories = Array.isArray(body.advisories) ? body.advisories : [];
+      const feed = {
+        advisories: advisories.slice(0, 20), // Max 20 advisories
+        lastUpdated: new Date().toISOString(),
+      };
+      await context.env.USAGE_DATA.put("guardian:feed", JSON.stringify(feed));
+
+      // ── Auto-publish new advisories to the Community page ──
+      // Each advisory becomes a 'security' post visible to all users
+      for (const adv of advisories) {
+        if (!adv.message) continue;
+        try {
+          const postId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+          const severity = (adv.severity || "info").toUpperCase();
+          const communityPost = {
+            id: postId,
+            title: `🛡️ [Guardian ${severity}] ${adv.message.slice(0, 100)}`,
+            body: `Security Advisory from Network Guardian\n\nSeverity: ${severity}\nDate: ${adv.date || new Date().toISOString()}\n\n${adv.message}\n\nThis advisory was published automatically by the Svart Network Guardian to keep all users informed of active threats and protections.`,
+            category: "security",
+            author: "Network Guardian",
+            votes: 0,
+            replies: [],
+            createdAt: Date.now(),
+          };
+          await context.env.USAGE_DATA.put(`community:post:${postId}`, JSON.stringify(communityPost));
+          // Add to community index
+          let idx: string[] = [];
+          try {
+            const raw = await context.env.USAGE_DATA.get("community:posts:index");
+            if (raw) idx = JSON.parse(raw);
+          } catch {}
+          idx.push(postId);
+          if (idx.length > 2000) idx = idx.slice(-2000);
+          await context.env.USAGE_DATA.put("community:posts:index", JSON.stringify(idx));
+        } catch {}
+      }
+
+      return jsonResponse({ success: true, message: "Threat feed updated.", feed });
+    }
+
+    // ───────────────────────────────────────────
+    // ADMIN: set-versions
+    // Admin sets the version manifest for all apps.
+    // Apps check this to know if updates are available.
+    // ───────────────────────────────────────────
+    if (action === "set-versions") {
+      const { authorized, role } = isAuthorized(context.request);
+      if (!authorized || role !== "admin") {
+        return errorResponse("Unauthorized. Admin only.", 401);
+      }
+
+      const versions = body.versions || {};
+      await context.env.USAGE_DATA.put("guardian:versions", JSON.stringify(versions));
+      return jsonResponse({ success: true, message: "Version manifest updated.", versions });
     }
 
     return errorResponse("Unknown action: " + action, 400);

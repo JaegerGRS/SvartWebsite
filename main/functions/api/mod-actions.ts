@@ -97,46 +97,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       if (log.length > 500) log = log.slice(-500);
       await context.env.USAGE_DATA.put("notif:log", JSON.stringify(log));
 
-      // Also send email to admin via MailChannels
-      try {
-        await fetch("https://api.mailchannels.net/tx/v1/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            personalizations: [
-              { to: [{ email: ADMIN_EMAIL, name: "Svart Admin" }] },
-            ],
-            from: {
-              email: "noreply@svartsecurity.org",
-              name: "Svart Mod Notification",
-            },
-            subject: `[MOD REPORT] ${subject}`,
-            content: [
-              {
-                type: "text/plain",
-                value: [
-                  "Mod Report / Notification",
-                  "=========================",
-                  "",
-                  `From:     ${modEmail} (${role})`,
-                  `Subject:  ${subject}`,
-                  `Date:     ${notification.date}`,
-                  "",
-                  "Message:",
-                  "--------",
-                  message,
-                  "",
-                  "---",
-                  "Svart Security Mod System",
-                ].join("\n"),
-              },
-            ],
-          }),
-        });
-      } catch (emailErr) {
-        // Non-blocking — notification is already saved to KV
-        console.error("Failed to email admin:", emailErr);
-      }
+      // Notification stored in KV — admin views from mod panel
+      // (MailChannels email removed — service discontinued 2024)
 
       return jsonResponse({ success: true, id: notifId, message: "Notification sent to admin." });
     }

@@ -1,26 +1,19 @@
 /**
- * /api/app-status — Desktop app heartbeat & status endpoint
+ * /api/app-status — Desktop app status endpoint (read-only, no KV writes)
  *
- * Desktop apps (SvartAI, SvartBrowser, SvartPass, etc.) call this
- * endpoint to register their presence and report service status.
- * The website can then show which apps are connected for a given user.
+ * Cloudflare Free Tier friendly: KV reads only, zero writes.
+ * Desktop apps manage their own service status locally.
+ * This endpoint just validates the key and returns account info.
  *
- * POST /api/app-status
- *   Headers: Authorization: Bearer <APP_SECRET>
- *   Body: { email, activationKey, app, version, services }
- *   Returns: { success, registered, serverTime, connectedApps[] }
+ * POST /api/app-status  — Validate key & return account status (0 writes)
+ *   Body: { activationKey, app?, version? }
  *
- * GET /api/app-status?email=<email>&key=<activationKey>
- *   Headers: Authorization: Bearer <APP_SECRET>
- *   Returns: { success, apps[] } — list of recently connected apps for this account
+ * GET /api/app-status?key=<key>  — Check if key is valid (0 writes)
  */
 
 interface Env {
   USAGE_DATA: KVNamespace;
 }
-
-const APP_SECRET = "svart-app-verify-2026";
-const ADMIN_SECRET = "hTBtS8xGAazH878gDLQDVWY7Xt0WsbqrNQN__FQ0cnzl_obEySzvACHcMI0v-3PR";
 
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -39,60 +32,60 @@ function errorResponse(error: string, status = 500): Response {
   return jsonResponse({ success: false, error }, status);
 }
 
-function checkKV(env: Env): boolean {
-  return !!(env && env.USAGE_DATA);
-}
-
-function isAuthorized(request: Request): boolean {
-  const auth = request.headers.get("Authorization") || "";
-  const token = auth.replace("Bearer ", "").trim();
-  return token === APP_SECRET || token === ADMIN_SECRET;
-}
-
 // CORS preflight
 export const onRequestOptions: PagesFunction<Env> = async () => {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 };
 
-// POST — App reports its status (heartbeat)
+// POST — Validate key and return account status (read-only, 0 KV writes)
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
-    if (!checkKV(context.env)) {
+    if (!context.env?.USAGE_DATA) {
       return errorResponse("Server storage not configured.", 503);
     }
 
-    if (!isAuthorized(context.request)) {
-      return errorResponse("Unauthorized. Valid app token required.", 401);
-    }
-
-    let email = "";
     let activationKey = "";
     let app = "";
     let version = "";
-    let services: Record<string, { connected: boolean; message: string }> = {};
 
     try {
       const body = (await context.request.json()) as {
-        email: string;
-        activationKey: string;
-        app: string;
-        version: string;
-        services?: Record<string, { connected: boolean; message: string }>;
+        activationKey?: string;
+        key?: string;
+        app?: string;
+        version?: string;
       };
-      email = (body.email || "").trim().toLowerCase();
-      activationKey = (body.activationKey || "").trim();
+      activationKey = (body.activationKey || body.key || "").trim();
       app = (body.app || "unknown").trim();
       version = (body.version || "0.0.0").trim();
-      services = body.services || {};
     } catch {
       return errorResponse("Invalid request body", 400);
     }
 
-    if (!email || !activationKey) {
-      return errorResponse("Email and activationKey are required", 400);
+    if (!activationKey) {
+      return errorResponse("Activation key is required", 400);
     }
 
-    // Verify the account exists and key matches
+    // Resolve key → email via index (read-only, no KV scan)
+    let email = "";
+    const regKey = await context.env.USAGE_DATA.get(`reg:key:${activationKey}`);
+    if (regKey) {
+      try {
+        const parsed = JSON.parse(regKey);
+        email = (parsed.email || "").trim().toLowerCase();
+      } catch {
+        email = regKey.trim().toLowerCase();
+      }
+    }
+    if (!email) {
+      const idx = await context.env.USAGE_DATA.get(`keyindex:${activationKey}`);
+      if (idx) email = idx.trim().toLowerCase();
+    }
+    if (!email) {
+      return errorResponse("Invalid key — no account found", 404);
+    }
+
+    // Get account data (read-only)
     const accountRaw = await context.env.USAGE_DATA.get(`account:${email}`);
     if (!accountRaw) {
       return errorResponse("Account not found", 404);
@@ -100,107 +93,74 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const account = JSON.parse(accountRaw);
     if (account.activationKey !== activationKey) {
-      return errorResponse("Invalid activation key", 403);
+      return errorResponse("Key mismatch", 403);
     }
-
-    // Build the heartbeat record
-    const now = new Date().toISOString();
-    const heartbeat = {
-      app,
-      version,
-      services,
-      lastSeen: now,
-      ip: context.request.headers.get("CF-Connecting-IP") || "unknown",
-    };
-
-    // Store per-app heartbeat with 5-minute TTL (auto-expires = auto-offline)
-    const kvKey = `app-status:${email}:${app}`;
-    await context.env.USAGE_DATA.put(kvKey, JSON.stringify(heartbeat), {
-      expirationTtl: 300, // 5 minutes — if app doesn't heartbeat, it goes offline
-    });
-
-    // Fetch all connected apps for this account to return
-    const connectedApps = await getConnectedApps(context.env, email);
 
     return jsonResponse({
       success: true,
-      registered: true,
-      serverTime: now,
-      connectedApps,
+      valid: true,
+      account: {
+        email: account.email,
+        displayName: account.displayName || "",
+        role: account.role || "user",
+      },
+      serverTime: new Date().toISOString(),
+      app,
+      version,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Internal server error";
-    return errorResponse(`Status report failed: ${message}`, 500);
+    return errorResponse(`Status check failed: ${message}`, 500);
   }
 };
 
-// GET — Query which apps are connected for an account
+// GET — Simple key validation or health check (read-only, 0 KV writes)
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
-    if (!checkKV(context.env)) {
+    if (!context.env?.USAGE_DATA) {
       return errorResponse("Server storage not configured.", 503);
     }
 
-    if (!isAuthorized(context.request)) {
-      return errorResponse("Unauthorized. Valid app token required.", 401);
-    }
-
     const url = new URL(context.request.url);
-    const email = (url.searchParams.get("email") || "").trim().toLowerCase();
     const key = (url.searchParams.get("key") || "").trim();
 
-    if (!email || !key) {
-      return errorResponse("Email and key parameters are required", 400);
+    if (!key) {
+      return jsonResponse({ ok: true, service: "app-status", message: "Provide ?key= to check status" });
     }
 
-    // Verify account
+    // Read-only key lookup
+    let email = "";
+    const regKey = await context.env.USAGE_DATA.get(`reg:key:${key}`);
+    if (regKey) {
+      try { email = JSON.parse(regKey).email || regKey; } catch { email = regKey; }
+    }
+    if (!email) {
+      const idx = await context.env.USAGE_DATA.get(`keyindex:${key}`);
+      if (idx) email = idx;
+    }
+    email = (email || "").trim().toLowerCase();
+
+    if (!email) {
+      return jsonResponse({ success: false, valid: false, error: "Key not found" }, 404);
+    }
+
     const accountRaw = await context.env.USAGE_DATA.get(`account:${email}`);
     if (!accountRaw) {
-      return errorResponse("Account not found", 404);
+      return jsonResponse({ success: false, valid: false, error: "Account not found" }, 404);
     }
 
     const account = JSON.parse(accountRaw);
-    if (account.activationKey !== key) {
-      return errorResponse("Invalid activation key", 403);
-    }
-
-    const connectedApps = await getConnectedApps(context.env, email);
-
     return jsonResponse({
       success: true,
-      apps: connectedApps,
+      valid: account.activationKey === key,
+      account: {
+        email: account.email,
+        displayName: account.displayName || "",
+        role: account.role || "user",
+      },
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Internal server error";
     return errorResponse(`Query failed: ${message}`, 500);
   }
 };
-
-// Helper: get all connected apps for an email
-// We check for known app names since KV list with prefix is reliable
-async function getConnectedApps(
-  env: Env,
-  email: string
-): Promise<Array<{ app: string; version: string; services: Record<string, unknown>; lastSeen: string }>> {
-  const appNames = ["SvartAI", "SvartBrowser", "SvartPass", "SvartNotes", "SvartDocs", "SvartChat"];
-  const apps: Array<{ app: string; version: string; services: Record<string, unknown>; lastSeen: string }> = [];
-
-  for (const appName of appNames) {
-    const raw = await env.USAGE_DATA.get(`app-status:${email}:${appName}`);
-    if (raw) {
-      try {
-        const data = JSON.parse(raw);
-        apps.push({
-          app: data.app || appName,
-          version: data.version || "unknown",
-          services: data.services || {},
-          lastSeen: data.lastSeen || "",
-        });
-      } catch {
-        // skip malformed
-      }
-    }
-  }
-
-  return apps;
-}
