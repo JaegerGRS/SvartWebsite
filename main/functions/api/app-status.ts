@@ -27,6 +27,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     let activationKey = "";
+    let emailHint = "";
     let app = "";
     let version = "";
 
@@ -34,10 +35,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       const body = (await context.request.json()) as {
         activationKey?: string;
         key?: string;
+        email?: string;
         app?: string;
         version?: string;
       };
       activationKey = (body.activationKey || body.key || "").trim();
+      emailHint = (body.email || "").trim().toLowerCase();
       app = (body.app || "unknown").trim();
       version = (body.version || "0.0.0").trim();
     } catch {
@@ -63,6 +66,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       const idx = await context.env.USAGE_DATA.get(`keyindex:${activationKey}`);
       if (idx) email = idx.trim().toLowerCase();
     }
+    // Fallback: use email hint from client (for accounts created before key indexing)
+    if (!email && emailHint) {
+      email = emailHint;
+    }
     if (!email) {
       return errorResponse("Invalid key — no account found", 404);
     }
@@ -76,6 +83,19 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const account = JSON.parse(accountRaw);
     if (account.activationKey !== activationKey) {
       return errorResponse("Key mismatch", 403);
+    }
+
+    // Backfill key indexes for accounts created before key indexing
+    if (!regKey) {
+      context.waitUntil(
+        context.env.USAGE_DATA.put(`reg:key:${activationKey}`, JSON.stringify({ email, activationKey })).catch(() => {})
+      );
+    }
+    const existingIdx = await context.env.USAGE_DATA.get(`keyindex:${activationKey}`);
+    if (!existingIdx) {
+      context.waitUntil(
+        context.env.USAGE_DATA.put(`keyindex:${activationKey}`, email).catch(() => {})
+      );
     }
 
     return jsonResponse({
