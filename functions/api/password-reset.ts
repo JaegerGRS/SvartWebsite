@@ -64,7 +64,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     // Append to the reset request log
     const logRaw = await context.env.USAGE_DATA.get("reset:log");
-    let log: Array<{ id: string; email: string; date: string; registered: boolean; status: string }> = [];
+    let log: Array<{ id: string; email: string; date: string; registered: boolean; status: string; tempPassword?: string; resolvedAt?: string }> = [];
     if (logRaw) {
       try {
         log = JSON.parse(logRaw);
@@ -131,7 +131,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     // Mark a request as resolved
     if (resolveId) {
       const logRaw = await context.env.USAGE_DATA.get("reset:log");
-      let log: Array<{ id: string; email: string; date: string; registered: boolean; status: string }> = [];
+      let log: Array<{ id: string; email: string; date: string; registered: boolean; status: string; tempPassword?: string; resolvedAt?: string }> = [];
       if (logRaw) {
         try {
           log = JSON.parse(logRaw);
@@ -202,7 +202,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     // Return full reset request log
     const logRaw = await context.env.USAGE_DATA.get("reset:log");
-    let log: Array<{ id: string; email: string; date: string; registered: boolean; status: string }> = [];
+    let log: Array<{ id: string; email: string; date: string; registered: boolean; status: string; tempPassword?: string; resolvedAt?: string }> = [];
     if (logRaw) {
       try {
         log = JSON.parse(logRaw);
