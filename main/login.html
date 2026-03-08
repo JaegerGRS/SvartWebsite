@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="canonical" href="https://svartsecurity.org/login.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log In - Svart Security</title>
     <meta name="description" content="Log in to your Svart Security account to manage secret keys and access your tools.">
@@ -192,7 +193,7 @@
             btn.disabled = true;
             btn.textContent = 'Logging in...';
 
-            var pwHash = hashPassword(password);
+            var pwHash = await hashPassword(password);
 
             // ===== Server-side authentication (source of truth) =====
             var serverAccount = null;
@@ -304,7 +305,8 @@
                     localStorage.removeItem('ct_persistent_session');
                 }
                 showMsg('Login successful! Redirecting...', 'success');
-                setTimeout(function() { window.location.href = 'account.html'; }, 1000);
+                var redirectTarget = new URLSearchParams(window.location.search).get('redirect') || 'account.html';
+                setTimeout(function() { window.location.href = redirectTarget; }, 1000);
                 return;
             }
 
@@ -321,14 +323,12 @@
             msgBox.style.display = 'block';
         }
 
-        function hashPassword(pw) {
-            let hash = 0;
-            for (let i = 0; i < pw.length; i++) {
-                const c = pw.charCodeAt(i);
-                hash = ((hash << 5) - hash) + c;
-                hash |= 0;
-            }
-            return 'h' + Math.abs(hash).toString(36);
+        async function hashPassword(pw) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(pw);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
         // Show force password change modal
@@ -365,7 +365,7 @@
                     return;
                 }
 
-                var newHash = hashPassword(newPw);
+                var newHash = await hashPassword(newPw);
 
                 // Update password on server
                 try {

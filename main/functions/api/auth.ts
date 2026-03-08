@@ -1,4 +1,4 @@
-import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, hashPassword } from "./_shared";
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, hashPassword, isValidEmail } from "./_shared";
 
 const CORS_HEADERS = makeCors("GET, POST, PUT, DELETE, OPTIONS");
 const jsonResponse = makeJsonResponse(CORS_HEADERS);
@@ -32,6 +32,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (!email || !passwordHash) {
       return errorResponse("Email and password are required", 400);
+    }
+
+    if (!isValidEmail(email)) {
+      return errorResponse("Invalid email format", 400);
     }
 
     // Look up server-side account

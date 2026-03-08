@@ -18,6 +18,8 @@ export interface Env {
 }
 
 // ── CORS Factory ──
+// Note: Origin is "*" because the Svart desktop apps (Tauri) call these APIs
+// from tauri:// origins. Rate limiting and auth tokens protect against abuse.
 
 export function makeCors(methods: string, headers = "Content-Type, Authorization"): Record<string, string> {
   return {
@@ -77,14 +79,91 @@ export function isAuthorized(request: Request, env: Env, allowedRoles: CallerRol
   return { authorized: role !== "none" && allowedRoles.includes(role), role };
 }
 
-// ── Password Hashing ──
+// ── Email Validation ──
 
-export function hashPassword(pw: string): string {
-  let hash = 0;
-  for (let i = 0; i < pw.length; i++) {
-    const c = pw.charCodeAt(i);
-    hash = ((hash << 5) - hash) + c;
-    hash |= 0;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+export function isValidEmail(email: string): boolean {
+  if (!email || typeof email !== "string") return false;
+  if (email.length > 254) return false; // RFC 5321 max
+  return EMAIL_REGEX.test(email);
+}
+
+// ── Email Domain Classification ──
+// Legitimate forwarding/alias services — ALLOWED, but rate-limited to prevent abuse.
+// These protect user privacy and we actively encourage their use.
+const FORWARDING_DOMAINS = new Set([
+  // Addy.io (formerly AnonAddy)
+  "addy.io", "anonaddy.me", "anonaddy.com",
+  // SimpleLogin (Proton)
+  "simplelogin.co", "simplelogin.com", "aleeas.com", "slmails.com",
+  // Firefox Relay
+  "relay.firefox.com", "mozmail.com",
+  // Apple Hide My Email / iCloud+
+  "privaterelay.appleid.com", "icloud.com",
+  // DuckDuckGo Email Protection
+  "duck.com",
+  // Fastmail masked email
+  "fastmail.com",
+  // StartMail
+  "startmail.com",
+  // Proton Mail (not forwarding, but privacy-focused — allow)
+  "proton.me", "protonmail.com", "pm.me",
+  // Tutanota / Tuta
+  "tutanota.com", "tuta.io", "tutamail.com", "tuta.com",
+  // Mailbox.org
+  "mailbox.org",
+  // Posteo
+  "posteo.net", "posteo.de",
+]);
+
+// Disposable/throwaway email services — BLOCKED. These are used for spam/abuse only.
+const DISPOSABLE_DOMAINS = new Set([
+  "tempmail.com", "temp-mail.org", "guerrillamail.com", "guerrillamail.net",
+  "guerrillamail.org", "guerrillamail.de", "guerrillamail.biz",
+  "mailinator.com", "maildrop.cc", "dispostable.com", "throwaway.email",
+  "yopmail.com", "yopmail.fr", "sharklasers.com", "guerrillamailblock.com",
+  "grr.la", "10minutemail.com", "10minutemail.net", "minutemail.com",
+  "tempail.com", "tempr.email", "temp-mail.io", "fakeinbox.com",
+  "mailnesia.com", "trashmail.com", "trashmail.org", "trashmail.me",
+  "trashmail.net", "getnada.com", "emailondeck.com", "mohmal.com",
+  "burnermail.io", "inboxkitten.com", "mytemp.email", "tempinbox.com",
+  "harakirimail.com", "mailcatch.com", "tmail.ws", "boun.cr",
+  "discard.email", "discardmail.com", "discardmail.de", "droptmail.com",
+  "crazymailing.com", "mailexpire.com", "mailforspam.com", "safetymail.info",
+  "spam4.me", "spamgourmet.com", "trashymail.com", "wegwerfmail.de",
+  "wegwerfmail.net", "wh4f.org", "trash-mail.com", "mintemail.com",
+]);
+
+export type EmailDomainType = "forwarding" | "disposable" | "standard";
+
+// Known forwarding services that use subdomains (e.g., alias@username.addy.io)
+const FORWARDING_PARENT_DOMAINS = ["addy.io", "anonaddy.me", "anonaddy.com", "simplelogin.co"];
+
+export function classifyEmailDomain(email: string): { domain: string; type: EmailDomainType } {
+  const domain = email.split("@")[1]?.toLowerCase() || "";
+  if (DISPOSABLE_DOMAINS.has(domain)) return { domain, type: "disposable" };
+  if (FORWARDING_DOMAINS.has(domain)) return { domain, type: "forwarding" };
+  // Check if this is a subdomain of a known forwarding service (e.g., alias@myname.addy.io)
+  for (const parent of FORWARDING_PARENT_DOMAINS) {
+    if (domain.endsWith("." + parent)) return { domain: parent, type: "forwarding" };
   }
-  return "h" + Math.abs(hash).toString(36);
+  return { domain, type: "standard" };
+}
+
+// ── Input Sanitization ──
+
+export function sanitizeString(input: string, maxLength = 500): string {
+  if (!input || typeof input !== "string") return "";
+  return input.trim().slice(0, maxLength);
+}
+
+// ── Password Hashing (SHA-256 via Web Crypto API) ──
+
+export async function hashPassword(pw: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(pw);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }

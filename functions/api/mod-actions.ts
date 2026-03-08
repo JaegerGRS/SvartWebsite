@@ -1,4 +1,4 @@
-import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, isAuthorized } from "./_shared";
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, isAuthorized, sanitizeString, isValidEmail } from "./_shared";
 
 const CORS_HEADERS = makeCors("GET, POST, OPTIONS");
 const jsonResponse = makeJsonResponse(CORS_HEADERS);
@@ -29,12 +29,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     // ======== Push notification/report to admin ========
     if (action === "notify") {
-      const modEmail = (body.modEmail || "").trim();
-      const subject = (body.subject || "").trim();
-      const message = (body.message || "").trim();
+      const modEmail = sanitizeString(body.modEmail || "", 254);
+      const subject = sanitizeString(body.subject || "", 200);
+      const message = sanitizeString(body.message || "", 2000);
 
       if (!modEmail || !subject || !message) {
         return errorResponse("modEmail, subject, and message are required", 400);
+      }
+
+      if (!isValidEmail(modEmail)) {
+        return errorResponse("Invalid email format", 400);
       }
 
       const notifId = `notif:${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -72,10 +76,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     // ======== Log a mod action ========
     if (action === "log") {
-      const modEmail = (body.modEmail || "").trim();
-      const actionType = (body.actionType || "").trim();
-      const details = (body.details || "").trim();
-      const targetEmail = (body.targetEmail || "").trim();
+      const modEmail = sanitizeString(body.modEmail || "", 254);
+      const actionType = sanitizeString(body.actionType || "", 100);
+      const details = sanitizeString(body.details || "", 2000);
+      const targetEmail = sanitizeString(body.targetEmail || "", 254);
 
       if (!modEmail || !actionType) {
         return errorResponse("modEmail and actionType are required", 400);

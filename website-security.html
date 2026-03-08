@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="canonical" href="https://svartsecurity.org/website-security.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Svart Security - Website Security</title>
     <meta name="description" content="Svart Security website security. Enterprise-grade encryption, strict security headers, and zero third-party dependencies.">
@@ -94,6 +95,18 @@
                     <h3>Alias &amp; Forwarding Email Guidance</h3>
                     <p>Users are encouraged to use an alias or forwarding email for all online accounts. No email or personal data is stored—your Svart ID is your only identity.</p>
                     <span class="security-badge">Privacy by Design</span>
+                </div>
+                <div class="security-card">
+                    <div class="security-icon">&#x1F3DB;</div>
+                    <h3>Google Trust Services (Verified CA)</h3>
+                    <p>Our SSL/TLS certificate is issued exclusively by <strong>Google Trust Services</strong> — a publicly trusted Certificate Authority. The full chain is published to Certificate Transparency logs and restricted via CAA DNS records so no other CA can issue certificates for this domain.</p>
+                    <span class="security-badge">GTS Verified</span>
+                </div>
+                <div class="security-card">
+                    <div class="security-icon">&#x1F4DC;</div>
+                    <h3>Certificate Transparency</h3>
+                    <p>Every certificate issued for svartsecurity.org is logged in public CT logs. You can independently verify our certificate chain at <a href="https://crt.sh/?q=svartsecurity.org" target="_blank" rel="noopener">crt.sh</a>. We enforce Certificate Transparency via Expect-CT headers.</p>
+                    <span class="security-badge">CT Enforced</span>
                 </div>
             </div>
 

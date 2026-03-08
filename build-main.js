@@ -41,4 +41,15 @@ if (existsSync('functions')) {
   console.log('Copied functions/ → main/functions/');
 }
 
+// .well-known (security.txt etc.)
+if (existsSync('.well-known')) {
+  cpSync('.well-known', 'main/.well-known', { recursive: true });
+  console.log('Copied .well-known/ → main/.well-known/');
+}
+
+// SECURITY.md
+if (existsSync('SECURITY.md')) {
+  cpSync('SECURITY.md', 'main/SECURITY.md');
+}
+
 console.log('Build complete! Output directory: main/');

@@ -1,4 +1,4 @@
-import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV } from "./_shared";
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, isValidEmail, classifyEmailDomain } from "./_shared";
 
 const CORS_HEADERS = makeCors("GET, POST, DELETE, OPTIONS");
 const jsonResponse = makeJsonResponse(CORS_HEADERS);
@@ -50,6 +50,49 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (!email || !activationKey) {
       return errorResponse("Missing email or activationKey", 400);
+    }
+
+    if (!isValidEmail(email)) {
+      return errorResponse("Invalid email format", 400);
+    }
+
+    // ── Email Domain Classification ──
+    // We WELCOME privacy-focused forwarding services (addy.io, SimpleLogin, Firefox Relay, etc.)
+    // but block throwaway/disposable emails and rate-limit forwarding domains to prevent abuse.
+    const { domain: emailDomain, type: domainType } = classifyEmailDomain(email);
+
+    if (domainType === "disposable") {
+      return jsonResponse(
+        {
+          success: false,
+          error: "Disposable email addresses are not allowed. For privacy, we recommend using a forwarding service like addy.io, SimpleLogin, or Firefox Relay instead.",
+        },
+        400
+      );
+    }
+
+    if (domainType === "forwarding") {
+      // Rate-limit: max 5 registrations per forwarding domain per day
+      // This prevents one person from creating dozens of aliases to bypass one-account-per-network
+      const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+      const rlKey = `ratelimit:domain:${emailDomain}:${today}`;
+      const rlRaw = await context.env.USAGE_DATA.get(rlKey);
+      const rlCount = rlRaw ? parseInt(rlRaw, 10) : 0;
+
+      if (rlCount >= 5) {
+        return jsonResponse(
+          {
+            success: false,
+            error: "Too many registrations from this email provider today. We support forwarding services like " + emailDomain + " for privacy, but limit registrations to prevent abuse. Please try again tomorrow.",
+          },
+          429
+        );
+      }
+
+      // Increment the counter (expires in 48 hours to auto-cleanup)
+      await context.env.USAGE_DATA.put(rlKey, String(rlCount + 1), {
+        expirationTtl: 60 * 60 * 48,
+      });
     }
 
     // Enforce unique email — each email can only register once

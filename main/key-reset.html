@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="canonical" href="https://svartsecurity.org/key-reset.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reset Secret Key - Svart Security</title>
     <meta name="description" content="Request a secret key reset for your Svart Security account. Requires identity verification via password and current key. Reviewed by admin.">
@@ -216,15 +217,13 @@
             });
         });
 
-        // Same hash function used in signup/login
-        function hashPassword(pw) {
-            var hash = 0;
-            for (var i = 0; i < pw.length; i++) {
-                var c = pw.charCodeAt(i);
-                hash = ((hash << 5) - hash) + c;
-                hash |= 0;
-            }
-            return 'h' + Math.abs(hash).toString(36);
+        // SHA-256 hash (Web Crypto API) — same as signup/login
+        async function hashPassword(pw) {
+            var encoder = new TextEncoder();
+            var data = encoder.encode(pw);
+            var hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            var hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
         }
 
         var form = document.getElementById('keyResetForm');
@@ -249,7 +248,7 @@
             btn.textContent = 'Submitting...';
 
             try {
-                var passwordHash = hashPassword(password);
+                var passwordHash = await hashPassword(password);
 
                 var resp = await fetch('/api/key-reset', {
                     method: 'POST',

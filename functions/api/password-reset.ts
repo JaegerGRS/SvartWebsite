@@ -1,4 +1,4 @@
-import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, hashPassword } from "./_shared";
+import { type Env, makeCors, makeJsonResponse, makeErrorResponse, optionsResponse, checkKV, hashPassword, isValidEmail } from "./_shared";
 
 const CORS_HEADERS = makeCors("GET, POST, OPTIONS");
 const jsonResponse = makeJsonResponse(CORS_HEADERS);
@@ -37,6 +37,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (!email) {
       return errorResponse("Email is required", 400);
+    }
+
+    if (!isValidEmail(email)) {
+      return errorResponse("Invalid email format", 400);
     }
 
     // Check if the email is actually registered
@@ -106,10 +110,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         return jsonResponse({ success: true, hasCredentials: false });
       }
       const cred = JSON.parse(credRaw);
+      // Only expose whether credentials exist and force-change flag.
+      // NEVER return the hashedPassword to unauthenticated callers.
       return jsonResponse({
         success: true,
         hasCredentials: true,
-        hashedPassword: cred.hashedPassword,
         forcePasswordChange: cred.forcePasswordChange,
       });
     }
@@ -138,7 +143,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       if (entry) {
         // Generate a random temporary password for this user
         const tempPassword = generateTempPassword();
-        const hashedTempPassword = hashPassword(tempPassword);
+        const hashedTempPassword = await hashPassword(tempPassword);
 
         entry.status = "resolved";
         entry.tempPassword = tempPassword; // Store plain text so mod can share it

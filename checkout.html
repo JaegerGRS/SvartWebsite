@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="canonical" href="https://svartsecurity.org/checkout.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - Svart Security</title>
-    <meta name="description" content="Complete your Svart Security purchase. Pay with PayPal, card, or gift card.">
+    <meta name="description" content="Complete your Svart Security purchase securely through PayPal. Cards, bank, and crypto accepted.">
     <meta name="theme-color" content="#0a0a0f">
     <link rel="stylesheet" href="css/style.css">
     <script>!function(){var t=localStorage.getItem("svart_theme")||"midnight";document.documentElement.setAttribute("data-theme",t)}()</script>
@@ -493,116 +494,39 @@
                     </div>
                 </div>
 
-                <!-- Payment method tabs -->
-                <div class="pay-tabs">
-                    <button class="pay-tab active" data-tab="paypal">
-                        <span class="pay-tab-icon">&#128179;</span>
-                        PayPal
-                    </button>
-                    <button class="pay-tab" data-tab="card">
-                        <span class="pay-tab-icon">&#128179;</span>
-                        Card
-                    </button>
-                    <button class="pay-tab" data-tab="crypto">
-                        <span class="pay-tab-icon">&#9823;</span>
-                        Crypto
-                    </button>
-                </div>
+                <!-- Payment Section -->
+                <div class="paypal-box">
+                    <div class="paypal-logo">&#128179;</div>
+                    <p><strong>Pay securely with PayPal</strong><br>
+                    Complete your payment of <strong id="paypalAmount">&pound;0.00</strong> through PayPal&rsquo;s secure checkout.<br>
+                    A small window will open &mdash; you stay right here on this page.</p>
 
-                <!-- PayPal panel -->
-                <div class="pay-panel active" id="panel-paypal">
-                    <div class="paypal-box">
-                        <div class="paypal-logo">&#128179;</div>
-                        <p><strong>Pay securely with PayPal</strong><br>
-                        You'll be redirected to PayPal to complete payment of <strong id="paypalAmount">&pound;0.00</strong>.<br>
-                        All payments go to our official Svart Security PayPal account.</p>
-                        <a id="paypalPayBtn" href="#" target="_blank" class="paypal-pay-btn">Pay with PayPal</a>
-                        <div class="paypal-confirm" id="paypalConfirm">
-                            <p>&#10003; Clicked PayPal? Once your payment is complete, click the button below to confirm.</p>
-                            <p style="font-size:0.8rem;color:var(--text-muted);margin:0 0 12px;">Your plan or top-up will be activated after we verify the payment (usually within a few minutes).</p>
-                            <button class="done-btn" id="paypalDoneBtn">&#10003; I've Completed Payment</button>
+                    <div style="margin:16px 0 24px;">
+                        <p style="color:var(--text-muted);font-size:0.85rem;margin:0 0 8px;"><strong style="color:var(--text-light);">PayPal accepts all of these:</strong></p>
+                        <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
+                            <span class="crypto-coin">&#128179; PayPal Balance</span>
+                            <span class="crypto-coin">&#128179; Credit / Debit Card</span>
+                            <span class="crypto-coin">&#127974; Bank Account</span>
+                            <span class="crypto-coin">&#8383; Crypto Wallet</span>
                         </div>
+                        <p style="color:var(--text-muted);font-size:0.78rem;margin:10px 0 0;">Visa, Mastercard, Amex, Discover &bull; Prepaid &amp; virtual cards accepted &bull; No account required for card payments</p>
                     </div>
-                </div>
 
-                <!-- Card panel -->
-                <div class="pay-panel" id="panel-card">
-                    <div class="card-form">
-                        <div class="card-types">
-                            <span>&#128179;</span>
-                            <span class="card-types-label">Visa, Mastercard, Amex, Discover &bull; Disposable &amp; prepaid cards accepted</span>
-                        </div>
+                    <button id="paypalPayBtn" class="paypal-pay-btn" type="button">Pay <span id="paypalPayAmount">&pound;0.00</span> with PayPal</button>
 
-                        <div class="form-group">
-                            <label for="cardName">Name on Card</label>
-                            <input type="text" id="cardName" placeholder="J. Smith" autocomplete="cc-name" />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="cardNumber">Card Number</label>
-                            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" inputmode="numeric" autocomplete="cc-number" />
-                        </div>
-
-                        <div class="card-row">
-                            <div class="form-group">
-                                <label for="cardExpiry">Expiry Date</label>
-                                <input type="text" id="cardExpiry" placeholder="MM / YY" maxlength="7" inputmode="numeric" autocomplete="cc-exp" />
-                            </div>
-                            <div class="form-group">
-                                <label for="cardCvv">CVV</label>
-                                <input type="text" id="cardCvv" placeholder="123" maxlength="4" inputmode="numeric" autocomplete="cc-csc" />
-                            </div>
-                        </div>
-
-                        <label class="save-card-check">
-                            <input type="checkbox" id="saveCard" />
-                            <span>Save this card for future purchases</span>
-                        </label>
-
-                        <button type="button" class="card-pay-btn" id="cardPayBtn">Pay <span id="cardPayAmount">&pound;0.00</span></button>
-
-                        <div class="accepted-cards">
-                            <p><strong>&#10003; Disposable cards accepted</strong> &mdash; use virtual, prepaid, or disposable cards for extra privacy.</p>
-                            <p><strong>&#10003; Corporate cards accepted</strong> &mdash; business Visa and Mastercard work perfectly.</p>
-                            <p>Your card details are processed via PayPal's secure payment gateway. We never store raw card data.</p>
-                        </div>
-
-                        <p class="card-info-note">&#128274; All card payments are securely processed through PayPal. Your full card details are never stored on our servers. If you choose to save your card, only a secure token is stored for faster future checkouts.</p>
+                    <div class="paypal-confirm" id="paypalConfirm">
+                        <p>&#10003; PayPal window opened! Complete your payment there, then confirm below.</p>
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin:0 0 12px;">Your plan or top-up will be activated after we verify the payment (usually within a few minutes).</p>
+                        <button class="done-btn" id="paypalDoneBtn">&#10003; I&rsquo;ve Completed Payment</button>
                     </div>
-                </div>
 
-                <!-- Crypto panel -->
-                <div class="pay-panel" id="panel-crypto">
-                    <div class="crypto-box">
-                        <div style="font-size:2.5rem;margin-bottom:12px;">&#9823;</div>
-                        <p><strong>Pay with Cryptocurrency</strong><br>
-                        We accept Bitcoin (BTC), Ethereum (ETH), Litecoin (LTC), and other major cryptocurrencies.<br>
-                        All crypto payments are converted and processed through our PayPal account.</p>
-
-                        <div class="crypto-coins">
-                            <span class="crypto-coin" title="Bitcoin">&#8383; BTC</span>
-                            <span class="crypto-coin" title="Ethereum">&#926; ETH</span>
-                            <span class="crypto-coin" title="Litecoin">&#321; LTC</span>
-                            <span class="crypto-coin" title="USDT">&#36; USDT</span>
-                        </div>
-
-                        <p style="font-size:0.88rem;color:var(--text-muted);margin:16px 0 20px;">Click below to open PayPal and complete your <strong id="cryptoAmount">&pound;0.00</strong> payment using your crypto-linked PayPal wallet or any supported cryptocurrency method.</p>
-
-                        <a id="cryptoPayBtn" href="#" target="_blank" class="crypto-pay-btn">Pay <span id="cryptoPayAmount">&pound;0.00</span> with Crypto</a>
-
-                        <div class="crypto-confirm" id="cryptoConfirm">
-                            <p>&#10003; Opened PayPal? Once your crypto payment is confirmed, click the button below.</p>
-                            <p style="font-size:0.8rem;color:var(--text-muted);margin:0 0 12px;">Crypto payments may take a few minutes to confirm on the blockchain. Your plan or top-up will be activated once verified.</p>
-                            <button class="done-btn" id="cryptoDoneBtn">&#10003; I've Completed Payment</button>
-                        </div>
-
-                        <div class="crypto-info">
-                            <p><strong>How it works:</strong></p>
-                            <p>1. Click the button above to open PayPal</p>
-                            <p>2. Pay using your crypto balance or linked crypto wallet</p>
-                            <p>3. Your plan or top-up is activated once payment is confirmed</p>
-                            <p style="margin-top:8px;"><strong>Privacy:</strong> Crypto payments offer enhanced privacy. We only see the PayPal transaction &mdash; not your wallet address.</p>
-                        </div>
+                    <div style="margin-top:20px;padding:14px 16px;border-radius:8px;background:rgba(var(--primary-rgb),0.04);border:1px solid rgba(var(--primary-rgb),0.1);text-align:left;">
+                        <p style="color:var(--text-muted);font-size:0.78rem;margin:0 0 6px;line-height:1.7;"><strong>&#128274; How it works:</strong></p>
+                        <p style="color:var(--text-muted);font-size:0.78rem;margin:0 0 4px;line-height:1.7;">1. Click the button above &mdash; a secure PayPal window opens</p>
+                        <p style="color:var(--text-muted);font-size:0.78rem;margin:0 0 4px;line-height:1.7;">2. Choose your payment method (card, bank, balance, or crypto)</p>
+                        <p style="color:var(--text-muted);font-size:0.78rem;margin:0 0 4px;line-height:1.7;">3. Complete payment &mdash; you stay on this page the entire time</p>
+                        <p style="color:var(--text-muted);font-size:0.78rem;margin:0;line-height:1.7;">4. Click &ldquo;I&rsquo;ve Completed Payment&rdquo; and your purchase is activated</p>
+                        <p style="color:var(--text-muted);font-size:0.75rem;margin:8px 0 0;line-height:1.7;"><strong>Privacy:</strong> We never see or store your card details, bank info, or wallet address. PayPal handles everything securely.</p>
                     </div>
                 </div>
 
@@ -732,9 +656,11 @@
         if (!isLoggedIn) {
             loginPrompt.style.display = 'block';
             checkoutContent.style.display = 'none';
-            // Preserve item in login redirect
+            // Preserve checkout item in login/signup links so user returns here after auth
+            var returnUrl = encodeURIComponent('checkout.html?item=' + productId);
             var loginLinks = loginPrompt.querySelectorAll('a');
-            loginLinks[0].href = 'login.html'; // After login, user can come back
+            if (loginLinks[0]) loginLinks[0].href = 'login.html?redirect=' + returnUrl;
+            if (loginLinks[1]) loginLinks[1].href = 'signup.html?redirect=' + returnUrl;
             return;
         }
 
@@ -742,7 +668,7 @@
         loginPrompt.style.display = 'none';
         checkoutContent.style.display = 'block';
 
-        var priceStr = '£' + product.price.toFixed(2);
+        var priceStr = '\u00a3' + product.price.toFixed(2);
 
         // Populate order summary
         document.getElementById('orderItem').textContent = product.name;
@@ -758,147 +684,41 @@
             document.getElementById('orderPeriod').textContent = product.period;
         }
 
-        // Set amounts in payment panels
+        // Set amounts in payment section
         document.getElementById('paypalAmount').textContent = priceStr;
-        document.getElementById('cardPayAmount').textContent = priceStr;
-        document.getElementById('cryptoAmount').textContent = priceStr;
-        document.getElementById('cryptoPayAmount').textContent = priceStr;
+        document.getElementById('paypalPayAmount').textContent = priceStr;
 
-        // PayPal button link
+        // Security: clear any previously stored card data (legacy cleanup)
+        localStorage.removeItem('svart_saved_cards');
+
+        // PayPal link with amount
         var paypalLink = PAYPAL_URL + '/' + product.price.toFixed(2) + 'GBP';
-        document.getElementById('paypalPayBtn').href = paypalLink;
 
-        // Tab switching
-        var tabs = document.querySelectorAll('.pay-tab');
-        var panels = document.querySelectorAll('.pay-panel');
-        tabs.forEach(function(tab) {
-            tab.addEventListener('click', function() {
-                tabs.forEach(function(t) { t.classList.remove('active'); });
-                panels.forEach(function(p) { p.classList.remove('active'); });
-                tab.classList.add('active');
-                document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-            });
-        });
-
-        // PayPal flow
+        // Open PayPal in a centered popup window (user stays on this page)
         var paypalPayBtn = document.getElementById('paypalPayBtn');
         var paypalConfirm = document.getElementById('paypalConfirm');
-        paypalPayBtn.addEventListener('click', function() {
-            // Show confirmation area after clicking
+
+        paypalPayBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Calculate centered popup position
+            var w = 500, h = 700;
+            var left = Math.max(0, (screen.width - w) / 2);
+            var top = Math.max(0, (screen.height - h) / 2);
+            var features = 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top + ',scrollbars=yes,resizable=yes,status=yes,toolbar=no,menubar=no,location=yes';
+            window.open(paypalLink, 'SvartPayPal', features);
+            // Show confirmation area after a short delay
             setTimeout(function() {
                 paypalConfirm.style.display = 'block';
-            }, 1000);
+                paypalConfirm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 800);
         });
 
+        // Confirmation button
         document.getElementById('paypalDoneBtn').addEventListener('click', function() {
-            showMsg('&#10003; Thank you! Your payment is being verified. Your ' + (product.type === 'plan' ? 'plan' : 'top-up') + ' will be activated within a few minutes. Check your email for confirmation.', 'success');
+            showMsg('\u2713 Thank you! Your payment is being verified. Your ' + (product.type === 'plan' ? 'plan' : 'top-up') + ' will be activated within a few minutes. Check your email for confirmation.', 'success');
             this.disabled = true;
             this.textContent = 'Payment Submitted';
         });
-
-        // Card number formatting
-        var cardNumberInput = document.getElementById('cardNumber');
-        cardNumberInput.addEventListener('input', function() {
-            var val = this.value.replace(/\D/g, '');
-            var formatted = '';
-            for (var i = 0; i < val.length && i < 16; i++) {
-                if (i > 0 && i % 4 === 0) formatted += ' ';
-                formatted += val[i];
-            }
-            this.value = formatted;
-        });
-
-        // Expiry formatting
-        var expiryInput = document.getElementById('cardExpiry');
-        expiryInput.addEventListener('input', function() {
-            var val = this.value.replace(/\D/g, '');
-            if (val.length >= 2) {
-                this.value = val.substring(0, 2) + ' / ' + val.substring(2, 4);
-            } else {
-                this.value = val;
-            }
-        });
-
-        // CVV restrict to numbers
-        document.getElementById('cardCvv').addEventListener('input', function() {
-            this.value = this.value.replace(/\D/g, '');
-        });
-
-        // Card pay button
-        document.getElementById('cardPayBtn').addEventListener('click', function() {
-            var name = document.getElementById('cardName').value.trim();
-            var number = document.getElementById('cardNumber').value.replace(/\s/g, '');
-            var expiry = document.getElementById('cardExpiry').value.replace(/\s/g, '');
-            var cvv = document.getElementById('cardCvv').value;
-            var saveCard = document.getElementById('saveCard').checked;
-
-            // Validation
-            if (!name) { showMsg('Please enter the name on your card.', 'error'); return; }
-            if (number.length < 13 || number.length > 16) { showMsg('Please enter a valid card number.', 'error'); return; }
-            if (!/^\d{2}\/\d{2}$/.test(expiry)) { showMsg('Please enter a valid expiry date (MM/YY).', 'error'); return; }
-            if (cvv.length < 3 || cvv.length > 4) { showMsg('Please enter a valid CVV.', 'error'); return; }
-
-            // Luhn check
-            if (!luhnCheck(number)) { showMsg('Invalid card number. Please check and try again.', 'error'); return; }
-
-            var btn = this;
-            btn.disabled = true;
-            btn.textContent = 'Processing...';
-
-            // Simulate payment processing → redirect to PayPal
-            setTimeout(function() {
-                // Card payments are processed via PayPal gateway
-                if (saveCard) {
-                    // Save token locally (in production, this would be a server-side token)
-                    var savedCards = JSON.parse(localStorage.getItem('svart_saved_cards') || '[]');
-                    savedCards.push({
-                        last4: number.slice(-4),
-                        expiry: expiry,
-                        name: name,
-                        savedAt: new Date().toISOString()
-                    });
-                    localStorage.setItem('svart_saved_cards', JSON.stringify(savedCards));
-                }
-
-                // Redirect to PayPal for actual payment processing
-                window.open(paypalLink, '_blank');
-                btn.textContent = 'Pay ' + priceStr;
-                btn.disabled = false;
-                showMsg('&#10003; A PayPal window has opened to complete your payment of ' + priceStr + '. Once confirmed, your ' + (product.type === 'plan' ? 'plan' : 'top-up') + ' will be activated automatically.' + (saveCard ? ' Your card has been saved for future purchases.' : ''), 'success');
-            }, 1500);
-        });
-
-        // Crypto flow
-        var cryptoPayBtn = document.getElementById('cryptoPayBtn');
-        var cryptoConfirm = document.getElementById('cryptoConfirm');
-        cryptoPayBtn.href = paypalLink;
-        cryptoPayBtn.addEventListener('click', function() {
-            setTimeout(function() {
-                cryptoConfirm.style.display = 'block';
-            }, 1000);
-        });
-
-        document.getElementById('cryptoDoneBtn').addEventListener('click', function() {
-            showMsg('&#10003; Thank you! Your crypto payment is being verified. Your ' + (product.type === 'plan' ? 'plan' : 'top-up') + ' will be activated once the transaction is confirmed. Check your email for confirmation.', 'success');
-            this.disabled = true;
-            this.textContent = 'Payment Submitted';
-        });
-
-        // Luhn algorithm for card validation
-        function luhnCheck(num) {
-            var sum = 0;
-            var alt = false;
-            for (var i = num.length - 1; i >= 0; i--) {
-                var n = parseInt(num[i], 10);
-                if (alt) {
-                    n *= 2;
-                    if (n > 9) n -= 9;
-                }
-                sum += n;
-                alt = !alt;
-            }
-            return sum % 10 === 0;
-        }
 
         function showMsg(html, type) {
             var msg = document.getElementById('checkoutMsg');

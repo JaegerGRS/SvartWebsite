@@ -1,8 +1,8 @@
-/browser /#cipher 301
-/download /#download 301
-/pricing /#pricing 301
-/docs /pages/docs.html 200
-/downloads /pages/account.html 301
+/browser /pages/download-browser.html 301
+/download /pages/downloads.html 301
+/pricing /pricing.html 301
+/docs /pages/download-docs.html 200
+/downloads /pages/downloads.html 301
 /download-ai /pages/download-ai.html 200
 /download-browser /pages/download-browser.html 200
 /download-pass /pages/download-pass.html 200

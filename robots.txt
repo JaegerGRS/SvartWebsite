@@ -28,8 +28,7 @@ User-agent: SemrushBot
 Disallow: /
 
 # Sitemap location
-Sitemap: https://cipher.dev/sitemap.xml
-Sitemap: https://cipher.dev/sitemap-index.xml
+Sitemap: https://svartsecurity.org/sitemap.xml
 
 # Request rate limiting
 Request-rate: 30/1m

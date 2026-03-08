@@ -115,7 +115,7 @@ function updateActiveNavLink() {
     let current = '';
     sections.forEach(section => {
         const sectionTop = section.offsetTop;
-        if (pageYOffset >= sectionTop - 200) {
+        if (window.scrollY >= sectionTop - 200) {
             current = section.getAttribute('id');
         }
     });
@@ -255,12 +255,8 @@ function submitContactForm(data, form, rateLimiter) {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Sending...';
     
-    // Use Formspree or similar secure email service
-    // Option 1: Formspree (recommended for static sites)
-    const formspreeEndpoint = 'https://formspree.io/f/your-form-id';
-    
-    // Option 2: Custom backend (use environment variable)
-    const customEndpoint = 'api/contact';  // Change to your backend
+    // Use custom backend endpoint
+    const contactEndpoint = '/api/contact';
     
     // Prepare form data
     const formData = new FormData();
@@ -271,7 +267,7 @@ function submitContactForm(data, form, rateLimiter) {
     formData.append('timestamp', data.timestamp);
     
     // Send request
-    fetch(formspreeEndpoint, {
+    fetch(contactEndpoint, {
         method: 'POST',
         body: formData,
         headers: {
@@ -487,12 +483,8 @@ document.querySelectorAll('.btn-primary').forEach(btn => {
 
 // Theme toggle (dark/midnight) - reads saved preference
 function initThemeToggle() {
-    var theme = localStorage.getItem('svart_theme') || 'dark';
-    if (theme && theme !== 'dark') {
-        document.documentElement.setAttribute('data-theme', theme);
-    } else {
-        document.documentElement.removeAttribute('data-theme');
-    }
+    var theme = localStorage.getItem('svart_theme') || 'midnight';
+    document.documentElement.setAttribute('data-theme', theme);
 }
 
 // Theme-color map for browser chrome

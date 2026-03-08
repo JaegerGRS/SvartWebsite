@@ -41,12 +41,10 @@
     "http-server": "^14.1.1",
     "prettier": "^3.0.0",
     "stylelint": "^15.0.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "@playwright/test": "^1.58.2"
   },
   "engines": {
     "node": ">=14.0.0"
-  },
-  "dependencies": {
-    "@playwright/test": "^1.58.2"
   }
 }
